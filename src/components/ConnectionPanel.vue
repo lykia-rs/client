@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { Database } from 'lucide-vue-next'
+import { Database, Plus, X } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
 
 interface Connection {
   id: string
   name: string
   address: string
+  host: string
+  port: string
+  color: string
   active: boolean
 }
 
@@ -15,34 +18,58 @@ defineProps<{
 
 const emit = defineEmits<{
   select: [conn: Connection]
+  add: []
+  remove: [id: string]
 }>()
 </script>
 
 <template>
   <div class="flex flex-col h-full bg-zinc-900">
-    <div class="px-4 py-3 border-b border-zinc-800/30">
+    <div class="px-4 py-3 border-b border-zinc-800/30 flex items-center justify-between">
       <h2 class="text-sm font-semibold text-zinc-100">Connections</h2>
+      <button
+        @click="emit('add')"
+        class="p-1 hover:bg-zinc-800 rounded transition-colors"
+        title="New Connection"
+      >
+        <Plus :size="16" />
+      </button>
     </div>
     
     <div class="flex-1 overflow-y-auto">
-      <button
+      <div
         v-for="conn in connections"
         :key="conn.id"
-        @click="emit('select', conn)"
         :class="cn(
-          'w-full px-4 py-3 text-left border-b border-zinc-800/20 transition-colors',
+          'group relative px-4 py-3 border-b border-zinc-800/20 transition-colors cursor-pointer',
           'hover:bg-zinc-800/50',
-          conn.active && 'bg-[#4db6ac]/10 border-l-2 border-l-[#4db6ac]'
+          conn.active && 'bg-zinc-800/30'
         )"
+        @click="emit('select', conn)"
       >
+        <div 
+          class="absolute left-0 top-0 bottom-0 w-1 transition-all"
+          :style="{ backgroundColor: conn.active ? conn.color : 'transparent' }"
+        />
         <div class="flex items-center gap-2">
-          <Database :size="16" class="text-zinc-400" />
+          <div 
+            class="w-2 h-2 rounded-full flex-shrink-0"
+            :style="{ backgroundColor: conn.color }"
+          />
+          <Database :size="16" class="text-zinc-400 flex-shrink-0" />
           <div class="flex-1 min-w-0">
             <div class="text-sm font-medium truncate">{{ conn.name }}</div>
             <div class="text-xs text-zinc-500 truncate">{{ conn.address }}</div>
           </div>
+          <button
+            v-if="connections.length > 1"
+            @click.stop="emit('remove', conn.id)"
+            class="opacity-0 group-hover:opacity-100 p-1 hover:bg-zinc-700 rounded transition-all"
+          >
+            <X :size="14" class="text-zinc-400 hover:text-red-400" />
+          </button>
         </div>
-      </button>
+      </div>
     </div>
   </div>
 </template>

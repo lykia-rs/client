@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import { Play, Loader2, Plus, X } from 'lucide-vue-next'
 import { Splitpanes, Pane } from 'splitpanes'
@@ -12,6 +12,10 @@ interface Connection {
   id: string
   name: string
   address: string
+  host: string
+  port: string
+  color: string
+  active: boolean
 }
 
 interface QueryTab {
@@ -21,6 +25,7 @@ interface QueryTab {
   result: any
   error: string
   loading: boolean
+  connectionId: string
 }
 
 const props = defineProps<{
@@ -28,35 +33,48 @@ const props = defineProps<{
 }>()
 
 let tabIdCounter = 0
-const tabs = ref<QueryTab[]>([
-  { id: '0', name: 'Query 1', query: '', result: null, error: '', loading: false }
+const allTabs = ref<QueryTab[]>([
+  { id: '0', name: 'Query 1', query: '', result: null, error: '', loading: false, connectionId: props.connection.id }
 ])
 const activeTabId = ref('0')
 
+const tabs = computed(() => allTabs.value.filter(t => t.connectionId === props.connection.id))
 const activeTab = computed(() => tabs.value.find(t => t.id === activeTabId.value))
+
+watch(() => props.connection.id, () => {
+  const firstTab = tabs.value[0]
+  if (firstTab) {
+    activeTabId.value = firstTab.id
+  } else {
+    addTab()
+  }
+})
 
 function addTab() {
   tabIdCounter++
+  const connTabs = tabs.value
   const newTab: QueryTab = {
-    id: String(tabIdCounter),
-    name: `Query ${tabIdCounter + 1}`,
+    id: String(Date.now()),
+    name: `Query ${connTabs.length + 1}`,
     query: '',
     result: null,
     error: '',
-    loading: false
+    loading: false,
+    connectionId: props.connection.id
   }
-  tabs.value.push(newTab)
+  allTabs.value.push(newTab)
   activeTabId.value = newTab.id
 }
 
 function closeTab(id: string) {
   if (tabs.value.length === 1) return
   
-  const index = tabs.value.findIndex(t => t.id === id)
-  tabs.value.splice(index, 1)
+  const index = allTabs.value.findIndex(t => t.id === id)
+  allTabs.value.splice(index, 1)
   
   if (activeTabId.value === id) {
-    activeTabId.value = tabs.value[Math.max(0, index - 1)].id
+    const connTabs = tabs.value
+    activeTabId.value = connTabs[Math.max(0, Math.min(index, connTabs.length - 1))]?.id || connTabs[0]?.id
   }
 }
 
@@ -99,13 +117,17 @@ async function executeQuery() {
             :key="tab.id"
             @click="activeTabId = tab.id"
             :class="cn(
-              'group flex items-center gap-2 px-3 py-1.5 text-sm rounded transition-colors',
+              'group relative flex items-center gap-2 px-3 py-1.5 text-sm rounded transition-colors',
               activeTabId === tab.id 
                 ? 'bg-zinc-800 text-zinc-100' 
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
             )"
           >
-            <span>{{ tab.name }}</span>
+            <div 
+              class="absolute left-0 top-0 bottom-0 w-0.5 rounded-full"
+              :style="{ backgroundColor: connection.color }"
+            />
+            <span class="ml-1">{{ tab.name }}</span>
             <button
               v-if="tabs.length > 1"
               @click.stop="closeTab(tab.id)"
