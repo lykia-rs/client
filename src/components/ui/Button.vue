@@ -17,12 +17,13 @@ const props = withDefaults(defineProps<ButtonProps>(), {
 
 const classes = computed(() =>
   cn(
-    'inline-flex items-center justify-center rounded-md font-medium transition-colors',
+    'inline-flex items-center justify-center rounded-md font-medium transition-all duration-200',
     'focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50',
+    'active:scale-95',
     {
-      'bg-[#4db6ac] text-white hover:opacity-90': props.variant === 'default',
-      'border border-zinc-700 bg-transparent hover:bg-zinc-800': props.variant === 'outline',
-      'hover:bg-zinc-800': props.variant === 'ghost',
+      'bg-[#4db6ac] text-white hover:opacity-90 hover:shadow-lg': props.variant === 'default',
+      'border border-zinc-700 bg-transparent hover:bg-zinc-800 hover:border-zinc-600': props.variant === 'outline',
+      'hover:bg-zinc-800 hover:scale-105': props.variant === 'ghost',
       'h-10 px-4 py-2 text-sm': props.size === 'default',
       'h-9 px-3 text-xs': props.size === 'sm',
       'h-11 px-8': props.size === 'lg',

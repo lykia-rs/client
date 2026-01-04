@@ -114,17 +114,6 @@ function removeConnection(id: string) {
 <style>
 @import 'splitpanes/dist/splitpanes.css';
 
-.splitpanes.splitpanes--vertical > .splitpanes__splitter,
-.splitpanes .splitpanes__splitter {
-  background-color: #3f3f3f !important;
-  border: none !important;
-}
-
-.splitpanes.splitpanes--vertical > .splitpanes__splitter:hover,
-.splitpanes .splitpanes__splitter:hover {
-  background-color: #1a1a1a !important;
-}
-
 .splitpanes--vertical > .splitpanes__splitter {
   width: 1px !important;
 }

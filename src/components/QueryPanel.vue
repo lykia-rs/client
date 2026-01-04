@@ -112,10 +112,10 @@ async function executeQuery() {
 </script>
 
 <template>
-  <Splitpanes horizontal class="h-full">
+  <Splitpanes horizontal class="h-full rounded-lg overflow-hidden">
     <!-- Query Editor with Tabs -->
     <Pane :size="40" :min-size="20">
-      <div class="flex flex-col h-full">
+      <div class="flex flex-col h-full bg-zinc-900">
         <!-- Tabs Header -->
         <div class="flex items-center gap-1 px-2 py-1 border-b border-zinc-800/30 bg-zinc-900">
           <button
@@ -123,21 +123,24 @@ async function executeQuery() {
             :key="tab.id"
             @click="activeTabId = tab.id"
             :class="cn(
-              'group relative flex items-center gap-2 px-3 py-1.5 text-sm rounded transition-colors',
+              'group relative flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-all duration-200',
               activeTabId === tab.id 
-                ? 'bg-zinc-800 text-zinc-100' 
+                ? 'bg-zinc-800 text-zinc-100 shadow-sm' 
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
             )"
           >
             <div 
-              class="absolute left-0 top-0 bottom-0 w-0.5 rounded-full"
-              :style="{ backgroundColor: connection.color }"
+              class="absolute left-0 top-0 bottom-0 w-0.5 rounded-full transition-all duration-200"
+              :style="{ 
+                backgroundColor: activeTabId === tab.id ? connection.color : 'transparent',
+                boxShadow: activeTabId === tab.id ? `0 0 8px ${connection.color}40` : 'none'
+              }"
             />
             <span class="ml-1">{{ tab.name }}</span>
             <button
               v-if="tabs.length > 1"
               @click.stop="closeTab(tab.id)"
-              class="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity"
+              class="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all duration-200 hover:scale-110"
             >
               <X :size="14" />
             </button>
@@ -145,7 +148,7 @@ async function executeQuery() {
           
           <button
             @click="addTab"
-            class="ml-1 p-1.5 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded transition-colors"
+            class="ml-1 p-1.5 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-md transition-all duration-200 hover:scale-105"
             title="New Query"
           >
             <Plus :size="16" />
@@ -157,7 +160,14 @@ async function executeQuery() {
             @click="executeQuery"
             :disabled="activeTab?.loading || !activeTab?.query.trim()"
             size="sm"
-            class="gap-2"
+            class="gap-2 transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            :style="{ 
+              backgroundColor: connection.color, 
+              borderColor: connection.color,
+              boxShadow: `0 0 0 0 ${connection.color}40`
+            }"
+            @mouseenter="(e: MouseEvent) => !activeTab?.loading && ((e.currentTarget as HTMLElement).style.boxShadow = `0 0 16px ${connection.color}80`)"
+            @mouseleave="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.boxShadow = `0 0 0 0 ${connection.color}40`)"
           >
             <Loader2 v-if="activeTab?.loading" :size="14" class="animate-spin" />
             <Play v-else :size="14" />
@@ -182,7 +192,7 @@ async function executeQuery() {
         </div>
         
         <div class="flex-1 overflow-auto p-4">
-          <div v-if="activeTab?.error" class="p-4 bg-red-950/20 border border-red-900/50 rounded text-red-400 text-sm font-mono">
+          <div v-if="activeTab?.error" class="p-4 bg-red-950/20 border border-red-900/50 rounded-lg text-red-400 text-sm font-mono">
             {{ activeTab.error }}
           </div>
           
@@ -196,10 +206,14 @@ async function executeQuery() {
         <!-- Status Bar -->
         <div 
           v-if="activeTab?.duration !== null && activeTab?.duration !== undefined"
-          class="px-4 py-2 border-t border-zinc-800/30 bg-zinc-900 flex items-center gap-2 text-xs text-zinc-400"
+          class="px-4 py-2 border-t border-zinc-800/30 bg-zinc-900 flex items-center gap-2 text-xs"
         >
-          <Clock :size="14" />
-          <span>Execution time: {{ activeTab.duration }}ms</span>
+          <Clock :size="14" class="text-zinc-400" />
+          <span class="text-zinc-400">Execution time:</span>
+          <span 
+            class="font-medium font-mono"
+            :style="{ color: connection.color }"
+          >{{ activeTab.duration }}ms</span>
         </div>
       </div>
     </Pane>

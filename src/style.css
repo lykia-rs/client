@@ -11,3 +11,44 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Splitpanes custom styling */
+.splitpanes__splitter {
+  background-color: #3f3f3f;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.splitpanes__splitter:hover {
+  background-color: #4db6ac;
+  box-shadow: 0 0 12px #4db6ac80, 0 0 24px #4db6ac40;
+}
+
+.splitpanes__splitter::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.2s ease;
+}
+
+.splitpanes--vertical > .splitpanes__splitter::before {
+  width: 2px;
+  height: 24px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+.splitpanes--horizontal > .splitpanes__splitter::before {
+  width: 24px;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+.splitpanes__splitter:hover::before {
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3), transparent);
+}
+
+.splitpanes--horizontal > .splitpanes__splitter:hover::before {
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+}
+
