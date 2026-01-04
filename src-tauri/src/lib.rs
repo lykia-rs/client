@@ -1,14 +1,62 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+use lykiadb_common::comm::{Message, Request, Response, client::{get_session, Protocol, ClientSession}};
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct QueryResult {
+    success: bool,
+    data: Option<serde_json::Value>,
+    error: Option<String>,
+}
+
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+async fn execute_query(address: String, query: String) -> Result<QueryResult, String> {
+    tokio::task::spawn_blocking(move || {
+        tokio::runtime::Handle::current().block_on(async move {
+            let mut session = get_session(&address, Protocol::Tcp).await;
+            let msg = Message::Request(Request::Run(query));
+            
+            match session.send_receive(msg).await {
+                Ok(Message::Response(Response::Value(value))) | 
+                Ok(Message::Response(Response::Program(value))) => {
+                    Ok(QueryResult {
+                        success: true,
+                        data: Some(value),
+                        error: None,
+                    })
+                }
+                Ok(Message::Response(Response::Error(err))) => {
+                    Ok(QueryResult {
+                        success: false,
+                        data: None,
+                        error: Some(format!("{:?}", err)),
+                    })
+                }
+                Err(e) => {
+                    Ok(QueryResult {
+                        success: false,
+                        data: None,
+                        error: Some(format!("Communication error: {:?}", e)),
+                    })
+                }
+                _ => {
+                    Ok(QueryResult {
+                        success: false,
+                        data: None,
+                        error: Some("Unexpected response".to_string()),
+                    })
+                }
+            }
+        })
+    })
+    .await
+    .map_err(|e| format!("Task error: {:?}", e))?
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![execute_query])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
