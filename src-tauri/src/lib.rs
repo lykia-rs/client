@@ -8,6 +8,27 @@ struct QueryResult {
     error: Option<String>,
 }
 
+#[derive(Serialize, Deserialize)]
+struct ConnectionResult {
+    success: bool,
+    error: Option<String>,
+}
+
+#[tauri::command]
+async fn test_connection(address: String) -> Result<ConnectionResult, String> {
+    tokio::task::spawn_blocking(move || {
+        tokio::runtime::Handle::current().block_on(async move {
+            let _session = get_session(&address, Protocol::Tcp).await;
+            Ok(ConnectionResult {
+                success: true,
+                error: None,
+            })
+        })
+    })
+    .await
+    .map_err(|e| format!("Connection error."))?
+}
+
 #[tauri::command]
 async fn execute_query(address: String, query: String) -> Result<QueryResult, String> {
     tokio::task::spawn_blocking(move || {
@@ -31,11 +52,11 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
                         error: Some(format!("{:?}", err)),
                     })
                 }
-                Err(e) => {
+                Err(_) => {
                     Ok(QueryResult {
                         success: false,
                         data: None,
-                        error: Some(format!("Communication error: {:?}", e)),
+                        error: Some("Communication error".to_string()),
                     })
                 }
                 _ => {
@@ -49,14 +70,14 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
         })
     })
     .await
-    .map_err(|e| format!("Task error: {:?}", e))?
+    .map_err(|e| format!("Connection error."))?
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![execute_query])
+        .invoke_handler(tauri::generate_handler![test_connection, execute_query])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

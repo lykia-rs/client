@@ -1,19 +1,33 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { X } from 'lucide-vue-next'
+import { X, Loader2 } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 
+const props = defineProps<{
+  onConnect: (host: string, port: string) => Promise<void>
+}>()
+
 const emit = defineEmits<{
-  submit: [host: string, port: string]
   close: []
 }>()
 
 const host = ref('localhost')
 const port = ref('19191')
+const loading = ref(false)
+const error = ref('')
 
-function handleSubmit() {
-  if (host.value.trim() && port.value.trim()) {
-    emit('submit', host.value.trim(), port.value.trim())
+async function handleSubmit() {
+  if (!host.value.trim() || !port.value.trim()) return
+  
+  loading.value = true
+  error.value = ''
+  
+  try {
+    await props.onConnect(host.value.trim(), port.value.trim())
+    // If successful, the parent will close the dialog
+  } catch (e: any) {
+    error.value = e?.message || String(e) || 'Failed to connect to server'
+    loading.value = false
   }
 }
 </script>
@@ -49,12 +63,17 @@ function handleSubmit() {
           />
         </div>
         
+        <div v-if="error" class="text-sm text-red-400 bg-red-950/20 border border-red-900/30 rounded px-3 py-2">
+          {{ error }}
+        </div>
+        
         <div class="flex gap-2 justify-end pt-2">
-          <Button variant="ghost" type="button" @click="emit('close')">
+          <Button variant="ghost" type="button" @click="emit('close')" :disabled="loading">
             Cancel
           </Button>
-          <Button type="submit">
-            Connect
+          <Button type="submit" :disabled="loading">
+            <Loader2 v-if="loading" :size="16" class="animate-spin mr-2" />
+            {{ loading ? 'Connecting...' : 'Connect' }}
           </Button>
         </div>
       </form>

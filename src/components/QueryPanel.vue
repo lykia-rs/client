@@ -16,6 +16,7 @@ interface Connection {
   port: string
   color: string
   active: boolean
+  connected: boolean
 }
 
 interface QueryTab {

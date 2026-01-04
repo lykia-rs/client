@@ -10,6 +10,7 @@ interface Connection {
   port: string
   color: string
   active: boolean
+  connected: boolean
 }
 
 defineProps<{
@@ -53,8 +54,12 @@ const emit = defineEmits<{
         />
         <div class="flex items-center gap-2">
           <div 
-            class="w-2 h-2 rounded-full flex-shrink-0"
+            :class="cn(
+              'w-2 h-2 rounded-full flex-shrink-0',
+              conn.connected ? '' : 'opacity-30'
+            )"
             :style="{ backgroundColor: conn.color }"
+            :title="conn.connected ? 'Connected' : 'Disconnected'"
           />
           <Database :size="16" class="text-zinc-400 flex-shrink-0" />
           <div class="flex-1 min-w-0">
