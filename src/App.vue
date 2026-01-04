@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Splitpanes, Pane } from 'splitpanes'
 import ConnectionPanel from '@/components/ConnectionPanel.vue'
 import QueryPanel from '@/components/QueryPanel.vue'
 
@@ -16,15 +17,41 @@ function selectConnection(conn: typeof connections.value[0]) {
 </script>
 
 <template>
-  <div class="flex h-screen w-screen bg-zinc-950 text-zinc-100">
-    <ConnectionPanel 
-      :connections="connections" 
-      @select="selectConnection"
-      class="w-64 border-r border-zinc-800"
-    />
-    <QueryPanel 
-      :connection="activeConnection"
-      class="flex-1"
-    />
+  <div class="h-screen w-screen bg-zinc-950 text-zinc-100">
+    <Splitpanes>
+      <Pane :size="20" :min-size="15" :max-size="40">
+        <ConnectionPanel 
+          :connections="connections" 
+          @select="selectConnection"
+        />
+      </Pane>
+      
+      <Pane :size="80">
+        <QueryPanel :connection="activeConnection" />
+      </Pane>
+    </Splitpanes>
   </div>
 </template>
+
+<style>
+@import 'splitpanes/dist/splitpanes.css';
+
+.splitpanes.splitpanes--vertical > .splitpanes__splitter,
+.splitpanes .splitpanes__splitter {
+  background-color: #3f3f3f !important;
+  border: none !important;
+}
+
+.splitpanes.splitpanes--vertical > .splitpanes__splitter:hover,
+.splitpanes .splitpanes__splitter:hover {
+  background-color: #1a1a1a !important;
+}
+
+.splitpanes--vertical > .splitpanes__splitter {
+  width: 1px !important;
+}
+
+.splitpanes--horizontal > .splitpanes__splitter {
+  height: 1px !important;
+}
+</style>

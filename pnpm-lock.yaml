@@ -26,6 +26,9 @@ importers:
       radix-vue:
         specifier: ^1.9.17
         version: 1.9.17(vue@3.5.26(typescript@5.6.3))
+      splitpanes:
+        specifier: ^4.0.4
+        version: 4.0.4(vue@3.5.26(typescript@5.6.3))
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -880,6 +883,11 @@ packages:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
+  splitpanes@4.0.4:
+    resolution: {integrity: sha512-RbysugZhjbCw5fgplvk3hOXr41stahQDtZhHVkhnnJI6H4wlGDhM2kIpbehy7v92duy9GnMa8zIhHigIV1TWtg==}
+    peerDependencies:
+      vue: ^3.2.0
+
   tailwind-merge@3.4.0:
     resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
 
@@ -1678,6 +1686,10 @@ snapshots:
       fsevents: 2.3.3
 
   source-map-js@1.2.1: {}
+
+  splitpanes@4.0.4(vue@3.5.26(typescript@5.6.3)):
+    dependencies:
+      vue: 3.5.26(typescript@5.6.3)
 
   tailwind-merge@3.4.0: {}
 

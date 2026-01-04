@@ -23,7 +23,7 @@ function formatValue(val: any): string {
 <template>
   <div v-if="isArray && columns.length" class="overflow-auto">
     <table class="w-full text-sm border-collapse">
-      <thead class="sticky top-0 bg-zinc-900 border-b border-zinc-800">
+      <thead class="sticky top-0 bg-zinc-900 border-b border-zinc-800/30">
         <tr>
           <th
             v-for="col in columns"
@@ -38,7 +38,7 @@ function formatValue(val: any): string {
         <tr
           v-for="(row, idx) in data"
           :key="idx"
-          class="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors"
+          class="border-b border-zinc-800/20 hover:bg-zinc-800/30 transition-colors"
         >
           <td
             v-for="col in columns"

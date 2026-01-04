@@ -20,7 +20,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="flex flex-col h-full bg-zinc-900">
-    <div class="px-4 py-3 border-b border-zinc-800">
+    <div class="px-4 py-3 border-b border-zinc-800/30">
       <h2 class="text-sm font-semibold text-zinc-100">Connections</h2>
     </div>
     
@@ -30,7 +30,7 @@ const emit = defineEmits<{
         :key="conn.id"
         @click="emit('select', conn)"
         :class="cn(
-          'w-full px-4 py-3 text-left border-b border-zinc-800/50 transition-colors',
+          'w-full px-4 py-3 text-left border-b border-zinc-800/20 transition-colors',
           'hover:bg-zinc-800/50',
           conn.active && 'bg-[#4db6ac]/10 border-l-2 border-l-[#4db6ac]'
         )"
