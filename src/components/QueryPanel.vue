@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
-import { Play, Loader2, Plus, X } from 'lucide-vue-next'
+import { Play, Loader2, Plus, X, Clock } from 'lucide-vue-next'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import Button from '@/components/ui/Button.vue'
@@ -27,6 +27,7 @@ interface QueryTab {
   error: string
   loading: boolean
   connectionId: string
+  duration: number | null
 }
 
 const props = defineProps<{
@@ -35,7 +36,7 @@ const props = defineProps<{
 
 let tabIdCounter = 0
 const allTabs = ref<QueryTab[]>([
-  { id: '0', name: 'Query 1', query: '', result: null, error: '', loading: false, connectionId: props.connection.id }
+  { id: '0', name: 'Query 1', query: '', result: null, error: '', loading: false, connectionId: props.connection.id, duration: null }
 ])
 const activeTabId = ref('0')
 
@@ -61,7 +62,8 @@ function addTab() {
     result: null,
     error: '',
     loading: false,
-    connectionId: props.connection.id
+    connectionId: props.connection.id,
+    duration: null
   }
   allTabs.value.push(newTab)
   activeTabId.value = newTab.id
@@ -86,12 +88,15 @@ async function executeQuery() {
   tab.loading = true
   tab.error = ''
   tab.result = null
+  tab.duration = null
   
   try {
     const res = await invoke<any>('execute_query', {
       address: props.connection.address,
       query: tab.query
     })
+    
+    tab.duration = res.duration
     
     if (res.success) {
       tab.result = res.data
@@ -186,6 +191,15 @@ async function executeQuery() {
           </div>
           
           <ResultTable v-else-if="activeTab?.result" :data="activeTab.result" />
+        </div>
+        
+        <!-- Status Bar -->
+        <div 
+          v-if="activeTab?.duration !== null && activeTab?.duration !== undefined"
+          class="px-4 py-2 border-t border-zinc-800/30 bg-zinc-900 flex items-center gap-2 text-xs text-zinc-400"
+        >
+          <Clock :size="14" />
+          <span>Execution time: {{ activeTab.duration }}ms</span>
         </div>
       </div>
     </Pane>

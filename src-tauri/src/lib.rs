@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 struct QueryResult {
     success: bool,
     data: Option<serde_json::Value>,
+    duration: u64,
     error: Option<String>,
 }
 
@@ -37,18 +38,20 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
             let msg = Message::Request(Request::Run(query));
             
             match session.send_receive(msg).await {
-                Ok(Message::Response(Response::Value(value))) | 
-                Ok(Message::Response(Response::Program(value))) => {
+                Ok(Message::Response(Response::Value(value, duration))) | 
+                Ok(Message::Response(Response::Program(value, duration))) => {
                     Ok(QueryResult {
                         success: true,
                         data: Some(value),
+                        duration,
                         error: None,
                     })
                 }
-                Ok(Message::Response(Response::Error(err))) => {
+                Ok(Message::Response(Response::Error(err, duration))) => {
                     Ok(QueryResult {
                         success: false,
                         data: None,
+                        duration,
                         error: Some(format!("{:?}", err)),
                     })
                 }
@@ -56,6 +59,7 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
                     Ok(QueryResult {
                         success: false,
                         data: None,
+                        duration: 0,
                         error: Some("Communication error".to_string()),
                     })
                 }
@@ -63,6 +67,7 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
                     Ok(QueryResult {
                         success: false,
                         data: None,
+                        duration: 0,
                         error: Some("Unexpected response".to_string()),
                     })
                 }
