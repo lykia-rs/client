@@ -12,11 +12,14 @@ export interface QueryTab {
   duration: number | null
 }
 
+// Shared state for all tabs across all connections
+const allTabs = ref<QueryTab[]>([])
+let tabIdCounter = 1
+
 export function useQueryTabs(connectionRef: Ref<Connection>) {
-  let tabIdCounter = 1
-  
-  const allTabs = ref<QueryTab[]>([
-    { 
+  // Initialize first tab if needed
+  if (allTabs.value.length === 0) {
+    allTabs.value.push({ 
       id: '0', 
       name: 'Query 1', 
       query: '', 
@@ -25,13 +28,14 @@ export function useQueryTabs(connectionRef: Ref<Connection>) {
       loading: false, 
       connectionId: connectionRef.value.id, 
       duration: null 
-    }
-  ])
+    })
+  }
   
   const activeTabId = ref('0')
 
   const tabs = computed(() => allTabs.value.filter(t => t.connectionId === connectionRef.value.id))
   const activeTab = computed(() => tabs.value.find(t => t.id === activeTabId.value))
+  const hasRunningQueries = computed(() => tabs.value.some(t => t.loading))
 
   watch(() => connectionRef.value.id, () => {
     const firstTab = tabs.value[0]
@@ -61,6 +65,10 @@ export function useQueryTabs(connectionRef: Ref<Connection>) {
   function closeTab(id: string) {
     if (tabs.value.length === 1) return
     
+    const tabToClose = allTabs.value.find(t => t.id === id)
+    // Prevent closing tabs that are currently executing a query
+    if (tabToClose?.loading) return
+    
     const index = allTabs.value.findIndex(t => t.id === id)
     allTabs.value.splice(index, 1)
     
@@ -74,7 +82,19 @@ export function useQueryTabs(connectionRef: Ref<Connection>) {
     tabs,
     activeTab,
     activeTabId,
+    hasRunningQueries,
     addTab,
     closeTab
   }
+}
+
+// Helper function to check if a connection has running queries
+export function hasRunningQueriesForConnection(connectionId: string): boolean {
+  return allTabs.value.some(t => t.connectionId === connectionId && t.loading)
+}
+
+// Helper function to reset state (for testing)
+export function resetQueryTabsState() {
+  allTabs.value = []
+  tabIdCounter = 1
 }

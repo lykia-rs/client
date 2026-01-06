@@ -5,6 +5,7 @@ import ConnectionPanel from '@/components/ConnectionPanel.vue'
 import QueryPanel from '@/components/QueryPanel.vue'
 import ConnectionDialog from '@/components/ConnectionDialog.vue'
 import { useConnections } from '@/composables/useConnections'
+import { hasRunningQueriesForConnection } from '@/composables/useQueryTabs'
 
 const showConnectionDialog = ref(false)
 
@@ -28,6 +29,7 @@ async function handleAddConnection(host: string, port: string) {
       <Pane :size="20" :min-size="15" :max-size="40">
         <ConnectionPanel 
           :connections="connections" 
+          :has-running-queries="hasRunningQueriesForConnection"
           @select="selectConnection"
           @add="showConnectionDialog = true"
           @remove="removeConnection"

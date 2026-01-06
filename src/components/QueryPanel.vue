@@ -54,7 +54,14 @@ async function executeQuery() {
             <button
               v-if="tabs.length > 1"
               @click.stop="closeTab(tab.id)"
-              class="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all duration-200 hover:scale-110"
+              :disabled="tab.loading"
+              :class="cn(
+                'opacity-0 group-hover:opacity-100 transition-all duration-200',
+                tab.loading 
+                  ? 'cursor-not-allowed text-zinc-600' 
+                  : 'hover:text-red-400 hover:scale-110'
+              )"
+              :title="tab.loading ? 'Cannot close while query is running' : 'Close tab'"
             >
               <X :size="14" />
             </button>

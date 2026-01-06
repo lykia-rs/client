@@ -5,12 +5,14 @@ import QueryPanel from '@/components/QueryPanel.vue'
 import ResultTable from '@/components/ResultTable.vue'
 import Button from '@/components/ui/Button.vue'
 import { createMockConnection, flushPromises } from '@/test/utils'
+import { resetQueryTabsState } from '@/composables/useQueryTabs'
 
 vi.mock('@tauri-apps/api/core')
 
 describe('QueryPanel.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    resetQueryTabsState()
   })
 
   const createWrapper = (props = {}) => {
@@ -784,6 +786,81 @@ describe('QueryPanel.vue', () => {
     // Textarea should be enabled again after error
     expect(textarea.attributes('disabled')).toBeUndefined()
     expect(textarea.attributes('readonly')).toBeUndefined()
+  })
+
+  it('disables tab close button when query is running', async () => {
+    vi.mocked(invoke).mockImplementation(
+      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 100))
+    )
+    
+    const wrapper = createWrapper()
+    
+    // Add a second tab
+    const addTabButton = wrapper.find('button[title="New Query"]')
+    await addTabButton.trigger('click')
+    await wrapper.vm.$nextTick()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    
+    // Find initial close buttons
+    let closeButtons = wrapper.findAll('button').filter(btn => 
+      btn.html().includes('Close tab') || btn.attributes('title')?.includes('close')
+    )
+    
+    // Close button should be enabled initially
+    expect(closeButtons[0].attributes('disabled')).toBeUndefined()
+    
+    const executeButton = wrapper.findComponent(Button)
+    await executeButton.trigger('click')
+    await wrapper.vm.$nextTick()
+    
+    // Re-query for close buttons after state change
+    closeButtons = wrapper.findAll('button').filter(btn => 
+      btn.attributes('title')?.includes('close') || btn.attributes('title')?.includes('Cannot')
+    )
+    
+    // Find the disabled button
+    const disabledButton = closeButtons.find(btn => 
+      btn.attributes('title')?.includes('Cannot close')
+    )
+    
+    expect(disabledButton).toBeDefined()
+    expect(disabledButton?.attributes('disabled')).toBeDefined()
+  })
+
+  it('re-enables tab close button after query completes', async () => {
+    vi.mocked(invoke).mockResolvedValue({
+      success: true,
+      data: [{ id: 1 }],
+      duration: 42,
+    })
+    
+    const wrapper = createWrapper()
+    
+    // Add a second tab
+    const addTabButton = wrapper.find('button[title="New Query"]')
+    await addTabButton.trigger('click')
+    await wrapper.vm.$nextTick()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    
+    const executeButton = wrapper.findComponent(Button)
+    await executeButton.trigger('click')
+    await flushPromises()
+    
+    // Find close button
+    const closeButtons = wrapper.findAll('button').filter(btn => 
+      btn.html().includes('Close tab') || btn.attributes('title')?.includes('close')
+    )
+    
+    const closeButton = closeButtons[0]
+    
+    // Close button should be enabled after completion
+    expect(closeButton.attributes('disabled')).toBeUndefined()
   })
 })
 

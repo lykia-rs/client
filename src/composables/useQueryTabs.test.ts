@@ -1,12 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { ref } from 'vue'
-import { useQueryTabs } from './useQueryTabs'
+import { useQueryTabs, hasRunningQueriesForConnection, resetQueryTabsState } from './useQueryTabs'
 import type { Connection } from './useConnections'
 
 describe('useQueryTabs', () => {
   let connection: Connection
 
   beforeEach(() => {
+    // Reset shared state before each test
+    resetQueryTabsState()
+    
     connection = {
       id: 'conn1',
       name: 'Test DB',
@@ -313,5 +316,99 @@ describe('useQueryTabs', () => {
     
     expect(activeTab.value).toBe(secondTab)
     expect(activeTab.value?.id).toBe(activeTabId.value)
+  })
+
+  it('prevents closing tabs that are currently loading', () => {
+    const connectionRef = ref(connection)
+    const { tabs, addTab, closeTab } = useQueryTabs(connectionRef)
+
+    // Add a second tab
+    addTab()
+    expect(tabs.value).toHaveLength(2)
+
+    const tabToClose = tabs.value[1]
+    const tabId = tabToClose.id
+
+    // Set tab to loading state
+    tabToClose.loading = true
+
+    // Attempt to close the loading tab
+    closeTab(tabId)
+
+    // Tab should still exist
+    expect(tabs.value).toHaveLength(2)
+    expect(tabs.value.find(t => t.id === tabId)).toBeDefined()
+  })
+
+  it('allows closing tabs that are not loading', () => {
+    const connectionRef = ref(connection)
+    const { tabs, addTab, closeTab } = useQueryTabs(connectionRef)
+
+    // Add a second tab
+    addTab()
+    expect(tabs.value).toHaveLength(2)
+
+    const tabToClose = tabs.value[1]
+    const tabId = tabToClose.id
+
+    // Ensure tab is not loading
+    tabToClose.loading = false
+
+    // Close the tab
+    closeTab(tabId)
+
+    // Tab should be removed
+    expect(tabs.value).toHaveLength(1)
+    expect(tabs.value.find(t => t.id === tabId)).toBeUndefined()
+  })
+
+  it('detects running queries for a connection', () => {
+    const connectionRef = ref(connection)
+    const { tabs, addTab } = useQueryTabs(connectionRef)
+
+    // Initially no running queries
+    expect(hasRunningQueriesForConnection(connection.id)).toBe(false)
+
+    // Add a tab and set it to loading
+    addTab()
+    tabs.value[1].loading = true
+
+    // Should now detect running queries
+    expect(hasRunningQueriesForConnection(connection.id)).toBe(true)
+
+    // Set loading to false
+    tabs.value[1].loading = false
+
+    // Should no longer detect running queries
+    expect(hasRunningQueriesForConnection(connection.id)).toBe(false)
+  })
+
+  it('detects running queries only for specific connection', () => {
+    const connection2: Connection = {
+      id: 'conn2',
+      name: 'Test DB 2',
+      address: 'localhost:19192',
+      host: 'localhost',
+      port: '19192',
+      color: '#a5d6a7',
+      active: false,
+      connected: true,
+    }
+
+    const connectionRef1 = ref(connection)
+    const connectionRef2 = ref(connection2)
+    
+    useQueryTabs(connectionRef1)
+    const { tabs: tabs2, addTab: addTab2 } = useQueryTabs(connectionRef2)
+
+    // Add loading tab to connection 2
+    addTab2()
+    tabs2.value[0].loading = true
+
+    // Connection 1 should have no running queries
+    expect(hasRunningQueriesForConnection(connection.id)).toBe(false)
+    
+    // Connection 2 should have running queries
+    expect(hasRunningQueriesForConnection(connection2.id)).toBe(true)
   })
 })

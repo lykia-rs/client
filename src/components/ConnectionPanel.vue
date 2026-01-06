@@ -5,6 +5,7 @@ import type { Connection } from '@/composables/useConnections'
 
 defineProps<{
   connections: Connection[]
+  hasRunningQueries: (connectionId: string) => boolean
 }>()
 
 const emit = defineEmits<{
@@ -62,9 +63,24 @@ const emit = defineEmits<{
           <button
             v-if="connections.length > 1"
             @click.stop="emit('remove', conn.id)"
-            class="opacity-0 group-hover:opacity-100 p-1 hover:bg-zinc-700 rounded transition-all duration-200 hover:scale-110"
+            :disabled="hasRunningQueries(conn.id)"
+            :class="cn(
+              'opacity-0 group-hover:opacity-100 p-1 rounded transition-all duration-200',
+              hasRunningQueries(conn.id)
+                ? 'cursor-not-allowed'
+                : 'hover:bg-zinc-700 hover:scale-110'
+            )"
+            :title="hasRunningQueries(conn.id) ? 'Cannot remove connection with running queries' : 'Remove connection'"
           >
-            <X :size="14" class="text-zinc-400 hover:text-red-400 transition-colors duration-200" />
+            <X 
+              :size="14" 
+              :class="cn(
+                'transition-colors duration-200',
+                hasRunningQueries(conn.id)
+                  ? 'text-zinc-600'
+                  : 'text-zinc-400 hover:text-red-400'
+              )"
+            />
           </button>
         </div>
       </div>

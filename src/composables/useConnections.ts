@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
+import { hasRunningQueriesForConnection } from './useQueryTabs'
 
 export interface Connection {
   id: string
@@ -75,6 +76,9 @@ export function useConnections() {
   function removeConnection(id: string) {
     const index = connections.value.findIndex(c => c.id === id)
     if (index === -1 || connections.value.length === 1) return
+    
+    // Prevent removing connections with running queries
+    if (hasRunningQueriesForConnection(id)) return
     
     connections.value.splice(index, 1)
     if (activeConnection.value.id === id) {

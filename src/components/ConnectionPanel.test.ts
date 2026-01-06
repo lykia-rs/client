@@ -9,6 +9,7 @@ describe('ConnectionPanel.vue', () => {
     return mount(ConnectionPanel, {
       props: {
         connections: [createMockConnection()],
+        hasRunningQueries: () => false,
         ...props,
       },
     })
@@ -257,5 +258,81 @@ describe('ConnectionPanel.vue', () => {
     
     const scrollableArea = wrapper.find('.flex-1.overflow-y-auto')
     expect(scrollableArea.exists()).toBe(true)
+  })
+
+  it('disables remove button when connection has running queries', () => {
+    const connections = [
+      createMockConnection({ id: '1' }),
+      createMockConnection({ id: '2' }),
+    ]
+    
+    const hasRunningQueries = (connId: string) => connId === '2'
+    
+    const wrapper = createWrapper({ connections, hasRunningQueries })
+    
+    // Find all buttons that contain X icon
+    const allButtons = wrapper.findAll('button')
+    const removeButtons = allButtons.filter(btn => {
+      const html = btn.html()
+      return html.includes('Remove connection') || html.includes('Cannot remove')
+    })
+    
+    // The second button (for connection 2) should be disabled
+    expect(removeButtons.length).toBeGreaterThan(0)
+    const disabledButton = removeButtons.find(btn => 
+      btn.attributes('title')?.includes('Cannot remove')
+    )
+    expect(disabledButton).toBeDefined()
+    expect(disabledButton?.attributes('disabled')).toBeDefined()
+  })
+
+  it('enables remove button when connection has no running queries', () => {
+    const connections = [
+      createMockConnection({ id: '1' }),
+      createMockConnection({ id: '2' }),
+    ]
+    
+    const hasRunningQueries = () => false
+    
+    const wrapper = createWrapper({ connections, hasRunningQueries })
+    
+    const allButtons = wrapper.findAll('button')
+    const removeButtons = allButtons.filter(btn => {
+      const title = btn.attributes('title')
+      return title?.includes('Remove connection')
+    })
+    
+    // Both buttons should be enabled (no disabled attribute)
+    removeButtons.forEach(btn => {
+      expect(btn.attributes('disabled')).toBeUndefined()
+    })
+  })
+
+  it('prevents remove event when connection has running queries', async () => {
+    const connections = [
+      createMockConnection({ id: '1' }),
+      createMockConnection({ id: '2' }),
+    ]
+    
+    const hasRunningQueries = (connId: string) => connId === '2'
+    
+    const wrapper = createWrapper({ connections, hasRunningQueries })
+    
+    const allButtons = wrapper.findAll('button')
+    const disabledButton = allButtons.find(btn => 
+      btn.attributes('title')?.includes('Cannot remove')
+    )
+    
+    // Disabled button should exist
+    expect(disabledButton).toBeDefined()
+    
+    // Try to click the disabled button
+    if (disabledButton) {
+      await disabledButton.trigger('click')
+    }
+    
+    // Remove event should not be emitted due to disabled state
+    // (disabled buttons don't trigger click events in most browsers)
+    expect(wrapper.emitted('remove')).toBeFalsy()
   })
 })

@@ -5,6 +5,12 @@ import { flushPromises } from '@/test/utils'
 
 vi.mock('@tauri-apps/api/core')
 
+// Mock the hasRunningQueriesForConnection function
+vi.mock('./useQueryTabs', () => ({
+  hasRunningQueriesForConnection: vi.fn(() => false),
+  useQueryTabs: vi.fn(),
+}))
+
 describe('useConnections', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -257,5 +263,53 @@ describe('useConnections', () => {
     expect(firstConn.active).toBe(false)
     expect(connections.value[1].active).toBe(true)
     expect(activeConnection.value).toBe(connections.value[1])
+  })
+
+  it('prevents removing connection with running queries', async () => {
+    vi.mocked(invoke).mockResolvedValue(undefined)
+    
+    // Import and setup the mock
+    const { hasRunningQueriesForConnection } = await import('./useQueryTabs')
+    vi.mocked(hasRunningQueriesForConnection).mockReturnValue(true)
+    
+    const { connections, addConnection, removeConnection } = useConnections()
+    
+    await addConnection('test', '8080')
+    await flushPromises()
+    
+    expect(connections.value).toHaveLength(2)
+    
+    const connToRemove = connections.value[1]
+    
+    // Try to remove connection with running queries
+    removeConnection(connToRemove.id)
+    
+    // Connection should still exist
+    expect(connections.value).toHaveLength(2)
+    expect(connections.value.find(c => c.id === connToRemove.id)).toBeDefined()
+  })
+
+  it('allows removing connection without running queries', async () => {
+    vi.mocked(invoke).mockResolvedValue(undefined)
+    
+    // Import and setup the mock
+    const { hasRunningQueriesForConnection } = await import('./useQueryTabs')
+    vi.mocked(hasRunningQueriesForConnection).mockReturnValue(false)
+    
+    const { connections, addConnection, removeConnection } = useConnections()
+    
+    await addConnection('test', '8080')
+    await flushPromises()
+    
+    expect(connections.value).toHaveLength(2)
+    
+    const connToRemove = connections.value[1]
+    
+    // Remove connection without running queries
+    removeConnection(connToRemove.id)
+    
+    // Connection should be removed
+    expect(connections.value).toHaveLength(1)
+    expect(connections.value.find(c => c.id === connToRemove.id)).toBeUndefined()
   })
 })
