@@ -113,12 +113,4 @@ function removeConnection(id: string) {
 
 <style>
 @import 'splitpanes/dist/splitpanes.css';
-
-.splitpanes--vertical > .splitpanes__splitter {
-  width: 1px !important;
-}
-
-.splitpanes--horizontal > .splitpanes__splitter {
-  height: 1px !important;
-}
 </style>

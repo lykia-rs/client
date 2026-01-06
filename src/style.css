@@ -18,37 +18,26 @@ body {
   transition: all 0.2s ease;
 }
 
-.splitpanes__splitter:hover {
+.splitpanes__splitter:hover,
+.splitpanes__splitter:active {
   background-color: #4db6ac;
-  box-shadow: 0 0 12px #4db6ac80, 0 0 24px #4db6ac40;
 }
 
-.splitpanes__splitter::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  transition: all 0.2s ease;
+.splitpanes--vertical > .splitpanes__splitter {
+  width: 1px;
 }
 
-.splitpanes--vertical > .splitpanes__splitter::before {
-  width: 2px;
-  height: 24px;
-  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent);
+.splitpanes--vertical > .splitpanes__splitter:hover,
+.splitpanes--vertical > .splitpanes__splitter:active {
+  width: 3px;
 }
 
-.splitpanes--horizontal > .splitpanes__splitter::before {
-  width: 24px;
-  height: 2px;
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+.splitpanes--horizontal > .splitpanes__splitter {
+  height: 1px;
 }
 
-.splitpanes__splitter:hover::before {
-  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3), transparent);
-}
-
-.splitpanes--horizontal > .splitpanes__splitter:hover::before {
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+.splitpanes--horizontal > .splitpanes__splitter:hover,
+.splitpanes--horizontal > .splitpanes__splitter:active {
+  height: 3px;
 }
 
