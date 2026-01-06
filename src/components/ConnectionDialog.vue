@@ -4,7 +4,7 @@ import { X, Loader2 } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 
 const props = defineProps<{
-  onConnect: (host: string, port: string) => Promise<void>
+  connectHandler: (host: string, port: string) => Promise<void>
 }>()
 
 const emit = defineEmits<{
@@ -23,7 +23,7 @@ async function handleSubmit() {
   error.value = ''
   
   try {
-    await props.onConnect(host.value.trim(), port.value.trim())
+    await props.connectHandler(host.value.trim(), port.value.trim())
     // If successful, the parent will close the dialog
   } catch (e: any) {
     error.value = e?.message || String(e) || 'Failed to connect to server'

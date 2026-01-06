@@ -122,7 +122,7 @@ describe('App.vue', () => {
     await wrapper.vm.$nextTick()
 
     const dialog = wrapper.findComponent(ConnectionDialog)
-    await dialog.props('onConnect')('newhost', '9999')
+    await dialog.props('connectHandler')('newhost', '9999')
     await flushPromises()
 
     let connections = wrapper.findComponent(ConnectionPanel).props('connections')
@@ -174,7 +174,7 @@ describe('App.vue', () => {
 
     // Emit connect event
     const dialog = wrapper.findComponent(ConnectionDialog)
-    const onConnect = dialog.props('onConnect')
+    const onConnect = dialog.props('connectHandler')
     await onConnect('newhost', '9999')
 
     await flushPromises()
@@ -209,7 +209,7 @@ describe('App.vue', () => {
 
     // Try to connect
     const dialog = wrapper.findComponent(ConnectionDialog)
-    const onConnect = dialog.props('onConnect')
+    const onConnect = dialog.props('connectHandler')
     
     await expect(onConnect('badhost', '9999')).rejects.toThrow()
 
@@ -235,7 +235,7 @@ describe('App.vue', () => {
     await wrapper.vm.$nextTick()
 
     const dialog = wrapper.findComponent(ConnectionDialog)
-    await dialog.props('onConnect')('newhost', '9999')
+    await dialog.props('connectHandler')('newhost', '9999')
     await flushPromises()
 
     let connections = wrapper.findComponent(ConnectionPanel).props('connections')
@@ -290,7 +290,7 @@ describe('App.vue', () => {
     await wrapper.vm.$nextTick()
 
     const dialog = wrapper.findComponent(ConnectionDialog)
-    await dialog.props('onConnect')('newhost', '9999')
+    await dialog.props('connectHandler')('newhost', '9999')
     await flushPromises()
 
     let connections = wrapper.findComponent(ConnectionPanel).props('connections')
@@ -325,14 +325,14 @@ describe('App.vue', () => {
     await connectionPanel.vm.$emit('add')
     await wrapper.vm.$nextTick()
     let dialog = wrapper.findComponent(ConnectionDialog)
-    await dialog.props('onConnect')('host1', '9991')
+    await dialog.props('connectHandler')('host1', '9991')
     await flushPromises()
 
     // Add second connection
     await connectionPanel.vm.$emit('add')
     await wrapper.vm.$nextTick()
     dialog = wrapper.findComponent(ConnectionDialog)
-    await dialog.props('onConnect')('host2', '9992')
+    await dialog.props('connectHandler')('host2', '9992')
     await flushPromises()
 
     const connections = wrapper.findComponent(ConnectionPanel).props('connections')

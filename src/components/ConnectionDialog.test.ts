@@ -12,7 +12,7 @@ describe('ConnectionDialog.vue', () => {
   const createWrapper = (props = {}) => {
     return mount(ConnectionDialog, {
       props: {
-        onConnect: vi.fn().mockResolvedValue(undefined),
+        connectHandler: vi.fn().mockResolvedValue(undefined),
         ...props,
       },
     })
@@ -103,9 +103,9 @@ describe('ConnectionDialog.vue', () => {
     expect(portInput.element.value).toBe('8080')
   })
 
-  it('calls onConnect with trimmed values when form is submitted', async () => {
-    const onConnect = vi.fn().mockResolvedValue(undefined)
-    const wrapper = createWrapper({ onConnect })
+  it('calls connectHandler with trimmed values when form is submitted', async () => {
+    const connectHandler = vi.fn().mockResolvedValue(undefined)
+    const wrapper = createWrapper({ connectHandler })
     
     const hostInput = wrapper.findAll('input')[0]
     const portInput = wrapper.findAll('input')[1]
@@ -116,12 +116,12 @@ describe('ConnectionDialog.vue', () => {
     const form = wrapper.find('form')
     await form.trigger('submit')
     
-    expect(onConnect).toHaveBeenCalledWith('testhost', '9999')
+    expect(connectHandler).toHaveBeenCalledWith('testhost', '9999')
   })
 
-  it('does not call onConnect when host is empty', async () => {
-    const onConnect = vi.fn()
-    const wrapper = createWrapper({ onConnect })
+  it('does not call connectHandler when host is empty', async () => {
+    const connectHandler = vi.fn()
+    const wrapper = createWrapper({ connectHandler })
     
     const hostInput = wrapper.findAll('input')[0]
     await hostInput.setValue('')
@@ -129,12 +129,12 @@ describe('ConnectionDialog.vue', () => {
     const form = wrapper.find('form')
     await form.trigger('submit')
     
-    expect(onConnect).not.toHaveBeenCalled()
+    expect(connectHandler).not.toHaveBeenCalled()
   })
 
-  it('does not call onConnect when port is empty', async () => {
-    const onConnect = vi.fn()
-    const wrapper = createWrapper({ onConnect })
+  it('does not call connectHandler when port is empty', async () => {
+    const connectHandler = vi.fn()
+    const wrapper = createWrapper({ connectHandler })
     
     const portInput = wrapper.findAll('input')[1]
     await portInput.setValue('')
@@ -142,12 +142,12 @@ describe('ConnectionDialog.vue', () => {
     const form = wrapper.find('form')
     await form.trigger('submit')
     
-    expect(onConnect).not.toHaveBeenCalled()
+    expect(connectHandler).not.toHaveBeenCalled()
   })
 
-  it('does not call onConnect when both fields are whitespace', async () => {
-    const onConnect = vi.fn()
-    const wrapper = createWrapper({ onConnect })
+  it('does not call connectHandler when both fields are whitespace', async () => {
+    const connectHandler = vi.fn()
+    const wrapper = createWrapper({ connectHandler })
     
     const hostInput = wrapper.findAll('input')[0]
     const portInput = wrapper.findAll('input')[1]
@@ -158,12 +158,12 @@ describe('ConnectionDialog.vue', () => {
     const form = wrapper.find('form')
     await form.trigger('submit')
     
-    expect(onConnect).not.toHaveBeenCalled()
+    expect(connectHandler).not.toHaveBeenCalled()
   })
 
   it('shows loading state when connecting', async () => {
-    const onConnect = vi.fn(() => new Promise(resolve => setTimeout(resolve, 100)))
-    const wrapper = createWrapper({ onConnect })
+    const connectHandler = vi.fn(() => new Promise(resolve => setTimeout(resolve, 100)))
+    const wrapper = createWrapper({ connectHandler })
     
     const form = wrapper.find('form')
     await form.trigger('submit')
@@ -176,8 +176,8 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('disables buttons while loading', async () => {
-    const onConnect = vi.fn(() => new Promise(resolve => setTimeout(resolve, 100)))
-    const wrapper = createWrapper({ onConnect })
+    const connectHandler = vi.fn(() => new Promise(resolve => setTimeout(resolve, 100)))
+    const wrapper = createWrapper({ connectHandler })
     
     const form = wrapper.find('form')
     await form.trigger('submit')
@@ -190,8 +190,8 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('displays error message when connection fails', async () => {
-    const onConnect = vi.fn().mockRejectedValue(new Error('Connection failed'))
-    const wrapper = createWrapper({ onConnect })
+    const connectHandler = vi.fn().mockRejectedValue(new Error('Connection failed'))
+    const wrapper = createWrapper({ connectHandler })
     
     const form = wrapper.find('form')
     await form.trigger('submit')
@@ -204,8 +204,8 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('displays generic error when error has no message', async () => {
-    const onConnect = vi.fn().mockRejectedValue('Unknown error')
-    const wrapper = createWrapper({ onConnect })
+    const connectHandler = vi.fn().mockRejectedValue('Unknown error')
+    const wrapper = createWrapper({ connectHandler })
     
     const form = wrapper.find('form')
     await form.trigger('submit')
@@ -217,8 +217,8 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('displays fallback error message when error is null', async () => {
-    const onConnect = vi.fn().mockRejectedValue(null)
-    const wrapper = createWrapper({ onConnect })
+    const connectHandler = vi.fn().mockRejectedValue(null)
+    const wrapper = createWrapper({ connectHandler })
     
     const form = wrapper.find('form')
     await form.trigger('submit')
@@ -231,11 +231,11 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('clears error message when retrying', async () => {
-    const onConnect = vi.fn()
+    const connectHandler = vi.fn()
       .mockRejectedValueOnce(new Error('First error'))
       .mockResolvedValueOnce(undefined)
     
-    const wrapper = createWrapper({ onConnect })
+    const wrapper = createWrapper({ connectHandler })
     
     const form = wrapper.find('form')
     await form.trigger('submit')
@@ -250,8 +250,8 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('stops loading when connection succeeds', async () => {
-    const onConnect = vi.fn().mockResolvedValue(undefined)
-    const wrapper = createWrapper({ onConnect })
+    const connectHandler = vi.fn().mockResolvedValue(undefined)
+    const wrapper = createWrapper({ connectHandler })
     
     const form = wrapper.find('form')
     await form.trigger('submit')
@@ -270,8 +270,8 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('keeps loading state on error', async () => {
-    const onConnect = vi.fn().mockRejectedValue(new Error('Failed'))
-    const wrapper = createWrapper({ onConnect })
+    const connectHandler = vi.fn().mockRejectedValue(new Error('Failed'))
+    const wrapper = createWrapper({ connectHandler })
     
     const form = wrapper.find('form')
     await form.trigger('submit')
@@ -283,8 +283,8 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('can submit form by clicking Connect button', async () => {
-    const onConnect = vi.fn().mockResolvedValue(undefined)
-    const wrapper = createWrapper({ onConnect })
+    const connectHandler = vi.fn().mockResolvedValue(undefined)
+    const wrapper = createWrapper({ connectHandler })
     
     // Trigger submit via form instead since buttons might not directly trigger submit
     const form = wrapper.find('form')
@@ -292,7 +292,7 @@ describe('ConnectionDialog.vue', () => {
     
     await flushPromises()
     
-    expect(onConnect).toHaveBeenCalledWith('localhost', '19191')
+    expect(connectHandler).toHaveBeenCalledWith('localhost', '19191')
   })
 
   it('has proper form accessibility', () => {
@@ -314,8 +314,8 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('shows loader icon when loading', async () => {
-    const onConnect = vi.fn(() => new Promise(() => {})) // Never resolves
-    const wrapper = createWrapper({ onConnect })
+    const connectHandler = vi.fn(() => new Promise(() => {})) // Never resolves
+    const wrapper = createWrapper({ connectHandler })
     
     const form = wrapper.find('form')
     await form.trigger('submit')

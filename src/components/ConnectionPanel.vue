@@ -1,17 +1,7 @@
 <script setup lang="ts">
 import { Database, Plus, X } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
-
-interface Connection {
-  id: string
-  name: string
-  address: string
-  host: string
-  port: string
-  color: string
-  active: boolean
-  connected: boolean
-}
+import type { Connection } from '@/composables/useConnections'
 
 defineProps<{
   connections: Connection[]

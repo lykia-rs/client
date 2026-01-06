@@ -443,4 +443,228 @@ describe('QueryPanel.vue', () => {
     // Should show empty query for new connection
     expect(wrapper.find('textarea').element.value).toBe('')
   })
+
+  it('maintains separate tabs per connection', async () => {
+    const connection1 = createMockConnection({ id: 'conn1', name: 'DB1' })
+    const connection2 = createMockConnection({ id: 'conn2', name: 'DB2' })
+    
+    const wrapper = createWrapper({ connection: connection1 })
+    
+    // Create tabs and set queries for connection 1
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM users')
+    await wrapper.vm.$nextTick()
+    
+    const addTabButton = wrapper.find('button[title="New Query"]')
+    await addTabButton.trigger('click')
+    await wrapper.vm.$nextTick()
+    
+    await wrapper.find('textarea').setValue('SELECT * FROM orders')
+    await wrapper.vm.$nextTick()
+    
+    // Switch to connection 2
+    await wrapper.setProps({ connection: connection2 })
+    await wrapper.vm.$nextTick()
+    
+    // Connection 2 should have its own tab
+    expect(wrapper.find('textarea').element.value).toBe('')
+    
+    // Switch back to connection 1
+    await wrapper.setProps({ connection: connection1 })
+    await wrapper.vm.$nextTick()
+    
+    // Connection 1 should still have both tabs
+    const tabs = wrapper.findAll('button').filter(btn => 
+      btn.text().includes('Query')
+    )
+    expect(tabs.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('preserves tab content when switching connections', async () => {
+    const connection1 = createMockConnection({ id: 'conn1' })
+    const connection2 = createMockConnection({ id: 'conn2' })
+    
+    const wrapper = createWrapper({ connection: connection1 })
+    
+    // Set query in connection 1
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM table1')
+    await wrapper.vm.$nextTick()
+    
+    // Switch to connection 2
+    await wrapper.setProps({ connection: connection2 })
+    await wrapper.vm.$nextTick()
+    
+    // Set different query in connection 2
+    await wrapper.find('textarea').setValue('SELECT * FROM table2')
+    await wrapper.vm.$nextTick()
+    
+    // Switch back to connection 1
+    await wrapper.setProps({ connection: connection1 })
+    await wrapper.vm.$nextTick()
+    
+    // Original query should be preserved
+    expect(wrapper.find('textarea').element.value).toBe('SELECT * FROM table1')
+  })
+
+  it('preserves query results per connection', async () => {
+    vi.mocked(invoke).mockResolvedValue({
+      success: true,
+      data: [{ id: 1, name: 'Result 1' }],
+      duration: 20,
+    })
+    
+    const connection1 = createMockConnection({ id: 'conn1' })
+    const connection2 = createMockConnection({ id: 'conn2' })
+    
+    const wrapper = createWrapper({ connection: connection1 })
+    
+    // Execute query in connection 1
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM conn1_table')
+    await wrapper.vm.$nextTick()
+    
+    const executeButton = wrapper.findComponent(Button)
+    await executeButton.trigger('click')
+    await flushPromises()
+    
+    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+    
+    // Switch to connection 2
+    await wrapper.setProps({ connection: connection2 })
+    await wrapper.vm.$nextTick()
+    
+    // Connection 2 should not show results from connection 1
+    expect(wrapper.findComponent(ResultTable).exists()).toBe(false)
+    
+    // Switch back to connection 1
+    await wrapper.setProps({ connection: connection1 })
+    await wrapper.vm.$nextTick()
+    
+    // Results should still be visible
+    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+  })
+
+  it('creates new tab for new connection if none exists', async () => {
+    const connection1 = createMockConnection({ id: 'conn1' })
+    const connection2 = createMockConnection({ id: 'conn2' })
+    
+    const wrapper = createWrapper({ connection: connection1 })
+    
+    // Switch to connection 2 (which has no tabs yet)
+    await wrapper.setProps({ connection: connection2 })
+    await wrapper.vm.$nextTick()
+    
+    // Should automatically create a tab
+    expect(wrapper.find('textarea').exists()).toBe(true)
+    const tabs = wrapper.findAll('button').filter(btn => 
+      btn.text().includes('Query')
+    )
+    expect(tabs.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('executes query on correct connection', async () => {
+    const connection1 = createMockConnection({ id: 'conn1', address: 'host1:9001' })
+    const connection2 = createMockConnection({ id: 'conn2', address: 'host2:9002' })
+    
+    vi.mocked(invoke).mockResolvedValue({
+      success: true,
+      data: [],
+      duration: 10,
+    })
+    
+    const wrapper = createWrapper({ connection: connection1 })
+    
+    // Set query for connection 1
+    await wrapper.find('textarea').setValue('SELECT 1')
+    await wrapper.vm.$nextTick()
+    
+    // Switch to connection 2
+    await wrapper.setProps({ connection: connection2 })
+    await wrapper.vm.$nextTick()
+    
+    // Set and execute query for connection 2
+    await wrapper.find('textarea').setValue('SELECT 2')
+    await wrapper.vm.$nextTick()
+    
+    await wrapper.findComponent(Button).trigger('click')
+    await flushPromises()
+    
+    // Should execute on connection 2's address
+    expect(invoke).toHaveBeenCalledWith('execute_query', {
+      address: 'host2:9002',
+      query: 'SELECT 2',
+    })
+  })
+
+  it('maintains separate active tabs per connection', async () => {
+    const connection1 = createMockConnection({ id: 'conn1' })
+    const connection2 = createMockConnection({ id: 'conn2' })
+    
+    const wrapper = createWrapper({ connection: connection1 })
+    
+    // Create two tabs for connection 1
+    const addTabButton = wrapper.find('button[title="New Query"]')
+    await addTabButton.trigger('click')
+    await wrapper.vm.$nextTick()
+    
+    // Get tabs and click the first one to make it active
+    let tabs = wrapper.findAll('button').filter(btn => 
+      btn.text().includes('Query')
+    )
+    await tabs[0].trigger('click')
+    await wrapper.vm.$nextTick()
+    
+    // First tab should be active
+    expect(tabs[0].classes()).toContain('bg-zinc-800')
+    
+    // Switch to connection 2
+    await wrapper.setProps({ connection: connection2 })
+    await wrapper.vm.$nextTick()
+    
+    // Add tab for connection 2
+    await wrapper.find('button[title="New Query"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    
+    // Switch back to connection 1
+    await wrapper.setProps({ connection: connection1 })
+    await wrapper.vm.$nextTick()
+    
+    // First tab should still be active in connection 1
+    tabs = wrapper.findAll('button').filter(btn => 
+      btn.text().includes('Query')
+    )
+    expect(tabs[0].classes()).toContain('bg-zinc-800')
+  })
+
+  it('does not mix tabs from different connections', async () => {
+    const connection1 = createMockConnection({ id: 'conn1' })
+    const connection2 = createMockConnection({ id: 'conn2' })
+    
+    const wrapper = createWrapper({ connection: connection1 })
+    
+    // Create 2 tabs for connection 1
+    const addTabButton = wrapper.find('button[title="New Query"]')
+    await addTabButton.trigger('click')
+    await wrapper.vm.$nextTick()
+    await addTabButton.trigger('click')
+    await wrapper.vm.$nextTick()
+    
+    let tabs = wrapper.findAll('button').filter(btn => 
+      btn.text().includes('Query')
+    )
+    const conn1TabCount = tabs.length
+    
+    // Switch to connection 2
+    await wrapper.setProps({ connection: connection2 })
+    await wrapper.vm.$nextTick()
+    
+    // Connection 2 should start with 1 tab (auto-created)
+    tabs = wrapper.findAll('button').filter(btn => 
+      btn.text().includes('Query')
+    )
+    expect(tabs.length).toBe(1)
+    expect(tabs.length).not.toBe(conn1TabCount)
+  })
 })
+

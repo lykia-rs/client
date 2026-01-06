@@ -1,112 +1,26 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { invoke } from '@tauri-apps/api/core'
+import { toRef } from 'vue'
 import { Play, Loader2, Plus, X, Clock } from 'lucide-vue-next'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import Button from '@/components/ui/Button.vue'
 import ResultTable from '@/components/ResultTable.vue'
 import { cn } from '@/lib/utils'
-
-interface Connection {
-  id: string
-  name: string
-  address: string
-  host: string
-  port: string
-  color: string
-  active: boolean
-  connected: boolean
-}
-
-interface QueryTab {
-  id: string
-  name: string
-  query: string
-  result: any
-  error: string
-  loading: boolean
-  connectionId: string
-  duration: number | null
-}
+import { useQueryTabs } from '@/composables/useQueryTabs'
+import { useQueryExecution } from '@/composables/useQueryExecution'
+import type { Connection } from '@/composables/useConnections'
 
 const props = defineProps<{
   connection: Connection
 }>()
 
-let tabIdCounter = 0
-const allTabs = ref<QueryTab[]>([
-  { id: '0', name: 'Query 1', query: '', result: null, error: '', loading: false, connectionId: props.connection.id, duration: null }
-])
-const activeTabId = ref('0')
-
-const tabs = computed(() => allTabs.value.filter(t => t.connectionId === props.connection.id))
-const activeTab = computed(() => tabs.value.find(t => t.id === activeTabId.value))
-
-watch(() => props.connection.id, () => {
-  const firstTab = tabs.value[0]
-  if (firstTab) {
-    activeTabId.value = firstTab.id
-  } else {
-    addTab()
-  }
-})
-
-function addTab() {
-  tabIdCounter++
-  const connTabs = tabs.value
-  const newTab: QueryTab = {
-    id: String(Date.now()),
-    name: `Query ${connTabs.length + 1}`,
-    query: '',
-    result: null,
-    error: '',
-    loading: false,
-    connectionId: props.connection.id,
-    duration: null
-  }
-  allTabs.value.push(newTab)
-  activeTabId.value = newTab.id
-}
-
-function closeTab(id: string) {
-  if (tabs.value.length === 1) return
-  
-  const index = allTabs.value.findIndex(t => t.id === id)
-  allTabs.value.splice(index, 1)
-  
-  if (activeTabId.value === id) {
-    const connTabs = tabs.value
-    activeTabId.value = connTabs[Math.max(0, Math.min(index, connTabs.length - 1))]?.id || connTabs[0]?.id
-  }
-}
+const connectionRef = toRef(props, 'connection')
+const { tabs, activeTab, activeTabId, addTab, closeTab } = useQueryTabs(connectionRef)
+const { executeQuery: executeQueryFn } = useQueryExecution()
 
 async function executeQuery() {
-  const tab = activeTab.value
-  if (!tab || !tab.query.trim()) return
-  
-  tab.loading = true
-  tab.error = ''
-  tab.result = null
-  tab.duration = null
-  
-  try {
-    const res = await invoke<any>('execute_query', {
-      address: props.connection.address,
-      query: tab.query
-    })
-    
-    tab.duration = res.duration
-    
-    if (res.success) {
-      tab.result = res.data
-    } else {
-      tab.error = res.error || 'Query failed'
-    }
-  } catch (e) {
-    tab.error = String(e)
-  } finally {
-    tab.loading = false
+  if (activeTab.value) {
+    await executeQueryFn(activeTab.value, props.connection)
   }
 }
 </script>
