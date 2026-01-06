@@ -13,7 +13,7 @@ body {
 
 /* Splitpanes custom styling */
 .splitpanes__splitter {
-  background-color: #3f3f3f;
+  background-color: #09090b;
   position: relative;
   transition: all 0.2s ease;
 }
@@ -24,20 +24,20 @@ body {
 }
 
 .splitpanes--vertical > .splitpanes__splitter {
-  width: 1px;
+  width: 2px;
 }
 
 .splitpanes--vertical > .splitpanes__splitter:hover,
 .splitpanes--vertical > .splitpanes__splitter:active {
-  width: 3px;
+  width: 6px;
 }
 
 .splitpanes--horizontal > .splitpanes__splitter {
-  height: 1px;
+  height: 2px;
 }
 
 .splitpanes--horizontal > .splitpanes__splitter:hover,
 .splitpanes--horizontal > .splitpanes__splitter:active {
-  height: 3px;
+  height: 6px;
 }
 

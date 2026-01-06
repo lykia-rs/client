@@ -25,7 +25,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-zinc-900 overflow-hidden">
+  <div class="flex flex-col h-full bg-zinc-900">
     <div class="px-4 py-3 border-b border-zinc-800/30 flex items-center justify-between">
       <h2 class="text-sm font-semibold text-zinc-100">Connections</h2>
       <button

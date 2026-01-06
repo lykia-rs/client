@@ -112,12 +112,12 @@ async function executeQuery() {
 </script>
 
 <template>
-  <Splitpanes horizontal class="h-full rounded-lg overflow-hidden">
+  <Splitpanes horizontal class="h-full">
     <!-- Query Editor with Tabs -->
     <Pane :size="40" :min-size="20">
       <div class="flex flex-col h-full bg-zinc-900">
         <!-- Tabs Header -->
-        <div class="flex items-center gap-1 px-2 py-1 border-b border-zinc-800/30 bg-zinc-900">
+        <div class="flex items-center gap-1 px-2 py-1 border-b border-zinc-800/30 bg-zinc-800">
           <button
             v-for="tab in tabs"
             :key="tab.id"
@@ -179,15 +179,15 @@ async function executeQuery() {
           v-if="activeTab"
           v-model="activeTab.query"
           placeholder="Enter your query here..."
-          class="flex-1 px-4 py-3 bg-zinc-950 text-zinc-100 font-mono text-sm resize-none outline-none placeholder:text-zinc-600"
+          class="flex-1 px-4 py-3 bg-zinc-850 text-zinc-100 font-mono text-sm resize-none outline-none placeholder:text-zinc-600"
         />
       </div>
     </Pane>
 
     <!-- Results -->
     <Pane :size="60" :min-size="20">
-      <div class="flex flex-col h-full bg-zinc-950 overflow-hidden">
-        <div class="px-4 py-2 border-b border-zinc-800/30 bg-zinc-900">
+      <div class="flex flex-col h-full bg-zinc-900">
+        <div class="px-4 py-2 border-b border-zinc-800/30 bg-zinc-800">
           <h3 class="text-sm font-semibold">Results</h3>
         </div>
         
