@@ -13,6 +13,8 @@ export interface QueryTab {
 }
 
 export function useQueryTabs(connectionRef: Ref<Connection>) {
+  let tabIdCounter = 1
+  
   const allTabs = ref<QueryTab[]>([
     { 
       id: '0', 
@@ -43,7 +45,7 @@ export function useQueryTabs(connectionRef: Ref<Connection>) {
   function addTab() {
     const connTabs = tabs.value
     const newTab: QueryTab = {
-      id: String(Date.now()),
+      id: `${Date.now()}-${tabIdCounter++}`,
       name: `Query ${connTabs.length + 1}`,
       query: '',
       result: null,
