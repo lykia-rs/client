@@ -194,7 +194,53 @@ describe('QueryPanel.vue', () => {
     expect(executeButton.html()).toContain('animate-spin')
   })
 
-  it('clears previous results when executing new query', async () => {
+  it('shows loading bar at top of results pane during query execution', async () => {
+    vi.mocked(invoke).mockImplementation(
+      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 100))
+    )
+    
+    const wrapper = createWrapper()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    
+    // Loading bar should not exist initially
+    let loadingBar = wrapper.find('.h-0\\.5')
+    expect(loadingBar.exists()).toBe(false)
+    
+    const executeButton = wrapper.findComponent(Button)
+    await executeButton.trigger('click')
+    await wrapper.vm.$nextTick()
+    
+    // Loading bar should appear during loading
+    loadingBar = wrapper.find('.h-0\\.5')
+    expect(loadingBar.exists()).toBe(true)
+  })
+
+  it('hides loading bar after query completes', async () => {
+    vi.mocked(invoke).mockResolvedValue({
+      success: true,
+      data: [{ id: 1 }],
+      duration: 42,
+    })
+    
+    const wrapper = createWrapper()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    
+    const executeButton = wrapper.findComponent(Button)
+    await executeButton.trigger('click')
+    await flushPromises()
+    
+    // Loading bar should be hidden after completion
+    const loadingBar = wrapper.find('.h-0\\.5')
+    expect(loadingBar.exists()).toBe(false)
+  })
+
+  it('keeps previous results visible when executing new query', async () => {
     vi.mocked(invoke).mockResolvedValue({
       success: true,
       data: [{ id: 1 }],
@@ -221,8 +267,9 @@ describe('QueryPanel.vue', () => {
     await executeButton.trigger('click')
     await wrapper.vm.$nextTick()
     
-    // Results should be cleared while loading
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(false)
+    // Results should remain visible while loading (locked state)
+    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+    expect(wrapper.findComponent(ResultTable).props('isLocked')).toBe(true)
   })
 
   it('displays execution time after query completes', async () => {

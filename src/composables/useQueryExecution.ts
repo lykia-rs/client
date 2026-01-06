@@ -8,7 +8,6 @@ export function useQueryExecution() {
     
     tab.loading = true
     tab.error = ''
-    tab.result = null
     tab.duration = null
     
     try {

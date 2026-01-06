@@ -77,7 +77,7 @@ describe('useQueryExecution', () => {
     expect(tab.loading).toBe(false)
   })
 
-  it('clears previous results when executing', async () => {
+  it('keeps previous results and clears error when executing', async () => {
     tab.result = [{ id: 999 }]
     tab.error = 'Old error'
     tab.duration = 999
@@ -92,7 +92,7 @@ describe('useQueryExecution', () => {
 
     await flushPromises()
 
-    expect(tab.result).toBe(null)
+    expect(tab.result).toEqual([{ id: 999 }]) // Result is kept
     expect(tab.error).toBe('')
     expect(tab.duration).toBe(null)
   })

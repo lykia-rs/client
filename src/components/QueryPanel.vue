@@ -106,6 +106,21 @@ async function executeQuery() {
     <!-- Results -->
     <Pane :size="60" :min-size="20">
       <div class="flex flex-col h-full bg-zinc-900">
+        <!-- Loading Bar -->
+        <div 
+          v-if="activeTab?.loading" 
+          class="h-0.5 w-full relative overflow-hidden"
+          :style="{ backgroundColor: connection.color + '40' }"
+        >
+          <div 
+            class="absolute inset-0 w-full h-full loading-shimmer"
+            :style="{ 
+              background: `linear-gradient(90deg, transparent 0%, ${connection.color} 50%, transparent 100%)`,
+              boxShadow: `0 0 8px ${connection.color}`
+            }"
+          />
+        </div>
+        
         <div class="px-4 py-2 border-b border-zinc-800/30 bg-zinc-800">
           <h3 class="text-sm font-semibold">Results</h3>
         </div>
@@ -138,3 +153,18 @@ async function executeQuery() {
     </Pane>
   </Splitpanes>
 </template>
+
+<style scoped>
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.loading-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+</style>
