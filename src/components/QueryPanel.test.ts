@@ -666,5 +666,77 @@ describe('QueryPanel.vue', () => {
     expect(tabs.length).toBe(1)
     expect(tabs.length).not.toBe(conn1TabCount)
   })
+
+  it('disables query textarea during loading state', async () => {
+    vi.mocked(invoke).mockImplementation(
+      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 100))
+    )
+    
+    const wrapper = createWrapper()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    
+    // Textarea should be enabled initially
+    expect(textarea.attributes('disabled')).toBeUndefined()
+    expect(textarea.attributes('readonly')).toBeUndefined()
+    
+    const executeButton = wrapper.findComponent(Button)
+    await executeButton.trigger('click')
+    await wrapper.vm.$nextTick()
+    
+    // Textarea should be disabled during loading
+    expect(textarea.attributes('disabled')).toBeDefined()
+    expect(textarea.attributes('readonly')).toBeDefined()
+    expect(textarea.classes()).toContain('opacity-50')
+    expect(textarea.classes()).toContain('cursor-not-allowed')
+  })
+
+  it('re-enables query textarea after query completes', async () => {
+    vi.mocked(invoke).mockResolvedValue({
+      success: true,
+      data: [{ id: 1 }],
+      duration: 42,
+    })
+    
+    const wrapper = createWrapper()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    
+    const executeButton = wrapper.findComponent(Button)
+    await executeButton.trigger('click')
+    await flushPromises()
+    
+    // Textarea should be enabled again after completion
+    expect(textarea.attributes('disabled')).toBeUndefined()
+    expect(textarea.attributes('readonly')).toBeUndefined()
+    expect(textarea.classes()).not.toContain('opacity-50')
+    expect(textarea.classes()).not.toContain('cursor-not-allowed')
+  })
+
+  it('re-enables query textarea after query error', async () => {
+    vi.mocked(invoke).mockResolvedValue({
+      success: false,
+      error: 'Syntax error',
+      duration: 10,
+    })
+    
+    const wrapper = createWrapper()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('INVALID QUERY')
+    await wrapper.vm.$nextTick()
+    
+    const executeButton = wrapper.findComponent(Button)
+    await executeButton.trigger('click')
+    await flushPromises()
+    
+    // Textarea should be enabled again after error
+    expect(textarea.attributes('disabled')).toBeUndefined()
+    expect(textarea.attributes('readonly')).toBeUndefined()
+  })
 })
 

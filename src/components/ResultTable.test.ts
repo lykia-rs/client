@@ -336,4 +336,93 @@ describe('ResultTable.vue', () => {
     const cells = wrapper.findAll('tbody td')
     expect(cells[1].text()).toBe('["tag1","tag2","tag3"]')
   })
+
+  it('renders without locked state by default', () => {
+    const data = [
+      { id: 1, name: 'Test' },
+    ]
+    
+    const wrapper = mount(ResultTable, {
+      props: { data },
+    })
+    
+    const overlay = wrapper.find('.bg-zinc-900\\/50')
+    expect(overlay.exists()).toBe(false)
+    
+    const container = wrapper.find('.relative')
+    expect(container.classes()).not.toContain('pointer-events-none')
+    expect(container.classes()).not.toContain('select-none')
+  })
+
+  it('renders locked state with overlay when isLocked is true', () => {
+    const data = [
+      { id: 1, name: 'Test' },
+    ]
+    
+    const wrapper = mount(ResultTable, {
+      props: { data, isLocked: true },
+    })
+    
+    const overlay = wrapper.find('.bg-zinc-900\\/50')
+    expect(overlay.exists()).toBe(true)
+    expect(overlay.text()).toContain('Query running...')
+    
+    const container = wrapper.find('.relative')
+    expect(container.classes()).toContain('pointer-events-none')
+    expect(container.classes()).toContain('select-none')
+  })
+
+  it('applies opacity when locked', () => {
+    const data = [
+      { id: 1, name: 'Test' },
+    ]
+    
+    const wrapper = mount(ResultTable, {
+      props: { data, isLocked: true },
+    })
+    
+    const contentWrapper = wrapper.find('.opacity-50')
+    expect(contentWrapper.exists()).toBe(true)
+  })
+
+  it('does not apply opacity when not locked', () => {
+    const data = [
+      { id: 1, name: 'Test' },
+    ]
+    
+    const wrapper = mount(ResultTable, {
+      props: { data, isLocked: false },
+    })
+    
+    const contentWrapper = wrapper.find('.opacity-50')
+    expect(contentWrapper.exists()).toBe(false)
+  })
+
+  it('renders table data correctly when locked', () => {
+    const data = [
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' },
+    ]
+    
+    const wrapper = mount(ResultTable, {
+      props: { data, isLocked: true },
+    })
+    
+    // Table should still render with data
+    expect(wrapper.find('table').exists()).toBe(true)
+    const rows = wrapper.findAll('tbody tr')
+    expect(rows).toHaveLength(2)
+  })
+
+  it('shows overlay on non-tabular data when locked', () => {
+    const data = { message: 'OK', status: 200 }
+    
+    const wrapper = mount(ResultTable, {
+      props: { data, isLocked: true },
+    })
+    
+    const overlay = wrapper.find('.bg-zinc-900\\/50')
+    expect(overlay.exists()).toBe(true)
+    expect(wrapper.find('pre').exists()).toBe(true)
+  })
 })

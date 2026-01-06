@@ -92,8 +92,13 @@ async function executeQuery() {
         <textarea
           v-if="activeTab"
           v-model="activeTab.query"
+          :disabled="activeTab.loading"
+          :readonly="activeTab.loading"
           placeholder="Enter your query here..."
-          class="flex-1 px-4 py-3 bg-zinc-850 text-zinc-100 font-mono text-sm resize-none outline-none placeholder:text-zinc-600"
+          :class="[
+            'flex-1 px-4 py-3 bg-zinc-850 text-zinc-100 font-mono text-sm resize-none outline-none placeholder:text-zinc-600 transition-opacity duration-200',
+            activeTab.loading ? 'opacity-50 cursor-not-allowed' : ''
+          ]"
         />
       </div>
     </Pane>
@@ -114,7 +119,7 @@ async function executeQuery() {
             Execute a query to see results
           </div>
           
-          <ResultTable v-else-if="activeTab?.result" :data="activeTab.result" />
+          <ResultTable v-else-if="activeTab?.result" :data="activeTab.result" :is-locked="activeTab?.loading" />
         </div>
         
         <!-- Status Bar -->
