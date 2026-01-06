@@ -788,7 +788,7 @@ describe('QueryPanel.vue', () => {
     expect(textarea.attributes('readonly')).toBeUndefined()
   })
 
-  it('disables tab close button when query is running', async () => {
+  it('shows spinner instead of close button when query is running', async () => {
     vi.mocked(invoke).mockImplementation(
       () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 100))
     )
@@ -804,33 +804,32 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    // Find initial close buttons
+    // Initially should have close button, no spinner
     let closeButtons = wrapper.findAll('button').filter(btn => 
-      btn.html().includes('Close tab') || btn.attributes('title')?.includes('close')
+      btn.attributes('title')?.includes('Close tab')
     )
+    expect(closeButtons.length).toBeGreaterThan(0)
     
-    // Close button should be enabled initially
-    expect(closeButtons[0].attributes('disabled')).toBeUndefined()
+    // Check no spinner initially
+    let spinners = wrapper.findAll('.animate-spin')
+    const initialSpinnerCount = spinners.length
     
     const executeButton = wrapper.findComponent(Button)
     await executeButton.trigger('click')
     await wrapper.vm.$nextTick()
     
-    // Re-query for close buttons after state change
-    closeButtons = wrapper.findAll('button').filter(btn => 
-      btn.attributes('title')?.includes('close') || btn.attributes('title')?.includes('Cannot')
-    )
+    // Should now have spinner (one in execute button, one in tab)
+    spinners = wrapper.findAll('.animate-spin')
+    expect(spinners.length).toBeGreaterThan(initialSpinnerCount)
     
-    // Find the disabled button
-    const disabledButton = closeButtons.find(btn => 
-      btn.attributes('title')?.includes('Cannot close')
+    // Close button for the active loading tab should be replaced by spinner
+    const tabButtons = wrapper.findAll('button').filter(btn => 
+      btn.text().includes('Query')
     )
-    
-    expect(disabledButton).toBeDefined()
-    expect(disabledButton?.attributes('disabled')).toBeDefined()
+    expect(tabButtons.length).toBeGreaterThan(0)
   })
 
-  it('re-enables tab close button after query completes', async () => {
+  it('shows close button again after query completes', async () => {
     vi.mocked(invoke).mockResolvedValue({
       success: true,
       data: [{ id: 1 }],

@@ -51,17 +51,19 @@ async function executeQuery() {
               }"
             />
             <span class="ml-1">{{ tab.name }}</span>
+            
+            <!-- Show spinner when loading, close button when not -->
+            <Loader2
+              v-if="tab.loading"
+              :size="14"
+              class="animate-spin"
+              :style="{ color: connection.color }"
+            />
             <button
-              v-if="tabs.length > 1"
+              v-else-if="tabs.length > 1"
               @click.stop="closeTab(tab.id)"
-              :disabled="tab.loading"
-              :class="cn(
-                'opacity-0 group-hover:opacity-100 transition-all duration-200',
-                tab.loading 
-                  ? 'cursor-not-allowed text-zinc-600' 
-                  : 'hover:text-red-400 hover:scale-110'
-              )"
-              :title="tab.loading ? 'Cannot close while query is running' : 'Close tab'"
+              class="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all duration-200 hover:scale-110"
+              title="Close tab"
             >
               <X :size="14" />
             </button>
