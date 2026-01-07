@@ -207,8 +207,8 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    // Loading bar should not exist initially
-    let loadingBar = wrapper.find('.h-0\\.5')
+    // Loading bar should not exist initially (look for full-width loading bar)
+    let loadingBar = wrapper.find('.h-0\\.5.w-full')
     expect(loadingBar.exists()).toBe(false)
     
     const executeButton = wrapper.findComponent(Button)
@@ -216,7 +216,7 @@ describe('QueryPanel.vue', () => {
     await wrapper.vm.$nextTick()
     
     // Loading bar should appear during loading
-    loadingBar = wrapper.find('.h-0\\.5')
+    loadingBar = wrapper.find('.h-0\\.5.w-full')
     expect(loadingBar.exists()).toBe(true)
   })
 
@@ -238,7 +238,7 @@ describe('QueryPanel.vue', () => {
     await flushPromises()
     
     // Loading bar should be hidden after completion
-    const loadingBar = wrapper.find('.h-0\\.5')
+    const loadingBar = wrapper.find('.h-0\\.5.w-full')
     expect(loadingBar.exists()).toBe(false)
   })
 
@@ -325,7 +325,7 @@ describe('QueryPanel.vue', () => {
     await tabs[0].trigger('click')
     await wrapper.vm.$nextTick()
     
-    expect(tabs[0].classes()).toContain('bg-zinc-800')
+    expect(tabs[0].classes()).toContain('bg-zinc-900')
   })
 
   it('maintains separate query content per tab', async () => {
@@ -404,7 +404,7 @@ describe('QueryPanel.vue', () => {
     let tabs = wrapper.findAll('button').filter(btn => 
       btn.text().includes('Query')
     )
-    expect(tabs[1].classes()).toContain('bg-zinc-800')
+    expect(tabs[1].classes()).toContain('bg-zinc-900')
     
     // Close the active tab
     const closeButton = tabs[1].find('button')
@@ -415,7 +415,7 @@ describe('QueryPanel.vue', () => {
     tabs = wrapper.findAll('button').filter(btn => 
       btn.text().includes('Query')
     )
-    expect(tabs[0].classes()).toContain('bg-zinc-800')
+    expect(tabs[0].classes()).toContain('bg-zinc-900')
   })
 
   it('shows empty state when no results', () => {
@@ -665,7 +665,7 @@ describe('QueryPanel.vue', () => {
     await wrapper.vm.$nextTick()
     
     // First tab should be active
-    expect(tabs[0].classes()).toContain('bg-zinc-800')
+    expect(tabs[0].classes()).toContain('bg-zinc-900')
     
     // Switch to connection 2
     await wrapper.setProps({ connection: connection2 })
@@ -683,7 +683,7 @@ describe('QueryPanel.vue', () => {
     tabs = wrapper.findAll('button').filter(btn => 
       btn.text().includes('Query')
     )
-    expect(tabs[0].classes()).toContain('bg-zinc-800')
+    expect(tabs[0].classes()).toContain('bg-zinc-900')
   })
 
   it('does not mix tabs from different connections', async () => {

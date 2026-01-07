@@ -31,38 +31,38 @@ async function executeQuery() {
     <Pane :size="40" :min-size="20">
       <div class="flex flex-col h-full bg-zinc-900">
         <!-- Tabs Header -->
-        <div class="flex items-center gap-1 px-2 py-1 border-b border-zinc-800/30 bg-zinc-800">
+        <div class="flex items-end gap-0.5 px-2 pt-1 border-b border-zinc-800/30 bg-zinc-800">
           <button
             v-for="tab in tabs"
             :key="tab.id"
             @click="activeTabId = tab.id"
             :class="cn(
-              'group relative flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-all duration-200',
+              'group relative flex items-center gap-2 px-4 py-1.5 text-sm transition-all duration-200 tab-trapezoid',
               activeTabId === tab.id 
-                ? 'bg-zinc-800 text-zinc-100 shadow-sm' 
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                ? 'bg-zinc-900 text-zinc-100 tab-active' 
+                : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70 tab-inactive'
             )"
           >
             <div 
-              class="absolute left-0 top-0 bottom-0 w-0.5 rounded-full transition-all duration-200"
+              class="absolute top-0 left-0 right-0 h-0.5 transition-all duration-200"
               :style="{ 
                 backgroundColor: activeTabId === tab.id ? connection.color : 'transparent',
-                boxShadow: activeTabId === tab.id ? `0 0 8px ${connection.color}40` : 'none'
+                boxShadow: activeTabId === tab.id ? `0 0 8px ${connection.color}80` : 'none'
               }"
             />
-            <span class="ml-1">{{ tab.name }}</span>
+            <span class="relative z-10 font-semibold">{{ tab.name }}</span>
             
             <!-- Show spinner when loading, close button when not -->
             <Loader2
               v-if="tab.loading"
               :size="14"
-              class="animate-spin"
+              class="animate-spin relative z-10"
               :style="{ color: connection.color }"
             />
             <button
               v-else-if="tabs.length > 1"
               @click.stop="closeTab(tab.id)"
-              class="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all duration-200 hover:scale-110"
+              class="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all duration-200 hover:scale-110 relative z-10"
               title="Close tab"
             >
               <X :size="14" />
@@ -71,7 +71,7 @@ async function executeQuery() {
           
           <button
             @click="addTab"
-            class="ml-1 p-1.5 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-md transition-all duration-200 hover:scale-105"
+            class="ml-2 mb-1 p-1.5 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-md transition-all duration-200 hover:scale-105"
             title="New Query"
           >
             <Plus :size="16" />
@@ -175,5 +175,39 @@ async function executeQuery() {
 
 .loading-shimmer {
   animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Trapezoid tab shape */
+.tab-trapezoid {
+  position: relative;
+  margin-bottom: -1px;
+  clip-path: polygon(
+    8px 0%,
+    calc(100% - 8px) 0%,
+    100% 100%,
+    0% 100%
+  );
+}
+
+.tab-trapezoid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  z-index: -1;
+}
+
+/* Active tab styling */
+.tab-active {
+  z-index: 10;
+}
+
+/* Inactive tab styling */
+.tab-inactive {
+  z-index: 5;
+}
+
+.tab-inactive:hover {
+  z-index: 8;
 }
 </style>
