@@ -336,4 +336,71 @@ describe('useQueryExecution', () => {
     await executeQuery(tab, connection)
     expect(tab.result).toEqual([{ id: 2 }])
   })
+
+  it('parses stringified JSON result', async () => {
+    const data = [{ avg: 500000, ct: 250000, mod: 2 }, { avg: 499998, ct: 250000, mod: 0 }]
+    const stringifiedData = JSON.stringify(data)
+
+    vi.mocked(invoke).mockResolvedValue({
+      success: true,
+      data: stringifiedData,
+      duration: 15,
+    })
+
+    const { executeQuery } = useQueryExecution()
+
+    await executeQuery(tab, connection)
+
+    expect(tab.result).toEqual(data)
+    expect(typeof tab.result).not.toBe('string')
+  })
+
+  it('handles regular object data without parsing', async () => {
+    const data = [{ id: 1, name: 'Test' }]
+
+    vi.mocked(invoke).mockResolvedValue({
+      success: true,
+      data: data,
+      duration: 10,
+    })
+
+    const { executeQuery } = useQueryExecution()
+
+    await executeQuery(tab, connection)
+
+    expect(tab.result).toEqual(data)
+  })
+
+  it('keeps original data if JSON parsing fails', async () => {
+    const invalidJson = '{invalid json'
+
+    vi.mocked(invoke).mockResolvedValue({
+      success: true,
+      data: invalidJson,
+      duration: 10,
+    })
+
+    const { executeQuery } = useQueryExecution()
+
+    await executeQuery(tab, connection)
+
+    expect(tab.result).toBe(invalidJson)
+  })
+
+  it('handles stringified object', async () => {
+    const data = { message: 'Success', count: 42 }
+    const stringifiedData = JSON.stringify(data)
+
+    vi.mocked(invoke).mockResolvedValue({
+      success: true,
+      data: stringifiedData,
+      duration: 12,
+    })
+
+    const { executeQuery } = useQueryExecution()
+
+    await executeQuery(tab, connection)
+
+    expect(tab.result).toEqual(data)
+  })
 })

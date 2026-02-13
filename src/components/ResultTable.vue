@@ -1,5 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import {
+  useVueTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  FlexRender,
+  type ColumnDef,
+  type SortingState,
+} from '@tanstack/vue-table'
+import { ref } from 'vue'
+import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-vue-next'
 
 const props = withDefaults(defineProps<{
   data: any
@@ -8,11 +20,46 @@ const props = withDefaults(defineProps<{
   isLocked: false
 })
 
+const sorting = ref<SortingState>([])
+
 const isArray = computed(() => Array.isArray(props.data) && props.data.length > 0)
-const columns = computed(() => {
+
+const columns = computed<ColumnDef<any>[]>(() => {
   if (!isArray.value) return []
   const first = props.data[0]
-  return typeof first === 'object' && first !== null ? Object.keys(first) : []
+  if (typeof first !== 'object' || first === null) return []
+  
+  return Object.keys(first).map(key => ({
+    accessorKey: key,
+    header: key,
+    cell: (info: any) => formatValue(info.getValue()),
+  }))
+})
+
+const table = computed(() => {
+  if (!isArray.value || columns.value.length === 0) return null
+  
+  return useVueTable({
+    get data() { return props.data },
+    get columns() { return columns.value },
+    state: {
+      get sorting() { return sorting.value },
+    },
+    onSortingChange: (updaterOrValue) => {
+      sorting.value = typeof updaterOrValue === 'function'
+        ? updaterOrValue(sorting.value)
+        : updaterOrValue
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 100,
+      },
+    },
+  })
 })
 
 function formatValue(val: any): string {
@@ -26,7 +73,7 @@ function formatValue(val: any): string {
 <template>
   <div 
     :class="[
-      'relative',
+      'relative h-full flex flex-col',
       isLocked ? 'pointer-events-none select-none' : ''
     ]"
   >
@@ -37,36 +84,100 @@ function formatValue(val: any): string {
       <div class="text-zinc-400 text-sm font-medium">Query running...</div>
     </div>
     
-    <div :class="isLocked ? 'opacity-50 transition-opacity duration-200' : ''">
-      <div v-if="isArray && columns.length" class="overflow-auto">
-        <table class="w-full text-sm border-collapse">
-          <thead class="sticky top-0 bg-zinc-900 border-b border-zinc-800/30">
-            <tr>
-              <th
-                v-for="col in columns"
-                :key="col"
-                class="text-left px-3 py-2 font-semibold text-zinc-300 text-xs uppercase tracking-wide"
+    <div :class="[
+      'flex-1 flex flex-col overflow-hidden',
+      isLocked ? 'opacity-50 transition-opacity duration-200' : ''
+    ]">
+      <div v-if="table" class="flex flex-col h-full">
+        <div class="overflow-auto flex-1">
+          <table class="w-full text-sm border-collapse">
+            <thead class="sticky top-0 bg-zinc-900 border-b border-zinc-800/30 z-10">
+              <tr
+                v-for="headerGroup in table.getHeaderGroups()"
+                :key="headerGroup.id"
               >
-                {{ col }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(row, idx) in data"
-              :key="idx"
-              class="border-b border-zinc-800/20 hover:bg-zinc-800/30 transition-colors"
+                <th
+                  v-for="header in headerGroup.headers"
+                  :key="header.id"
+                  :class="[
+                    'text-left px-3 py-2 font-semibold text-zinc-300 text-xs uppercase tracking-wide',
+                    header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-zinc-800/50 transition-colors' : ''
+                  ]"
+                  @click="header.column.getToggleSortingHandler()?.($event)"
+                >
+                  <div class="flex items-center gap-2">
+                    <FlexRender
+                      :render="header.column.columnDef.header"
+                      :props="header.getContext()"
+                    />
+                    <component
+                      :is="
+                        header.column.getIsSorted() === 'asc'
+                          ? ChevronUp
+                          : header.column.getIsSorted() === 'desc'
+                          ? ChevronDown
+                          : ChevronsUpDown
+                      "
+                      :class="[
+                        'w-4 h-4',
+                        header.column.getIsSorted() ? 'text-zinc-300' : 'text-zinc-600'
+                      ]"
+                    />
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="row in table.getRowModel().rows"
+                :key="row.id"
+                class="border-b border-zinc-800/20 hover:bg-zinc-800/30 transition-colors"
+              >
+                <td
+                  v-for="cell in row.getVisibleCells()"
+                  :key="cell.id"
+                  class="px-3 py-2 font-mono text-zinc-300 text-xs"
+                >
+                  <FlexRender
+                    :render="cell.column.columnDef.cell"
+                    :props="cell.getContext()"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination controls -->
+        <div 
+          v-if="table.getPageCount() > 1"
+          class="flex items-center justify-between gap-2 px-3 py-2 border-t border-zinc-800/30 bg-zinc-900/50"
+        >
+          <div class="text-xs text-zinc-400">
+            Showing {{ table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1 }} 
+            to {{ Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length) }} 
+            of {{ table.getFilteredRowModel().rows.length }} rows
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              class="px-2 py-1 text-xs rounded bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              @click="table.previousPage()"
+              :disabled="!table.getCanPreviousPage()"
             >
-              <td
-                v-for="col in columns"
-                :key="col"
-                class="px-3 py-2 font-mono text-zinc-300 text-xs"
-              >
-                {{ formatValue(row[col]) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              Previous
+            </button>
+            <span class="text-xs text-zinc-400">
+              Page {{ table.getState().pagination.pageIndex + 1 }} of {{ table.getPageCount() }}
+            </span>
+            <button
+              class="px-2 py-1 text-xs rounded bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              @click="table.nextPage()"
+              :disabled="!table.getCanNextPage()"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
       
       <pre v-else class="text-xs font-mono text-zinc-300 whitespace-pre-wrap">{{ JSON.stringify(data, null, 2) }}</pre>

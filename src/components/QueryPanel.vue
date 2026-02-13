@@ -134,16 +134,18 @@ async function executeQuery() {
           <h3 class="text-sm font-semibold">Results</h3>
         </div>
         
-        <div class="flex-1 overflow-auto p-4">
-          <div v-if="activeTab?.error" class="p-4 bg-red-950/20 border border-red-900/50 rounded-lg text-red-400 text-sm font-mono">
+        <div class="flex-1 overflow-hidden flex flex-col">
+          <div v-if="activeTab?.error" class="p-4 bg-red-950/20 border border-red-900/50 rounded-lg text-red-400 text-sm font-mono m-4">
             {{ activeTab.error }}
           </div>
           
-          <div v-else-if="!activeTab?.result && !activeTab?.loading" class="text-zinc-500 text-sm">
+          <div v-else-if="!activeTab?.result && !activeTab?.loading" class="text-zinc-500 text-sm p-4">
             Execute a query to see results
           </div>
           
-          <ResultTable v-else-if="activeTab?.result" :data="activeTab.result" :is-locked="activeTab?.loading" />
+          <div v-else-if="activeTab?.result" class="flex-1 overflow-hidden p-4">
+            <ResultTable :data="activeTab.result" :is-locked="activeTab?.loading" />
+          </div>
         </div>
         
         <!-- Status Bar -->
