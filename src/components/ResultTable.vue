@@ -151,26 +151,26 @@ function formatValue(val: any): string {
         <!-- Pagination controls -->
         <div 
           v-if="table.getPageCount() > 1"
-          class="flex items-center justify-between gap-2 px-3 py-2 border-t border-zinc-800/30 bg-zinc-900/50"
+          class="flex items-center justify-between gap-2 px-3 py-2 border-t border-zinc-300 dark:border-zinc-800/30 bg-zinc-200 dark:bg-zinc-800"
         >
-          <div class="text-xs text-zinc-400">
+          <div class="text-xs text-zinc-600 dark:text-zinc-400">
             Showing {{ table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1 }} 
             to {{ Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length) }} 
             of {{ table.getFilteredRowModel().rows.length }} rows
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="px-2 py-1 text-xs rounded bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="px-2 py-1 text-xs rounded bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               @click="table.previousPage()"
               :disabled="!table.getCanPreviousPage()"
             >
               Previous
             </button>
-            <span class="text-xs text-zinc-400">
+            <span class="text-xs text-zinc-600 dark:text-zinc-400">
               Page {{ table.getState().pagination.pageIndex + 1 }} of {{ table.getPageCount() }}
             </span>
             <button
-              class="px-2 py-1 text-xs rounded bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="px-2 py-1 text-xs rounded bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               @click="table.nextPage()"
               :disabled="!table.getCanNextPage()"
             >
@@ -180,7 +180,7 @@ function formatValue(val: any): string {
         </div>
       </div>
       
-      <pre v-else class="text-xs font-mono text-zinc-300 whitespace-pre-wrap">{{ JSON.stringify(data, null, 2) }}</pre>
+      <pre v-else class="text-xs font-mono text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap p-4">{{ JSON.stringify(data, null, 2) }}</pre>
     </div>
   </div>
 </template>

@@ -143,7 +143,7 @@ async function executeQuery() {
             Execute a query to see results
           </div>
           
-          <div v-else-if="activeTab?.result" class="flex-1 overflow-hidden p-4">
+          <div v-else-if="activeTab?.result" class="flex-1 overflow-hidden">
             <ResultTable :data="activeTab.result" :is-locked="activeTab?.loading" />
           </div>
         </div>
