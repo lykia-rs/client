@@ -152,7 +152,7 @@ describe('QueryPanel.vue', () => {
     
     await flushPromises()
     
-    const errorElement = wrapper.find('.text-red-400')
+    const errorElement = wrapper.find('.text-red-700')
     expect(errorElement.exists()).toBe(true)
     expect(errorElement.text()).toContain('Syntax error in query')
   })
@@ -171,7 +171,7 @@ describe('QueryPanel.vue', () => {
     
     await flushPromises()
     
-    const errorElement = wrapper.find('.text-red-400')
+    const errorElement = wrapper.find('.text-red-700')
     expect(errorElement.exists()).toBe(true)
     expect(errorElement.text()).toContain('Network error')
   })
@@ -325,7 +325,7 @@ describe('QueryPanel.vue', () => {
     await tabs[0].trigger('click')
     await wrapper.vm.$nextTick()
     
-    expect(tabs[0].classes()).toContain('bg-zinc-900')
+    expect(tabs[0].classes()).toContain('bg-zinc-100')
   })
 
   it('maintains separate query content per tab', async () => {
@@ -404,7 +404,7 @@ describe('QueryPanel.vue', () => {
     let tabs = wrapper.findAll('button').filter(btn => 
       btn.text().includes('Query')
     )
-    expect(tabs[1].classes()).toContain('bg-zinc-900')
+    expect(tabs[1].classes()).toContain('bg-zinc-100')
     
     // Close the active tab
     const closeButton = tabs[1].find('button')
@@ -415,7 +415,7 @@ describe('QueryPanel.vue', () => {
     tabs = wrapper.findAll('button').filter(btn => 
       btn.text().includes('Query')
     )
-    expect(tabs[0].classes()).toContain('bg-zinc-900')
+    expect(tabs[0].classes()).toContain('bg-zinc-100')
   })
 
   it('shows empty state when no results', () => {
@@ -665,7 +665,7 @@ describe('QueryPanel.vue', () => {
     await wrapper.vm.$nextTick()
     
     // First tab should be active
-    expect(tabs[0].classes()).toContain('bg-zinc-900')
+    expect(tabs[0].classes()).toContain('bg-zinc-100')
     
     // Switch to connection 2
     await wrapper.setProps({ connection: connection2 })
@@ -683,7 +683,7 @@ describe('QueryPanel.vue', () => {
     tabs = wrapper.findAll('button').filter(btn => 
       btn.text().includes('Query')
     )
-    expect(tabs[0].classes()).toContain('bg-zinc-900')
+    expect(tabs[0].classes()).toContain('bg-zinc-100')
   })
 
   it('does not mix tabs from different connections', async () => {

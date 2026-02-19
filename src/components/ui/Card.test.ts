@@ -24,8 +24,8 @@ describe('Card.vue', () => {
     const card = wrapper.find('div')
     expect(card.classes()).toContain('rounded-lg')
     expect(card.classes()).toContain('border')
-    expect(card.classes()).toContain('border-zinc-800')
-    expect(card.classes()).toContain('bg-zinc-900')
+    expect(card.classes()).toContain('border-zinc-300')
+    expect(card.classes()).toContain('bg-white')
   })
 
   it('accepts custom class prop', () => {
@@ -93,7 +93,7 @@ describe('Card.vue', () => {
     
     const card = wrapper.find('div')
     expect(card.classes()).toContain('rounded-lg')
-    expect(card.classes()).toContain('border-zinc-800')
+    expect(card.classes()).toContain('border-zinc-300')
     expect(card.classes()).toContain('p-4')
     expect(card.classes()).toContain('shadow-xl')
   })

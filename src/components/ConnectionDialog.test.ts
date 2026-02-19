@@ -79,7 +79,7 @@ describe('ConnectionDialog.vue', () => {
   it('does not emit close when dialog content is clicked', async () => {
     const wrapper = createWrapper()
     
-    const dialog = wrapper.find('.bg-zinc-900')
+    const dialog = wrapper.find('.bg-white')
     await dialog.trigger('click')
     
     expect(wrapper.emitted('close')).toBeFalsy()
@@ -198,7 +198,7 @@ describe('ConnectionDialog.vue', () => {
     
     await flushPromises()
     
-    const errorMessage = wrapper.find('.text-red-400')
+    const errorMessage = wrapper.find('.text-red-700')
     expect(errorMessage.exists()).toBe(true)
     expect(errorMessage.text()).toBe('Connection failed')
   })
@@ -212,7 +212,7 @@ describe('ConnectionDialog.vue', () => {
     
     await flushPromises()
     
-    const errorMessage = wrapper.find('.text-red-400')
+    const errorMessage = wrapper.find('.text-red-700')
     expect(errorMessage.text()).toBe('Unknown error')
   })
 
@@ -225,7 +225,7 @@ describe('ConnectionDialog.vue', () => {
     
     await flushPromises()
     
-    const errorMessage = wrapper.find('.text-red-400')
+    const errorMessage = wrapper.find('.text-red-700')
     // The component converts null to string 'null' 
     expect(errorMessage.text()).toBeTruthy()
   })
@@ -241,12 +241,12 @@ describe('ConnectionDialog.vue', () => {
     await form.trigger('submit')
     await flushPromises()
     
-    expect(wrapper.find('.text-red-400').exists()).toBe(true)
+    expect(wrapper.find('.text-red-700').exists()).toBe(true)
     
     await form.trigger('submit')
     await wrapper.vm.$nextTick()
     
-    expect(wrapper.find('.text-red-400').exists()).toBe(false)
+    expect(wrapper.find('.text-red-700').exists()).toBe(false)
   })
 
   it('stops loading when connection succeeds', async () => {
@@ -333,7 +333,7 @@ describe('ConnectionDialog.vue', () => {
     expect(backdrop.classes()).toContain('animate-in')
     expect(backdrop.classes()).toContain('fade-in')
     
-    const dialog = wrapper.find('.bg-zinc-900')
+    const dialog = wrapper.find('.bg-white')
     expect(dialog.classes()).toContain('animate-in')
     expect(dialog.classes()).toContain('zoom-in-95')
   })

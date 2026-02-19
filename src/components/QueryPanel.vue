@@ -29,9 +29,9 @@ async function executeQuery() {
   <Splitpanes horizontal class="h-full">
     <!-- Query Editor with Tabs -->
     <Pane :size="40" :min-size="20">
-      <div class="flex flex-col h-full bg-zinc-900">
+      <div class="flex flex-col h-full bg-zinc-100 dark:bg-zinc-900">
         <!-- Tabs Header -->
-        <div class="flex items-end gap-0.5 px-2 pt-1 border-b border-zinc-800/30 bg-zinc-800">
+        <div class="flex items-end gap-0.5 px-2 pt-1 border-b border-zinc-300 dark:border-zinc-800/30 bg-zinc-200 dark:bg-zinc-800">
           <button
             v-for="tab in tabs"
             :key="tab.id"
@@ -39,8 +39,8 @@ async function executeQuery() {
             :class="cn(
               'group relative flex items-center gap-2 px-4 py-1.5 text-sm transition-all duration-200 tab-trapezoid',
               activeTabId === tab.id 
-                ? 'bg-zinc-900 text-zinc-100 tab-active' 
-                : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70 tab-inactive'
+                ? 'bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 tab-active' 
+                : 'bg-zinc-300/50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800/70 tab-inactive'
             )"
           >
             <div 
@@ -71,7 +71,7 @@ async function executeQuery() {
           
           <button
             @click="addTab"
-            class="ml-2 mb-1 p-1.5 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-md transition-all duration-200 hover:scale-105"
+            class="ml-2 mb-1 p-1.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-800 rounded-md transition-all duration-200 hover:scale-105"
             title="New Query"
           >
             <Plus :size="16" />
@@ -105,7 +105,7 @@ async function executeQuery() {
           :readonly="activeTab.loading"
           placeholder="Enter your query here..."
           :class="[
-            'flex-1 px-4 py-3 bg-zinc-850 text-zinc-100 font-mono text-sm resize-none outline-none placeholder:text-zinc-600 transition-opacity duration-200',
+            'flex-1 px-4 py-3 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-mono text-sm resize-none outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 transition-opacity duration-200',
             activeTab.loading ? 'opacity-50 cursor-not-allowed' : ''
           ]"
         />
@@ -114,7 +114,7 @@ async function executeQuery() {
 
     <!-- Results -->
     <Pane :size="60" :min-size="20">
-      <div class="flex flex-col h-full bg-zinc-900">
+      <div class="flex flex-col h-full bg-zinc-100 dark:bg-zinc-900">
         <!-- Loading Bar -->
         <div 
           v-if="activeTab?.loading" 
@@ -130,16 +130,16 @@ async function executeQuery() {
           />
         </div>
         
-        <div class="px-4 py-2 border-b border-zinc-800/30 bg-zinc-800">
-          <h3 class="text-sm font-semibold">Results</h3>
+        <div class="px-4 py-2 border-b border-zinc-300 dark:border-zinc-800/30 bg-zinc-200 dark:bg-zinc-800">
+          <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Results</h3>
         </div>
         
         <div class="flex-1 overflow-hidden flex flex-col">
-          <div v-if="activeTab?.error" class="p-4 bg-red-950/20 border border-red-900/50 rounded-lg text-red-400 text-sm font-mono m-4">
+          <div v-if="activeTab?.error" class="p-4 bg-red-100 dark:bg-red-950/20 border border-red-300 dark:border-red-900/50 rounded-lg text-red-700 dark:text-red-400 text-sm font-mono m-4">
             {{ activeTab.error }}
           </div>
           
-          <div v-else-if="!activeTab?.result && !activeTab?.loading" class="text-zinc-500 text-sm p-4">
+          <div v-else-if="!activeTab?.result && !activeTab?.loading" class="text-zinc-500 dark:text-zinc-500 text-sm p-4">
             Execute a query to see results
           </div>
           
@@ -151,10 +151,10 @@ async function executeQuery() {
         <!-- Status Bar -->
         <div 
           v-if="activeTab?.duration !== null && activeTab?.duration !== undefined"
-          class="px-4 py-2 border-t border-zinc-800/30 bg-zinc-900 flex items-center gap-2 text-xs"
+          class="px-4 py-2 border-t border-zinc-300 dark:border-zinc-800/30 bg-zinc-100 dark:bg-zinc-900 flex items-center gap-2 text-xs"
         >
-          <Clock :size="14" class="text-zinc-400" />
-          <span class="text-zinc-400">Execution time:</span>
+          <Clock :size="14" class="text-zinc-600 dark:text-zinc-400" />
+          <span class="text-zinc-600 dark:text-zinc-400">Execution time:</span>
           <span 
             class="font-medium font-mono"
             :style="{ color: connection.color }"

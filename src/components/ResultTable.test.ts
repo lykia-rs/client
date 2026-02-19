@@ -236,7 +236,7 @@ describe('ResultTable.vue', () => {
     })
     
     const row = wrapper.find('tbody tr')
-    expect(row.classes()).toContain('hover:bg-zinc-800/30')
+    expect(row.classes()).toContain('hover:bg-zinc-200')
   })
 
   it('uses monospace font for cell values', () => {
@@ -364,7 +364,7 @@ describe('ResultTable.vue', () => {
       props: { data, isLocked: true },
     })
     
-    const overlay = wrapper.find('.bg-zinc-900\\/50')
+    const overlay = wrapper.find('.bg-zinc-100\\/50')
     expect(overlay.exists()).toBe(true)
     expect(overlay.text()).toContain('Query running...')
     
@@ -422,7 +422,7 @@ describe('ResultTable.vue', () => {
       props: { data, isLocked: true },
     })
     
-    const overlay = wrapper.find('.bg-zinc-900\\/50')
+    const overlay = wrapper.find('.bg-zinc-100\\/50')
     expect(overlay.exists()).toBe(true)
     expect(wrapper.find('pre').exists()).toBe(true)
   })

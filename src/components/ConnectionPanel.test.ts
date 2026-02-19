@@ -89,7 +89,7 @@ describe('ConnectionPanel.vue', () => {
     
     const connectionElements = wrapper.findAll('.group')
     // Active connection should have background style
-    expect(connectionElements[0].classes()).toContain('bg-zinc-800/30')
+    expect(connectionElements[0].classes()).toContain('bg-zinc-200')
   })
 
   it('emits select event when connection is clicked', async () => {
@@ -238,7 +238,7 @@ describe('ConnectionPanel.vue', () => {
     const wrapper = createWrapper()
     
     const connectionElement = wrapper.find('.group')
-    expect(connectionElement.classes()).toContain('hover:bg-zinc-800/50')
+    expect(connectionElement.classes()).toContain('hover:bg-zinc-200')
   })
 
   it('renders Database icon for each connection', () => {

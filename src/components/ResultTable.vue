@@ -79,9 +79,9 @@ function formatValue(val: any): string {
   >
     <div 
       v-if="isLocked"
-      class="absolute inset-0 bg-zinc-900/50 backdrop-blur-[1px] z-10 flex items-center justify-center transition-opacity duration-200"
+      class="absolute inset-0 bg-zinc-100/50 dark:bg-zinc-900/50 backdrop-blur-[1px] z-10 flex items-center justify-center transition-opacity duration-200"
     >
-      <div class="text-zinc-400 text-sm font-medium">Query running...</div>
+      <div class="text-zinc-600 dark:text-zinc-400 text-sm font-medium">Query running...</div>
     </div>
     
     <div :class="[
@@ -91,7 +91,7 @@ function formatValue(val: any): string {
       <div v-if="table" class="flex flex-col h-full">
         <div class="overflow-auto flex-1">
           <table class="w-full text-sm border-collapse">
-            <thead class="sticky top-0 bg-zinc-900 border-b border-zinc-800/30 z-10">
+            <thead class="sticky top-0 bg-zinc-100 dark:bg-zinc-900 border-b border-zinc-300 dark:border-zinc-800/30 z-10">
               <tr
                 v-for="headerGroup in table.getHeaderGroups()"
                 :key="headerGroup.id"
@@ -100,8 +100,8 @@ function formatValue(val: any): string {
                   v-for="header in headerGroup.headers"
                   :key="header.id"
                   :class="[
-                    'text-left px-3 py-2 font-semibold text-zinc-300 text-xs uppercase tracking-wide',
-                    header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-zinc-800/50 transition-colors' : ''
+                    'text-left px-3 py-2 font-semibold text-zinc-700 dark:text-zinc-300 text-xs uppercase tracking-wide',
+                    header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-zinc-200 dark:hover:bg-zinc-800/50 transition-colors' : ''
                   ]"
                   @click="header.column.getToggleSortingHandler()?.($event)"
                 >
@@ -120,7 +120,7 @@ function formatValue(val: any): string {
                       "
                       :class="[
                         'w-4 h-4',
-                        header.column.getIsSorted() ? 'text-zinc-300' : 'text-zinc-600'
+                        header.column.getIsSorted() ? 'text-zinc-700 dark:text-zinc-300' : 'text-zinc-400 dark:text-zinc-600'
                       ]"
                     />
                   </div>
@@ -131,12 +131,12 @@ function formatValue(val: any): string {
               <tr
                 v-for="row in table.getRowModel().rows"
                 :key="row.id"
-                class="border-b border-zinc-800/20 hover:bg-zinc-800/30 transition-colors"
+                class="border-b border-zinc-300 dark:border-zinc-800/20 hover:bg-zinc-200 dark:hover:bg-zinc-800/30 transition-colors"
               >
                 <td
                   v-for="cell in row.getVisibleCells()"
                   :key="cell.id"
-                  class="px-3 py-2 font-mono text-zinc-300 text-xs"
+                  class="px-3 py-2 font-mono text-zinc-700 dark:text-zinc-300 text-xs"
                 >
                   <FlexRender
                     :render="cell.column.columnDef.cell"

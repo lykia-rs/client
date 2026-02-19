@@ -24,7 +24,7 @@ async function handleAddConnection(host: string, port: string) {
 </script>
 
 <template>
-  <div class="h-screen w-screen bg-zinc-950 text-zinc-100">
+  <div class="h-screen w-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
     <Splitpanes>
       <Pane :size="20" :min-size="15" :max-size="40">
         <ConnectionPanel 

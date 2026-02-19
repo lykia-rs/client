@@ -16,7 +16,7 @@ const props = withDefaults(defineProps<CardProps>(), {
   <Primitive
     :as="as"
     :as-child="asChild"
-    :class="cn('rounded-lg border border-zinc-800 bg-zinc-900', props.class)"
+    :class="cn('rounded-lg border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900', props.class)"
   >
     <slot />
   </Primitive>

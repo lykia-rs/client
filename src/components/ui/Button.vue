@@ -22,8 +22,8 @@ const classes = computed(() =>
     'active:scale-95',
     {
       'bg-[#4db6ac] text-white hover:opacity-90 hover:shadow-lg': props.variant === 'default',
-      'border border-zinc-700 bg-transparent hover:bg-zinc-800 hover:border-zinc-600': props.variant === 'outline',
-      'hover:bg-zinc-800 hover:scale-105': props.variant === 'ghost',
+      'border border-zinc-400 dark:border-zinc-700 bg-transparent hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:border-zinc-500 dark:hover:border-zinc-600 text-zinc-900 dark:text-zinc-100': props.variant === 'outline',
+      'hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:scale-105 text-zinc-900 dark:text-zinc-100': props.variant === 'ghost',
       'h-10 px-4 py-2 text-sm': props.size === 'default',
       'h-9 px-3 text-xs': props.size === 'sm',
       'h-11 px-8': props.size === 'lg',

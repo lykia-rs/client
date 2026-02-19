@@ -40,7 +40,7 @@ describe('Button.vue', () => {
     
     const button = wrapper.find('button')
     expect(button.classes()).toContain('border')
-    expect(button.classes()).toContain('border-zinc-700')
+    expect(button.classes()).toContain('border-zinc-400')
   })
 
   it('applies ghost variant styles', () => {
@@ -54,7 +54,7 @@ describe('Button.vue', () => {
     })
     
     const button = wrapper.find('button')
-    expect(button.classes()).toContain('hover:bg-zinc-800')
+    expect(button.classes()).toContain('hover:bg-zinc-200')
   })
 
   it('applies default size styles', () => {
