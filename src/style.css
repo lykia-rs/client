@@ -19,9 +19,13 @@ body {
 
 /* Splitpanes custom styling */
 .splitpanes__splitter {
-  background-color: #09090b;
+  background-color: #e4e4e7;
   position: relative;
   transition: all 0.2s ease;
+}
+
+.dark .splitpanes__splitter {
+  background-color: #09090b;
 }
 
 .splitpanes__splitter:hover,
