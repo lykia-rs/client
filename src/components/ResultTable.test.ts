@@ -236,7 +236,7 @@ describe('ResultTable.vue', () => {
     })
     
     const row = wrapper.find('tbody tr')
-    expect(row.classes()).toContain('hover:bg-zinc-200')
+    expect(row.classes()).toContain('hover:bg-zinc-50')
   })
 
   it('uses monospace font for cell values', () => {

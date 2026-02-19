@@ -35,7 +35,7 @@ describe('QueryPanel.vue', () => {
     
     expect(wrapper.find('.splitpanes').exists()).toBe(true)
     expect(wrapper.find('textarea').exists()).toBe(true)
-    expect(wrapper.find('h3').text()).toBe('Results')
+    expect(wrapper.text()).toContain('Results')
   })
 
   it('initializes with one default tab', () => {
@@ -325,7 +325,7 @@ describe('QueryPanel.vue', () => {
     await tabs[0].trigger('click')
     await wrapper.vm.$nextTick()
     
-    expect(tabs[0].classes()).toContain('bg-zinc-100')
+    expect(tabs[0].classes()).toContain('bg-white')
   })
 
   it('maintains separate query content per tab', async () => {
@@ -404,7 +404,7 @@ describe('QueryPanel.vue', () => {
     let tabs = wrapper.findAll('button').filter(btn => 
       btn.text().includes('Query')
     )
-    expect(tabs[1].classes()).toContain('bg-zinc-100')
+    expect(tabs[1].classes()).toContain('bg-white')
     
     // Close the active tab
     const closeButton = tabs[1].find('button')
@@ -415,7 +415,7 @@ describe('QueryPanel.vue', () => {
     tabs = wrapper.findAll('button').filter(btn => 
       btn.text().includes('Query')
     )
-    expect(tabs[0].classes()).toContain('bg-zinc-100')
+    expect(tabs[0].classes()).toContain('bg-white')
   })
 
   it('shows empty state when no results', () => {
@@ -665,7 +665,7 @@ describe('QueryPanel.vue', () => {
     await wrapper.vm.$nextTick()
     
     // First tab should be active
-    expect(tabs[0].classes()).toContain('bg-zinc-100')
+    expect(tabs[0].classes()).toContain('bg-white')
     
     // Switch to connection 2
     await wrapper.setProps({ connection: connection2 })
@@ -683,7 +683,7 @@ describe('QueryPanel.vue', () => {
     tabs = wrapper.findAll('button').filter(btn => 
       btn.text().includes('Query')
     )
-    expect(tabs[0].classes()).toContain('bg-zinc-100')
+    expect(tabs[0].classes()).toContain('bg-white')
   })
 
   it('does not mix tabs from different connections', async () => {

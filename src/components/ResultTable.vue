@@ -90,8 +90,8 @@ function formatValue(val: any): string {
     ]">
       <div v-if="table" class="flex flex-col h-full">
         <div class="overflow-auto flex-1">
-          <table class="w-full text-sm border-collapse">
-            <thead class="sticky top-0 bg-zinc-100 dark:bg-zinc-900 border-b border-zinc-300 dark:border-zinc-800/30 z-10">
+          <table class="w-full border-collapse">
+            <thead class="sticky top-0 bg-zinc-100/95 dark:bg-zinc-900/95 border-b border-zinc-300/60 dark:border-zinc-800/40 z-10 backdrop-blur-sm">
               <tr
                 v-for="headerGroup in table.getHeaderGroups()"
                 :key="headerGroup.id"
@@ -100,7 +100,7 @@ function formatValue(val: any): string {
                   v-for="header in headerGroup.headers"
                   :key="header.id"
                   :class="[
-                    'text-left px-3 py-2 font-semibold text-zinc-700 dark:text-zinc-300 text-xs uppercase tracking-wide',
+                    'text-left px-3 py-2.5 font-semibold text-[10px] uppercase tracking-widest text-zinc-500 dark:text-zinc-500 select-none',
                     header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-zinc-200 dark:hover:bg-zinc-800/50 transition-colors' : ''
                   ]"
                   @click="header.column.getToggleSortingHandler()?.($event)"
@@ -131,12 +131,12 @@ function formatValue(val: any): string {
               <tr
                 v-for="row in table.getRowModel().rows"
                 :key="row.id"
-                class="border-b border-zinc-300 dark:border-zinc-800/20 hover:bg-zinc-200 dark:hover:bg-zinc-800/30 transition-colors"
+                class="border-b border-zinc-200/80 dark:border-zinc-800/20 hover:bg-zinc-50 dark:hover:bg-zinc-800/20 transition-colors"
               >
                 <td
                   v-for="cell in row.getVisibleCells()"
                   :key="cell.id"
-                  class="px-3 py-2 font-mono text-zinc-700 dark:text-zinc-300 text-xs"
+                  class="px-3 py-2 font-mono text-[12px] text-zinc-700 dark:text-zinc-300"
                 >
                   <FlexRender
                     :render="cell.column.columnDef.cell"
@@ -151,26 +151,26 @@ function formatValue(val: any): string {
         <!-- Pagination controls -->
         <div 
           v-if="table.getPageCount() > 1"
-          class="flex items-center justify-between gap-2 px-3 py-2 border-t border-zinc-300 dark:border-zinc-800/30 bg-zinc-200 dark:bg-zinc-800"
+          class="flex items-center justify-between gap-2 px-3 py-2 border-t border-zinc-300/60 dark:border-zinc-800/30 bg-zinc-200/60 dark:bg-zinc-950/80"
         >
-          <div class="text-xs text-zinc-600 dark:text-zinc-400">
+          <div class="text-[11px] text-zinc-500 dark:text-zinc-500">
             Showing {{ table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1 }} 
             to {{ Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length) }} 
             of {{ table.getFilteredRowModel().rows.length }} rows
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="px-2 py-1 text-xs rounded bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="px-3 py-1 text-[11px] font-medium rounded-md border border-zinc-300 dark:border-zinc-700/60 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700/80 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               @click="table.previousPage()"
               :disabled="!table.getCanPreviousPage()"
             >
               Previous
             </button>
-            <span class="text-xs text-zinc-600 dark:text-zinc-400">
+            <span class="text-[11px] text-zinc-500 dark:text-zinc-500">
               Page {{ table.getState().pagination.pageIndex + 1 }} of {{ table.getPageCount() }}
             </span>
             <button
-              class="px-2 py-1 text-xs rounded bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="px-3 py-1 text-[11px] font-medium rounded-md border border-zinc-300 dark:border-zinc-700/60 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700/80 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               @click="table.nextPage()"
               :disabled="!table.getCanNextPage()"
             >

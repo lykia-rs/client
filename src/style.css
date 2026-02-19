@@ -7,14 +7,21 @@
 }
 
 html {
-  font-size: 110%;
+  font-size: 100%;
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+@theme {
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
 }
 
 /* Splitpanes custom styling */

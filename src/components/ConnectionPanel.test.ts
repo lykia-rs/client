@@ -229,7 +229,7 @@ describe('ConnectionPanel.vue', () => {
     
     const wrapper = createWrapper({ connections: [connection] })
     
-    const nameElement = wrapper.find('.text-sm.font-medium.truncate')
+    const nameElement = wrapper.find('.text-xs.font-medium.truncate')
     expect(nameElement.exists()).toBe(true)
     expect(nameElement.classes()).toContain('truncate')
   })

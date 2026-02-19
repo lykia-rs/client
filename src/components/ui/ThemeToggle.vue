@@ -8,10 +8,10 @@ const { theme, toggleTheme } = useTheme()
 <template>
   <button
     @click="toggleTheme"
-    class="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-md transition-all duration-200 hover:scale-105"
+    class="p-1.5 text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700/50 rounded transition-all duration-200"
     :title="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
   >
-    <Sun v-if="theme === 'dark'" :size="16" class="text-zinc-900 dark:text-zinc-100" />
-    <Moon v-else :size="16" class="text-zinc-900 dark:text-zinc-100" />
+    <Sun v-if="theme === 'dark'" :size="14" />
+    <Moon v-else :size="14" />
   </button>
 </template>

@@ -52,7 +52,8 @@ describe('ConnectionDialog.vue', () => {
   it('emits close event when close button is clicked', async () => {
     const wrapper = createWrapper()
     
-    const closeButton = wrapper.find('button[class*="hover:scale-110"]')
+    const allButtons = wrapper.findAll('button')
+    const closeButton = allButtons.find(btn => !btn.classes().includes('inline-flex'))!
     await closeButton.trigger('click')
     
     expect(wrapper.emitted('close')).toHaveLength(1)
