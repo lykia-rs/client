@@ -100,7 +100,7 @@ function formatValue(val: any): string {
                   v-for="header in headerGroup.headers"
                   :key="header.id"
                   :class="[
-                    'text-left px-3 py-2.5 font-semibold text-[10px] uppercase tracking-widest text-zinc-500 dark:text-zinc-500 select-none',
+                    'text-left px-3 py-2.5 font-semibold text-label uppercase tracking-widest text-zinc-500 dark:text-zinc-500 select-none',
                     header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-zinc-200 dark:hover:bg-zinc-800/50 transition-colors' : ''
                   ]"
                   @click="header.column.getToggleSortingHandler()?.($event)"
@@ -151,26 +151,26 @@ function formatValue(val: any): string {
         <!-- Pagination controls -->
         <div 
           v-if="table.getPageCount() > 1"
-          class="flex items-center justify-between gap-2 px-3 py-2 border-t border-zinc-300/60 dark:border-zinc-800/30 bg-zinc-200/60 dark:bg-zinc-950/80"
+          class="flex items-center justify-between gap-2 px-3 h-8 border-t border-zinc-300/60 dark:border-zinc-800/30 bg-zinc-200/60 dark:bg-zinc-950/80"
         >
-          <div class="text-[11px] text-zinc-500 dark:text-zinc-500">
+          <div class="text-xs text-zinc-500 dark:text-zinc-500">
             Showing {{ table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1 }} 
             to {{ Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length) }} 
             of {{ table.getFilteredRowModel().rows.length }} rows
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="px-3 py-1 text-[11px] font-medium rounded-md border border-zinc-300 dark:border-zinc-700/60 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700/80 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              class="px-3 py-1 text-xs font-medium rounded border border-zinc-300 dark:border-zinc-700/60 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700/80 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               @click="table.previousPage()"
               :disabled="!table.getCanPreviousPage()"
             >
               Previous
             </button>
-            <span class="text-[11px] text-zinc-500 dark:text-zinc-500">
+            <span class="text-xs text-zinc-500 dark:text-zinc-500">
               Page {{ table.getState().pagination.pageIndex + 1 }} of {{ table.getPageCount() }}
             </span>
             <button
-              class="px-3 py-1 text-[11px] font-medium rounded-md border border-zinc-300 dark:border-zinc-700/60 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700/80 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              class="px-3 py-1 text-xs font-medium rounded border border-zinc-300 dark:border-zinc-700/60 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700/80 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               @click="table.nextPage()"
               :disabled="!table.getCanNextPage()"
             >

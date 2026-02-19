@@ -31,13 +31,13 @@ async function executeQuery() {
     <Pane :size="40" :min-size="20">
       <div class="flex flex-col h-full bg-zinc-100 dark:bg-zinc-900">
         <!-- Tabs Header -->
-        <div class="flex items-stretch bg-zinc-200 dark:bg-zinc-950 border-b border-zinc-300/70 dark:border-zinc-800/60 overflow-x-auto">
+        <div class="flex h-10 items-stretch bg-zinc-200 dark:bg-zinc-950 border-b border-zinc-300/70 dark:border-zinc-800/60 overflow-x-auto">
           <button
             v-for="tab in tabs"
             :key="tab.id"
             @click="activeTabId = tab.id"
             :class="cn(
-              'group relative flex items-center gap-1.5 px-4 min-h-[38px] text-[11px] font-medium whitespace-nowrap transition-all duration-150 shrink-0 border-r border-zinc-300/50 dark:border-zinc-800/40',
+              'group relative flex items-center gap-1.5 px-4 text-xs font-medium whitespace-nowrap transition-all duration-150 shrink-0 border-r border-zinc-300/50 dark:border-zinc-800/40',
               activeTabId === tab.id 
                 ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100' 
                 : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900/50'
@@ -81,7 +81,7 @@ async function executeQuery() {
               @click="executeQuery"
               :disabled="activeTab?.loading || !activeTab?.query.trim()"
               size="sm"
-              class="gap-1.5 text-[11px] font-semibold tracking-wide transition-all duration-200 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+              class="gap-1.5 text-xs font-semibold tracking-wide disabled:opacity-40 disabled:cursor-not-allowed"
               :style="{ 
                 backgroundColor: connection.color, 
                 borderColor: connection.color,
@@ -101,7 +101,7 @@ async function executeQuery() {
           :readonly="activeTab.loading"
           placeholder="Enter your query here..."
           :class="[
-            'flex-1 px-5 py-4 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-mono text-[13px] leading-6 resize-none outline-none placeholder:text-zinc-400/70 dark:placeholder:text-zinc-600/80 transition-opacity duration-200',
+            'flex-1 px-5 py-4 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-mono text-sm leading-6 resize-none outline-none placeholder:text-zinc-400/70 dark:placeholder:text-zinc-600/80 transition-opacity duration-200',
             activeTab.loading ? 'opacity-50 cursor-not-allowed' : ''
           ]"
         />
@@ -126,8 +126,8 @@ async function executeQuery() {
           />
         </div>
         
-        <div class="px-4 py-2 border-b border-zinc-300/60 dark:border-zinc-800/30 bg-zinc-200/70 dark:bg-zinc-950/80">
-          <span class="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Results</span>
+        <div class="px-4 h-8 flex items-center border-b border-zinc-300/60 dark:border-zinc-800/30 bg-zinc-200/70 dark:bg-zinc-950/80">
+          <span class="text-label font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Results</span>
         </div>
         
         <div class="flex-1 overflow-hidden flex flex-col">
@@ -135,7 +135,7 @@ async function executeQuery() {
             {{ activeTab.error }}
           </div>
           
-          <div v-else-if="!activeTab?.result && !activeTab?.loading" class="text-[12px] text-zinc-400 dark:text-zinc-600 p-6">
+          <div v-else-if="!activeTab?.result && !activeTab?.loading" class="text-ui text-zinc-400 dark:text-zinc-600 p-6">
             Execute a query to see results
           </div>
           
@@ -147,12 +147,12 @@ async function executeQuery() {
         <!-- Status Bar -->
         <div 
           v-if="activeTab?.duration !== null && activeTab?.duration !== undefined"
-          class="px-4 py-1.5 border-t border-zinc-300/60 dark:border-zinc-800/30 bg-zinc-100/80 dark:bg-zinc-950/80 flex items-center gap-1.5"
+          class="px-4 h-8 border-t border-zinc-300/60 dark:border-zinc-800/30 bg-zinc-100/80 dark:bg-zinc-950/80 flex items-center gap-1.5"
         >
           <Clock :size="12" class="text-zinc-400 dark:text-zinc-500" />
-          <span class="text-[10px] text-zinc-400 dark:text-zinc-500">Execution time:</span>
+          <span class="text-label text-zinc-400 dark:text-zinc-500">Execution time:</span>
           <span 
-            class="text-[10px] font-semibold font-mono"
+            class="text-label font-semibold font-mono"
             :style="{ color: connection.color }"
           >{{ activeTab.duration }}ms</span>
         </div>

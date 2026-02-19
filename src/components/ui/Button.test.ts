@@ -40,7 +40,7 @@ describe('Button.vue', () => {
     
     const button = wrapper.find('button')
     expect(button.classes()).toContain('border')
-    expect(button.classes()).toContain('border-zinc-400')
+    expect(button.classes()).toContain('border-zinc-300')
   })
 
   it('applies ghost variant styles', () => {
@@ -54,7 +54,7 @@ describe('Button.vue', () => {
     })
     
     const button = wrapper.find('button')
-    expect(button.classes()).toContain('hover:bg-zinc-200')
+    expect(button.classes()).toContain('hover:bg-zinc-100')
   })
 
   it('applies default size styles', () => {
@@ -68,7 +68,7 @@ describe('Button.vue', () => {
     })
     
     const button = wrapper.find('button')
-    expect(button.classes()).toContain('h-10')
+    expect(button.classes()).toContain('h-9')
     expect(button.classes()).toContain('px-4')
   })
 
@@ -83,7 +83,7 @@ describe('Button.vue', () => {
     })
     
     const button = wrapper.find('button')
-    expect(button.classes()).toContain('h-9')
+    expect(button.classes()).toContain('h-7')
     expect(button.classes()).toContain('px-3')
   })
 
@@ -98,8 +98,8 @@ describe('Button.vue', () => {
     })
     
     const button = wrapper.find('button')
-    expect(button.classes()).toContain('h-11')
-    expect(button.classes()).toContain('px-8')
+    expect(button.classes()).toContain('h-10')
+    expect(button.classes()).toContain('px-6')
   })
 
   it('accepts custom class prop', () => {
@@ -191,7 +191,7 @@ describe('Button.vue', () => {
     expect(button.classes()).toContain('transition-all')
   })
 
-  it('has active scale effect', () => {
+  it('has active press effect', () => {
     const wrapper = mount(Button, {
       slots: {
         default: 'Button',
@@ -199,7 +199,7 @@ describe('Button.vue', () => {
     })
     
     const button = wrapper.find('button')
-    expect(button.classes()).toContain('active:scale-95')
+    expect(button.classes()).toContain('active:opacity-80')
   })
 
   it('has inline-flex display', () => {
@@ -229,7 +229,7 @@ describe('Button.vue', () => {
     
     const button = wrapper.find('button')
     expect(button.classes()).toContain('border')
-    expect(button.classes()).toContain('h-9')
+    expect(button.classes()).toContain('h-7')
     expect(button.classes()).toContain('my-custom-class')
   })
 

@@ -13,7 +13,7 @@ html {
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', system-ui, sans-serif;
-  font-size: 13px;
+  font-size: 11px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -22,6 +22,12 @@ body {
 
 @theme {
   --font-mono: 'JetBrains Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
+  /* Compact uppercase section labels */
+  --font-size-label: 0.5rem;
+  --font-size-label--line-height: 1.4;
+  /* General tool UI text */
+  --font-size-ui: 0.8125rem;
+  --font-size-ui--line-height: 1.5;
 }
 
 /* Splitpanes custom styling */

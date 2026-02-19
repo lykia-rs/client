@@ -47,22 +47,22 @@ async function handleSubmit() {
       
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
-          <label class="block text-[11px] font-medium mb-1.5 text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Host</label>
+          <label class="block text-label font-semibold mb-1.5 text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Host</label>
           <input
             v-model="host"
             type="text"
             placeholder="localhost"
-            class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-300/80 dark:border-zinc-800 rounded-md text-[13px] font-mono outline-none focus:border-[#4db6ac] focus:ring-2 focus:ring-[#4db6ac]/20 transition-all duration-200 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400/60"
+            class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-300/80 dark:border-zinc-800 rounded text-sm font-mono outline-none focus:border-[#4db6ac] focus:ring-2 focus:ring-[#4db6ac]/20 transition-all duration-150 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400/60"
           />
         </div>
         
         <div>
-          <label class="block text-[11px] font-medium mb-1.5 text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Port</label>
+          <label class="block text-label font-semibold mb-1.5 text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Port</label>
           <input
             v-model="port"
             type="text"
             placeholder="19191"
-            class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-300/80 dark:border-zinc-800 rounded-md text-[13px] font-mono outline-none focus:border-[#4db6ac] focus:ring-2 focus:ring-[#4db6ac]/20 transition-all duration-200 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400/60"
+            class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-300/80 dark:border-zinc-800 rounded text-sm font-mono outline-none focus:border-[#4db6ac] focus:ring-2 focus:ring-[#4db6ac]/20 transition-all duration-150 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400/60"
           />
         </div>
         
