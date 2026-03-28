@@ -20,6 +20,7 @@ const { tabs, activeTab, activeTabId, addTab, closeTab } = useQueryTabs(connecti
 const { executeQuery: executeQueryFn } = useQueryExecution()
 
 const editorRef = ref<InstanceType<typeof CodeEditor> | null>(null)
+const hasLocalError = ref(false)
 
 watch(() => activeTab.value?.errorSpan, (span) => {
   if (span) {
@@ -90,7 +91,7 @@ async function executeQuery() {
           <div class="flex items-center px-3 shrink-0 border-l border-zinc-300/40 dark:border-zinc-800/30">
             <Button 
               @click="executeQuery"
-              :disabled="activeTab?.loading || !activeTab?.query.trim()"
+              :disabled="activeTab?.loading || !activeTab?.query.trim() || hasLocalError"
               size="sm"
               class="gap-1.5 text-xs font-semibold tracking-wide disabled:opacity-40 disabled:cursor-not-allowed"
               :style="{ 
@@ -112,6 +113,7 @@ async function executeQuery() {
           :disabled="activeTab.loading"
           :readonly="activeTab.loading"
           placeholder="Enter your query here..."
+          @parse-error="hasLocalError = $event"
         />
       </div>
     </Pane>

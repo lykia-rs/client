@@ -21,6 +21,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
+  (e: 'parseError', hasErrors: boolean): void
 }>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -37,9 +38,11 @@ function applyParseErrors(v: EditorView, content: string) {
     setEditorErrors(v, result.errors.map(e => ({
       from: e.from, to: e.to, message: e.message, severity: 'error' as const,
     })))
-  } else if (hasLocalErrors) {
+    emit('parseError', true)
+  } else {
+    if (hasLocalErrors) clearEditorErrors(v)
     hasLocalErrors = false
-    clearEditorErrors(v)
+    emit('parseError', false)
   }
 }
 
@@ -223,19 +226,6 @@ defineExpose({ showErrors, hideErrors })
   text-decoration: wavy underline;
   text-decoration-color: #3b82f6;
   text-underline-offset: 3px;
-}
-
-/* Error tooltip */
-.cm-error-tooltip {
-  background: #1c1c1e;
-  color: #f87171;
-  border: 1px solid #ef4444;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 0.75rem;
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
-  max-width: 400px;
-  white-space: pre-wrap;
 }
 
 /* Dark theme */

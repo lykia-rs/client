@@ -20,7 +20,7 @@ const CodeEditorStub = {
     :class="{ 'opacity-50 cursor-not-allowed': disabled }"
   />`,
   props: ['modelValue', 'disabled', 'readonly', 'placeholder'],
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'parseError'],
 }
 
 describe('QueryPanel.vue', () => {
@@ -86,6 +86,29 @@ describe('QueryPanel.vue', () => {
     
     const executeButton = wrapper.findComponent(Button)
     expect(executeButton.attributes('disabled')).toBeUndefined()
+  })
+
+  it('disables Execute button when editor emits a parse error', async () => {
+    const wrapper = createWrapper()
+
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM users')
+    await wrapper.vm.$nextTick()
+
+    // Verify it's enabled first
+    expect(wrapper.findComponent(Button).attributes('disabled')).toBeUndefined()
+
+    // Simulate a parse error from CodeEditor
+    wrapper.findComponent(CodeEditorStub).vm.$emit('parseError', true)
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findComponent(Button).attributes('disabled')).toBeDefined()
+
+    // Resolve the error
+    wrapper.findComponent(CodeEditorStub).vm.$emit('parseError', false)
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findComponent(Button).attributes('disabled')).toBeUndefined()
   })
 
   it('updates query text when typing in textarea', async () => {
