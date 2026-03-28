@@ -11,60 +11,25 @@ pub struct Tree {
     pub span: Span,
 }
 
+fn leaf(name: &str, span: Span) -> Tree {
+    Tree { name: name.to_string(), children: None, span }
+}
+
 pub struct TreeBuilder;
 
 impl TreeBuilder {
     pub fn token_to_tree(token: Token) -> Tree {
+        let span = token.span;
         match token.tok_type {
-            TokenType::Identifier { dollar } => Tree {
-                name: if dollar {
-                    "Variable".to_string()
-                } else {
-                    "Identifier".to_string()
-                },
-                children: None,
-                span: token.span,
-            },
-            TokenType::Keyword(_) => Tree {
-                name: "Keyword".to_string(),
-                children: None,
-                span: token.span,
-            },
-            TokenType::SqlKeyword(_) => Tree {
-                name: "SqlKeyword".to_string(),
-                children: None,
-                span: token.span,
-            },
-            TokenType::Str => Tree {
-                name: "String".to_string(),
-                children: None,
-                span: token.span,
-            },
-            TokenType::Num => Tree {
-                name: "Number".to_string(),
-                children: None,
-                span: token.span,
-            },
-            TokenType::True | TokenType::False => Tree {
-                name: "Boolean".to_string(),
-                children: None,
-                span: token.span,
-            },
-            TokenType::Undefined => Tree {
-                name: "Undefined".to_string(),
-                children: None,
-                span: token.span,
-            },
-            TokenType::Symbol(_) => Tree {
-                name: "Symbol".to_string(),
-                children: None,
-                span: token.span,
-            },
-            TokenType::Eof => Tree {
-                name: "Eof".to_string(),
-                children: None,
-                span: token.span,
-            },
+            TokenType::Identifier { dollar } => leaf(if dollar { "Variable" } else { "Identifier" }, span),
+            TokenType::Keyword(_)            => leaf("Keyword", span),
+            TokenType::SqlKeyword(_)         => leaf("SqlKeyword", span),
+            TokenType::Str                   => leaf("String", span),
+            TokenType::Num                   => leaf("Number", span),
+            TokenType::True | TokenType::False => leaf("Boolean", span),
+            TokenType::Undefined             => leaf("Undefined", span),
+            TokenType::Symbol(_)             => leaf("Symbol", span),
+            TokenType::Eof                   => leaf("Eof", span),
         }
     }
 }

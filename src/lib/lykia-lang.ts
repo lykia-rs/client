@@ -1,15 +1,15 @@
 import {
+  HighlightStyle,
   Language,
   LanguageSupport,
   defineLanguageFacet,
   syntaxHighlighting,
 } from '@codemirror/language'
 import { Input, NodeType, Parser, PartialParse, Tree } from '@lezer/common'
-import { HighlightStyle } from '@codemirror/language'
 import { styleTags, tags as t } from '@lezer/highlight'
 import type { TokenTree } from '@/lib/wasm'
 
-const tagMap = {
+const highlight = styleTags({
   String: t.string,
   Number: t.number,
   Identifier: t.variableName,
@@ -19,19 +19,29 @@ const tagMap = {
   Symbol: t.operator,
   Variable: t.special(t.variableName),
   'Null Undefined': t.null,
-} as Record<string, any>
+})
 
-const highlight = styleTags(tagMap)
+// Node types are defined once at module load — never recreated per-parse
+let _nodeId = 0
+const makeType = (name: string, top = false) =>
+  NodeType.define({ id: _nodeId++, name, top, props: [highlight] })
+
+const TOKEN_TYPES: Record<string, NodeType> = Object.fromEntries(
+  ['Program', 'Keyword', 'SqlKeyword', 'String', 'Number', 'Boolean',
+   'Identifier', 'Variable', 'Symbol', 'Eof', 'Undefined']
+    .map((name) => [name, makeType(name)]),
+)
+const ROOT_TYPE = makeType('_root', true)
 
 function convertToLezerTree(node: TokenTree): Tree {
   if (!node.span) return Tree.empty
-  const children = (node.children || []).slice().sort(
-    (a: TokenTree, b: TokenTree) => a.span.start - b.span.start,
-  )
+  const children = (node.children ?? [])
+    .slice()
+    .sort((a, b) => a.span.start - b.span.start)
   return new Tree(
-    NodeType.define({ id: 0, name: node.name, top: false, props: [highlight] }),
+    TOKEN_TYPES[node.name] ?? makeType(node.name),
     children.map(convertToLezerTree),
-    children.map((c: TokenTree) => c.span.start - node.span.start),
+    children.map((c) => c.span.start - node.span.start),
     node.span.end - node.span.start,
   )
 }
@@ -49,17 +59,14 @@ class LykiaParser extends Parser {
         try {
           const parsed = this.tokenizeFn(doc)
           if (!parsed) return this.lastTree
-
-          const tree = new Tree(
-            NodeType.define({ id: 0, name: '_root', top: true, props: [highlight] }),
+          this.lastTree = new Tree(
+            ROOT_TYPE,
             [convertToLezerTree(parsed)],
             [parsed.span.start],
             parsed.span.end,
           )
-          this.lastTree = tree
-          return tree
+          return this.lastTree
         } catch {
-          // On parse error, return last successful tree to keep highlighting stable
           return this.lastTree
         }
       },

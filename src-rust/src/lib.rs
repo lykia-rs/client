@@ -14,12 +14,9 @@ pub fn tokenize(source: &str) -> Result<JsValue, JsValue> {
         return Ok(JsValue::NULL);
     }
 
-    let root_span = {
-        let mut s = tokens.last().unwrap().span;
-        s.start = 0;
-        s.line = 0;
-        s
-    };
+    let mut root_span = tokens.last().unwrap().span;
+    root_span.start = 0;
+    root_span.line = 0;
 
     let token_tree = Tree {
         name: "Program".to_owned(),
