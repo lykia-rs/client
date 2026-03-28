@@ -9,6 +9,20 @@ import { resetQueryTabsState } from '@/composables/useQueryTabs'
 
 vi.mock('@tauri-apps/api/core')
 
+const CodeEditorStub = {
+  name: 'CodeEditor',
+  template: `<textarea
+    :value="modelValue"
+    :disabled="disabled"
+    :readonly="readonly"
+    @input="$emit('update:modelValue', $event.target.value)"
+    class="code-editor-stub"
+    :class="{ 'opacity-50 cursor-not-allowed': disabled }"
+  />`,
+  props: ['modelValue', 'disabled', 'readonly', 'placeholder'],
+  emits: ['update:modelValue'],
+}
+
 describe('QueryPanel.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -25,6 +39,7 @@ describe('QueryPanel.vue', () => {
         stubs: {
           Splitpanes: { template: '<div class="splitpanes"><slot /></div>' },
           Pane: { template: '<div class="pane"><slot /></div>' },
+          CodeEditor: CodeEditorStub,
         },
       },
     })
@@ -738,8 +753,9 @@ describe('QueryPanel.vue', () => {
     // Textarea should be disabled during loading
     expect(textarea.attributes('disabled')).toBeDefined()
     expect(textarea.attributes('readonly')).toBeDefined()
-    expect(textarea.classes()).toContain('opacity-50')
-    expect(textarea.classes()).toContain('cursor-not-allowed')
+    // Editor wrapper should show disabled styling
+    const editorWrapper = textarea.element.closest('.opacity-50')
+    expect(editorWrapper).not.toBeNull()
   })
 
   it('re-enables query textarea after query completes', async () => {

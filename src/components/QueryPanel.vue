@@ -5,6 +5,7 @@ import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import Button from '@/components/ui/Button.vue'
 import ResultTable from '@/components/ResultTable.vue'
+import CodeEditor from '@/components/CodeEditor.vue'
 import { cn } from '@/lib/utils'
 import { useQueryTabs } from '@/composables/useQueryTabs'
 import { useQueryExecution } from '@/composables/useQueryExecution'
@@ -94,16 +95,12 @@ async function executeQuery() {
           </div>
         </div>
         
-        <textarea
+        <CodeEditor
           v-if="activeTab"
           v-model="activeTab.query"
           :disabled="activeTab.loading"
           :readonly="activeTab.loading"
           placeholder="Enter your query here..."
-          :class="[
-            'flex-1 px-5 py-4 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-mono text-sm leading-6 resize-none outline-none placeholder:text-zinc-400/70 dark:placeholder:text-zinc-600/80 transition-opacity duration-200',
-            activeTab.loading ? 'opacity-50 cursor-not-allowed' : ''
-          ]"
         />
       </div>
     </Pane>
