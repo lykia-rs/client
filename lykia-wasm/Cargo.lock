@@ -19,6 +19,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d20789868f4b01b2f2caec9f5c4e0213b41e3e5702a50157d699ae31ced2fcb"
 
 [[package]]
+name = "bytes"
+version = "1.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
+
+[[package]]
 name = "cfg-if"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -65,13 +71,14 @@ dependencies = [
 name = "lykiadb-common"
 version = "0.1.0"
 dependencies = [
+ "bytes",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
 name = "lykiadb-lang"
 version = "0.1.0"
-source = "git+https://github.com/lykia-rs/lykiadb.git?branch=main#457ef399cf0e5bf6d6b8efd6ddc43c298836158d"
 dependencies = [
  "assert-json-diff",
  "derivative",
