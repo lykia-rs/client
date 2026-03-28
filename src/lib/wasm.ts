@@ -1,5 +1,5 @@
-import init, { tokenize as wasmTokenize } from '../../lykia-wasm/pkg/lykia_wasm'
-import wasmUrl from '../../lykia-wasm/pkg/lykia_wasm_bg.wasm?url'
+import init, { tokenize as wasmTokenize } from '../../src-rust/pkg/src_rust'
+import wasmUrl from '../../src-rust/pkg/src_rust_bg.wasm?url'
 
 let initialized = false
 let initPromise: Promise<void> | null = null

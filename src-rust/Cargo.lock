@@ -58,18 +58,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "lykia-wasm"
-version = "0.1.0"
-dependencies = [
- "lykiadb-lang",
- "serde",
- "serde-wasm-bindgen",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "lykiadb-common"
 version = "0.1.0"
+source = "git+https://github.com/lykia-rs/lykiadb.git?branch=main#6a76c233509811f8720fba2e841b8aeb561b2714"
 dependencies = [
  "bytes",
  "serde",
@@ -79,6 +70,7 @@ dependencies = [
 [[package]]
 name = "lykiadb-lang"
 version = "0.1.0"
+source = "git+https://github.com/lykia-rs/lykiadb.git?branch=main#6a76c233509811f8720fba2e841b8aeb561b2714"
 dependencies = [
  "assert-json-diff",
  "derivative",
@@ -248,6 +240,16 @@ name = "siphasher"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b2aa850e253778c88a04c3d7323b043aeda9d3e30d5971937c1855769763678e"
+
+[[package]]
+name = "src-rust"
+version = "0.1.0"
+dependencies = [
+ "lykiadb-lang",
+ "serde",
+ "serde-wasm-bindgen",
+ "wasm-bindgen",
+]
 
 [[package]]
 name = "syn"
