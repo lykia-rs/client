@@ -79,7 +79,7 @@ onMounted(async () => {
             "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
           fontSize: '0.875rem',
           lineHeight: '1.5rem',
-          padding: '2px 0',
+          padding: '6px 8px',
           caretColor: 'transparent',
         },
         '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--cm-cursor-color, #000)' },
