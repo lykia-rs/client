@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { toRef } from 'vue'
+import { toRef, ref, watch } from 'vue'
 import { Play, Loader2, Plus, X, Clock } from 'lucide-vue-next'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import Button from '@/components/ui/Button.vue'
 import ResultTable from '@/components/ResultTable.vue'
+import CodeEditor from '@/components/CodeEditor.vue'
 import { cn } from '@/lib/utils'
 import { useQueryTabs } from '@/composables/useQueryTabs'
 import { useQueryExecution } from '@/composables/useQueryExecution'
@@ -17,6 +18,17 @@ const props = defineProps<{
 const connectionRef = toRef(props, 'connection')
 const { tabs, activeTab, activeTabId, addTab, closeTab } = useQueryTabs(connectionRef)
 const { executeQuery: executeQueryFn } = useQueryExecution()
+
+const editorRef = ref<InstanceType<typeof CodeEditor> | null>(null)
+const hasLocalError = ref(false)
+
+watch(() => activeTab.value?.errorSpan, (span) => {
+  if (span) {
+    editorRef.value?.showErrors?.([{ from: span.from, to: span.to, message: activeTab.value?.error ?? '', severity: 'error' }])
+  } else {
+    editorRef.value?.hideErrors?.()
+  }
+})
 
 async function executeQuery() {
   if (activeTab.value) {
@@ -79,7 +91,7 @@ async function executeQuery() {
           <div class="flex items-center px-3 shrink-0 border-l border-zinc-300/40 dark:border-zinc-800/30">
             <Button 
               @click="executeQuery"
-              :disabled="activeTab?.loading || !activeTab?.query.trim()"
+              :disabled="activeTab?.loading || !activeTab?.query.trim() || hasLocalError"
               size="sm"
               class="gap-1.5 text-xs font-semibold tracking-wide disabled:opacity-40 disabled:cursor-not-allowed"
               :style="{ 
@@ -94,16 +106,14 @@ async function executeQuery() {
           </div>
         </div>
         
-        <textarea
+        <CodeEditor
+          ref="editorRef"
           v-if="activeTab"
           v-model="activeTab.query"
           :disabled="activeTab.loading"
           :readonly="activeTab.loading"
           placeholder="Enter your query here..."
-          :class="[
-            'flex-1 px-5 py-4 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-mono text-sm leading-6 resize-none outline-none placeholder:text-zinc-400/70 dark:placeholder:text-zinc-600/80 transition-opacity duration-200',
-            activeTab.loading ? 'opacity-50 cursor-not-allowed' : ''
-          ]"
+          @parse-error="hasLocalError = $event"
         />
       </div>
     </Pane>

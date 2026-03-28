@@ -2,11 +2,18 @@ use lykiadb_common::comm::{Message, Request, Response, client::{get_session, Pro
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
+struct ErrorSpan {
+    from: usize,
+    to: usize,
+}
+
+#[derive(Serialize, Deserialize)]
 struct QueryResult {
     success: bool,
     data: Option<serde_json::Value>,
     duration: u64,
     error: Option<String>,
+    error_span: Option<ErrorSpan>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -45,6 +52,7 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
                         data: Some(value),
                         duration,
                         error: None,
+                        error_span: None,
                     })
                 }
                 Ok(Message::Response(Response::Error(err, duration))) => {
@@ -52,7 +60,8 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
                         success: false,
                         data: None,
                         duration,
-                        error: Some(format!("{:?}", err)),
+                        error: Some(format!("{}: {}", err.message, err.hint)),
+                        error_span: err.span.map(|s| ErrorSpan { from: s.start, to: s.end }),
                     })
                 }
                 Err(_) => {
@@ -61,6 +70,7 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
                         data: None,
                         duration: 0,
                         error: Some("Communication error".to_string()),
+                        error_span: None,
                     })
                 }
                 _ => {
@@ -69,6 +79,7 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
                         data: None,
                         duration: 0,
                         error: Some("Unexpected response".to_string()),
+                        error_span: None,
                     })
                 }
             }

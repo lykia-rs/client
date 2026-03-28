@@ -1,0 +1,121 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { mount } from '@vue/test-utils'
+import CodeEditor from '@/components/CodeEditor.vue'
+import { setErrors, clearErrors } from '@/lib/error-highlighting'
+import { flushPromises } from '@/test/utils'
+
+// --- CodeMirror mocks ---
+
+vi.mock('@codemirror/view', () => {
+  class EditorView {
+    state: any
+    dispatch = vi.fn()
+    destroy = vi.fn()
+    constructor({ state, parent }: any) {
+      this.state = state ?? { doc: { toString: () => '' } }
+      if (parent) parent.setAttribute('data-codemirror', 'true')
+    }
+    static updateListener = { of: vi.fn(() => []) }
+    static editable = { of: vi.fn(() => []) }
+    static theme = vi.fn(() => [])
+  }
+  return {
+    EditorView,
+    keymap: { of: vi.fn(() => []) },
+    drawSelection: vi.fn(() => []),
+  }
+})
+
+vi.mock('@codemirror/state', () => ({
+  EditorState: {
+    create: vi.fn().mockReturnValue({ doc: { toString: () => '' } }),
+    readOnly: { of: vi.fn(() => []) },
+  },
+  Compartment: class Compartment {
+    of = vi.fn((x: any) => x)
+    reconfigure = vi.fn((x: any) => x)
+  },
+  StateEffect: { define: vi.fn(() => ({ of: vi.fn() })) },
+  StateField: { define: vi.fn(() => ({})) },
+  Decoration: {
+    none: {},
+    mark: vi.fn(() => ({ range: vi.fn() })),
+    set: vi.fn(() => ({})),
+  },
+}))
+
+vi.mock('@codemirror/commands', () => ({
+  defaultKeymap: [],
+  indentWithTab: {},
+}))
+
+vi.mock('@/lib/lykia-lang', () => ({
+  lykiaLanguage: vi.fn(() => []),
+}))
+
+vi.mock('@/lib/error-highlighting', () => ({
+  errorHighlighting: vi.fn(() => []),
+  setErrors: vi.fn(),
+  clearErrors: vi.fn(),
+}))
+
+// --- Tests ---
+
+describe('CodeEditor.vue', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  function createWrapper(props = {}) {
+    return mount(CodeEditor, {
+      props: { modelValue: '', ...props },
+    })
+  }
+
+  it('renders a container div', () => {
+    const wrapper = createWrapper()
+    expect(wrapper.find('div.code-editor').exists()).toBe(true)
+  })
+
+  it('applies opacity class when disabled', () => {
+    const wrapper = createWrapper({ disabled: true })
+    expect(wrapper.find('div').classes()).toContain('opacity-50')
+    expect(wrapper.find('div').classes()).toContain('cursor-not-allowed')
+  })
+
+  it('does not apply disabled classes when enabled', () => {
+    const wrapper = createWrapper({ disabled: false })
+    expect(wrapper.find('div').classes()).not.toContain('opacity-50')
+  })
+
+  it('exposes showErrors method', () => {
+    const wrapper = createWrapper()
+    expect(typeof (wrapper.vm as any).showErrors).toBe('function')
+  })
+
+  it('exposes hideErrors method', () => {
+    const wrapper = createWrapper()
+    expect(typeof (wrapper.vm as any).hideErrors).toBe('function')
+  })
+
+  it('calls setErrors when showErrors is invoked with a view', async () => {
+    const wrapper = createWrapper()
+    await flushPromises()
+    const errors = [{ from: 0, to: 5, message: 'Test error', severity: 'error' as const }]
+    ;(wrapper.vm as any).showErrors(errors)
+    expect(setErrors).toHaveBeenCalledWith(expect.anything(), errors)
+  })
+
+  it('calls clearErrors when hideErrors is invoked', async () => {
+    const wrapper = createWrapper()
+    await flushPromises()
+    ;(wrapper.vm as any).hideErrors()
+    expect(clearErrors).toHaveBeenCalled()
+  })
+
+  it('destroys the editor on unmount', async () => {
+    const wrapper = createWrapper()
+    await flushPromises()
+    expect(() => wrapper.unmount()).not.toThrow()
+  })
+})
