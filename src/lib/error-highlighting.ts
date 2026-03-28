@@ -1,5 +1,5 @@
 import { StateEffect, StateField } from '@codemirror/state'
-import { Decoration, DecorationSet, EditorView } from '@codemirror/view'
+import { Decoration, DecorationSet, EditorView, hoverTooltip, type Tooltip } from '@codemirror/view'
 
 export interface ErrorMarker {
   from: number
@@ -11,9 +11,11 @@ export interface ErrorMarker {
 const setErrorsEffect = StateEffect.define<ErrorMarker[]>()
 const clearErrorsEffect = StateEffect.define<null>()
 
-const errorMark = Decoration.mark({ class: 'cm-error' })
-const warningMark = Decoration.mark({ class: 'cm-warning' })
-const infoMark = Decoration.mark({ class: 'cm-info-mark' })
+function markClass(severity?: ErrorMarker['severity']) {
+  if (severity === 'warning') return 'cm-error-warning'
+  if (severity === 'info') return 'cm-error-info'
+  return 'cm-error-span'
+}
 
 function buildDecorations(errors: ErrorMarker[], docLength: number): DecorationSet {
   const decorations = errors
@@ -21,9 +23,7 @@ function buildDecorations(errors: ErrorMarker[], docLength: number): DecorationS
       const from = Math.max(0, Math.min(e.from, docLength))
       const to = Math.max(from, Math.min(e.to, docLength))
       if (from === to) return null
-      const mark =
-        e.severity === 'warning' ? warningMark : e.severity === 'info' ? infoMark : errorMark
-      return mark.range(from, to)
+      return Decoration.mark({ class: markClass(e.severity) }).range(from, to)
     })
     .filter((d): d is NonNullable<typeof d> => d !== null)
     .sort((a, b) => a.from - b.from)
@@ -31,30 +31,51 @@ function buildDecorations(errors: ErrorMarker[], docLength: number): DecorationS
   return Decoration.set(decorations)
 }
 
-const errorField = StateField.define<DecorationSet>({
-  create() {
-    return Decoration.none
+const errorField = StateField.define<ErrorMarker[]>({
+  create() { return [] },
+  update(markers, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(setErrorsEffect)) return effect.value
+      if (effect.is(clearErrorsEffect)) return []
+    }
+    return markers
   },
+})
+
+const errorDecorationField = StateField.define<DecorationSet>({
+  create() { return Decoration.none },
   update(decorations, tr) {
     for (const effect of tr.effects) {
-      if (effect.is(setErrorsEffect)) {
+      if (effect.is(setErrorsEffect))
         return buildDecorations(effect.value, tr.state.doc.length)
-      }
-      if (effect.is(clearErrorsEffect)) {
+      if (effect.is(clearErrorsEffect))
         return Decoration.none
-      }
     }
-    if (tr.docChanged) {
-      // Map existing decorations through document changes
-      return decorations.map(tr.changes)
-    }
+    if (tr.docChanged) return decorations.map(tr.changes)
     return decorations
   },
   provide: (f) => EditorView.decorations.from(f),
 })
 
+const errorTooltipExtension = hoverTooltip((view, pos): Tooltip | null => {
+  const markers = view.state.field(errorField, false) ?? []
+  const hit = markers.find((m) => pos >= m.from && pos <= m.to)
+  if (!hit) return null
+  return {
+    pos: hit.from,
+    end: hit.to,
+    above: true,
+    create() {
+      const dom = document.createElement('div')
+      dom.className = 'cm-error-tooltip'
+      dom.textContent = hit.message
+      return { dom }
+    },
+  }
+}, { hoverTime: 150 })
+
 export function errorHighlighting() {
-  return errorField
+  return [errorField, errorDecorationField, errorTooltipExtension]
 }
 
 export function setErrors(view: EditorView, errors: ErrorMarker[]) {

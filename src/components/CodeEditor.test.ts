@@ -31,6 +31,10 @@ vi.mock('@codemirror/state', () => ({
     create: vi.fn().mockReturnValue({ doc: { toString: () => '' } }),
     readOnly: { of: vi.fn(() => []) },
   },
+  Compartment: class Compartment {
+    of = vi.fn((x: any) => x)
+    reconfigure = vi.fn((x: any) => x)
+  },
   StateEffect: { define: vi.fn(() => ({ of: vi.fn() })) },
   StateField: { define: vi.fn(() => ({})) },
   Decoration: {

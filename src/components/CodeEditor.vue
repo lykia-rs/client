@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { EditorView, keymap, drawSelection } from '@codemirror/view'
-import { EditorState } from '@codemirror/state'
+import { EditorState, Compartment } from '@codemirror/state'
 import { defaultKeymap, indentWithTab } from '@codemirror/commands'
 import { lykiaLanguage } from '@/lib/lykia-lang'
 import {
@@ -27,6 +27,7 @@ const containerRef = ref<HTMLDivElement | null>(null)
 let view: EditorView | null = null
 let suppressUpdate = false
 let hasLocalErrors = false
+let editableCompartment: Compartment | null = null
 
 function applyParseErrors(v: EditorView, content: string) {
   const result = tokenize(content)
@@ -46,6 +47,8 @@ onMounted(async () => {
   await initWasm()
   if (!containerRef.value) return
 
+  editableCompartment = new Compartment()
+
   const state = EditorState.create({
     doc: props.modelValue,
     extensions: [
@@ -61,8 +64,10 @@ onMounted(async () => {
           applyParseErrors(update.view, update.state.doc.toString())
         }
       }),
-      EditorState.readOnly.of(!!props.readonly),
-      EditorView.editable.of(!props.disabled),
+      editableCompartment.of([
+        EditorState.readOnly.of(!!props.readonly),
+        EditorView.editable.of(!props.disabled),
+      ]),
       EditorView.theme({
         '&': { height: '100%' },
         '.cm-scroller': { overflow: 'auto' },
@@ -90,6 +95,19 @@ onMounted(async () => {
   // Check initial content for parse errors
   applyParseErrors(view, props.modelValue)
 })
+
+watch(
+  [() => props.disabled, () => props.readonly],
+  ([disabled, readonly]) => {
+    if (!view || !editableCompartment) return
+    view.dispatch({
+      effects: editableCompartment.reconfigure([
+        EditorState.readOnly.of(!!readonly),
+        EditorView.editable.of(!disabled),
+      ]),
+    })
+  },
+)
 
 onBeforeUnmount(() => {
   view?.destroy()
@@ -189,22 +207,35 @@ defineExpose({ showErrors, hideErrors })
 }
 
 /* Error / warning / info marks */
-.code-editor .cm-error {
+.code-editor .cm-error-span {
   text-decoration: wavy underline;
   text-decoration-color: #ef4444;
   text-underline-offset: 3px;
 }
 
-.code-editor .cm-warning {
+.code-editor .cm-error-warning {
   text-decoration: wavy underline;
   text-decoration-color: #eab308;
   text-underline-offset: 3px;
 }
 
-.code-editor .cm-info-mark {
+.code-editor .cm-error-info {
   text-decoration: wavy underline;
   text-decoration-color: #3b82f6;
   text-underline-offset: 3px;
+}
+
+/* Error tooltip */
+.cm-error-tooltip {
+  background: #1c1c1e;
+  color: #f87171;
+  border: 1px solid #ef4444;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  max-width: 400px;
+  white-space: pre-wrap;
 }
 
 /* Dark theme */
@@ -247,25 +278,21 @@ defineExpose({ showErrors, hideErrors })
   font-style: italic;
 }
 
-.dark .code-editor .cm-error {
+.dark .code-editor .cm-error-span {
   text-decoration-color: #ef4444;
 }
 
-.dark .code-editor .cm-warning {
+.dark .code-editor .cm-error-warning {
   text-decoration-color: #eab308;
 }
 
-.dark .code-editor .cm-info-mark {
+.dark .code-editor .cm-error-info {
   text-decoration-color: #3b82f6;
 }
 
 /* Dark theme editor background */
 .dark .code-editor .cm-editor {
   color: #e4e4e7;
-}
-
-.dark .code-editor .cm-cursor {
-  border-left-color: #e4e4e7;
 }
 
 .dark .code-editor .cm-activeLine {
