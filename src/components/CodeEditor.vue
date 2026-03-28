@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { EditorView, keymap } from '@codemirror/view'
+import { EditorView, keymap, drawSelection } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
 import { defaultKeymap, indentWithTab } from '@codemirror/commands'
 import { lykiaLanguage } from '@/lib/lykia-lang'
@@ -26,6 +26,21 @@ const emit = defineEmits<{
 const containerRef = ref<HTMLDivElement | null>(null)
 let view: EditorView | null = null
 let suppressUpdate = false
+let hasLocalErrors = false
+
+function applyParseErrors(v: EditorView, content: string) {
+  const result = tokenize(content)
+  if (!result) return
+  if (result.errors.length > 0) {
+    hasLocalErrors = true
+    setEditorErrors(v, result.errors.map(e => ({
+      from: e.from, to: e.to, message: e.message, severity: 'error' as const,
+    })))
+  } else if (hasLocalErrors) {
+    hasLocalErrors = false
+    clearEditorErrors(v)
+  }
+}
 
 onMounted(async () => {
   await initWasm()
@@ -35,6 +50,7 @@ onMounted(async () => {
     doc: props.modelValue,
     extensions: [
       keymap.of([...defaultKeymap, indentWithTab]),
+      drawSelection(),
       lykiaLanguage(tokenize),
       errorHighlighting(),
       EditorView.updateListener.of((update) => {
@@ -42,6 +58,7 @@ onMounted(async () => {
           suppressUpdate = true
           emit('update:modelValue', update.state.doc.toString())
           suppressUpdate = false
+          applyParseErrors(update.view, update.state.doc.toString())
         }
       }),
       EditorState.readOnly.of(!!props.readonly),
@@ -54,8 +71,10 @@ onMounted(async () => {
             "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
           fontSize: '0.875rem',
           lineHeight: '1.5rem',
-          padding: '1rem 0',
+          padding: '2px 0',
+          caretColor: 'transparent',
         },
+        '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--cm-cursor-color, #000)' },
         '.cm-gutters': { display: 'none' },
         '.cm-focused': { outline: 'none' },
         '&.cm-editor': { background: 'transparent' },
@@ -67,6 +86,9 @@ onMounted(async () => {
     state,
     parent: containerRef.value,
   })
+
+  // Check initial content for parse errors
+  applyParseErrors(view, props.modelValue)
 })
 
 onBeforeUnmount(() => {
@@ -88,11 +110,17 @@ watch(
 )
 
 function showErrors(errors: ErrorMarker[]) {
-  if (view) setEditorErrors(view, errors)
+  if (view) {
+    hasLocalErrors = false  // External errors override local state
+    setEditorErrors(view, errors)
+  }
 }
 
 function hideErrors() {
-  if (view) clearEditorErrors(view)
+  if (view) {
+    hasLocalErrors = false
+    clearEditorErrors(view)
+  }
 }
 
 defineExpose({ showErrors, hideErrors })
@@ -101,7 +129,7 @@ defineExpose({ showErrors, hideErrors })
 <template>
   <div
     ref="containerRef"
-    class="w-full h-full flex-1 flex overflow-hidden bg-white dark:bg-zinc-900 transition-opacity duration-200 code-editor"
+    class="w-full h-full flex-1 flex flex-col overflow-hidden bg-white dark:bg-zinc-900 transition-opacity duration-200 code-editor"
     :class="{ 'opacity-50 cursor-not-allowed': disabled }"
   />
 </template>
@@ -110,6 +138,14 @@ defineExpose({ showErrors, hideErrors })
 /* CodeMirror base theming */
 .code-editor .cm-editor {
   height: 100%;
+}
+
+:root {
+  --cm-cursor-color: #18181b;
+}
+
+.dark {
+  --cm-cursor-color: #e4e4e7;
 }
 
 /* Syntax highlighting — Light theme */

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toRef } from 'vue'
+import { toRef, ref, watch } from 'vue'
 import { Play, Loader2, Plus, X, Clock } from 'lucide-vue-next'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -18,6 +18,16 @@ const props = defineProps<{
 const connectionRef = toRef(props, 'connection')
 const { tabs, activeTab, activeTabId, addTab, closeTab } = useQueryTabs(connectionRef)
 const { executeQuery: executeQueryFn } = useQueryExecution()
+
+const editorRef = ref<InstanceType<typeof CodeEditor> | null>(null)
+
+watch(() => activeTab.value?.errorSpan, (span) => {
+  if (span) {
+    editorRef.value?.showErrors?.([{ from: span.from, to: span.to, message: activeTab.value?.error ?? '', severity: 'error' }])
+  } else {
+    editorRef.value?.hideErrors?.()
+  }
+})
 
 async function executeQuery() {
   if (activeTab.value) {
@@ -96,6 +106,7 @@ async function executeQuery() {
         </div>
         
         <CodeEditor
+          ref="editorRef"
           v-if="activeTab"
           v-model="activeTab.query"
           :disabled="activeTab.loading"

@@ -7,6 +7,7 @@ export interface QueryTab {
   query: string
   result: any
   error: string
+  errorSpan: { from: number; to: number } | null
   loading: boolean
   connectionId: string
   duration: number | null
@@ -25,6 +26,7 @@ export function useQueryTabs(connectionRef: Ref<Connection>) {
       query: '', 
       result: null, 
       error: '', 
+      errorSpan: null,
       loading: false, 
       connectionId: connectionRef.value.id, 
       duration: null 
@@ -54,6 +56,7 @@ export function useQueryTabs(connectionRef: Ref<Connection>) {
       query: '',
       result: null,
       error: '',
+      errorSpan: null,
       loading: false,
       connectionId: connectionRef.value.id,
       duration: null

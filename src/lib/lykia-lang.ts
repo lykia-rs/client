@@ -7,7 +7,7 @@ import {
 } from '@codemirror/language'
 import { Input, NodeType, Parser, PartialParse, Tree } from '@lezer/common'
 import { styleTags, tags as t } from '@lezer/highlight'
-import type { TokenTree } from '@/lib/wasm'
+import type { TokenTree, TokenizeResult } from '@/lib/wasm'
 
 const highlight = styleTags({
   String: t.string,
@@ -48,7 +48,7 @@ function convertToLezerTree(node: TokenTree): Tree {
 
 class LykiaParser extends Parser {
   private lastTree: Tree = Tree.empty
-  constructor(private tokenizeFn: (source: string) => TokenTree | null) {
+  constructor(private tokenizeFn: (source: string) => TokenizeResult) {
     super()
   }
 
@@ -56,19 +56,16 @@ class LykiaParser extends Parser {
     const doc = input.read(0, input.length)
     return {
       advance: (): Tree | null => {
-        try {
-          const parsed = this.tokenizeFn(doc)
-          if (!parsed) return this.lastTree
+        const result = this.tokenizeFn(doc)
+        if (result?.tree) {
           this.lastTree = new Tree(
             ROOT_TYPE,
-            [convertToLezerTree(parsed)],
-            [parsed.span.start],
-            parsed.span.end,
+            [convertToLezerTree(result.tree)],
+            [result.tree.span.start],
+            result.tree.span.end,
           )
-          return this.lastTree
-        } catch {
-          return this.lastTree
         }
+        return this.lastTree
       },
       parsedPos: input.length,
       stopAt: () => {},
@@ -90,7 +87,7 @@ export const lykiaHighlightStyle = HighlightStyle.define([
 ])
 
 export function lykiaLanguage(
-  tokenizeFn: (source: string) => TokenTree | null,
+  tokenizeFn: (source: string) => TokenizeResult,
 ): LanguageSupport {
   const facet = defineLanguageFacet()
   const parser = new LykiaParser(tokenizeFn)

@@ -15,6 +15,17 @@ export interface TokenTree {
   }
 }
 
+export interface ParseError {
+  from: number
+  to: number
+  message: string
+}
+
+export interface TokenizeResult {
+  tree: TokenTree | null
+  errors: ParseError[]
+}
+
 export function initWasm(): Promise<void> {
   if (initialized) return Promise.resolve()
   if (initPromise) return initPromise
@@ -24,7 +35,7 @@ export function initWasm(): Promise<void> {
   return initPromise
 }
 
-export function tokenize(source: string): TokenTree | null {
-  if (!initialized) return null
-  return wasmTokenize(source) as TokenTree | null
+export function tokenize(source: string): TokenizeResult {
+  if (!initialized) return { tree: null, errors: [] }
+  return wasmTokenize(source) as TokenizeResult
 }
