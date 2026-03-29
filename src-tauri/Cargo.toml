@@ -24,4 +24,5 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 lykiadb-common = { git = "https://github.com/lykia-rs/lykiadb.git", branch = "main" }
+bson = { version = "3.1.0", features = ["serde", "serde_with-3"] }
 

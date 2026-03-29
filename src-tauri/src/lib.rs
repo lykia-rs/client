@@ -10,7 +10,7 @@ struct ErrorSpan {
 #[derive(Serialize, Deserialize)]
 struct QueryResult {
     success: bool,
-    data: Option<serde_json::Value>,
+    data: Option<bson::Bson>,
     duration: u64,
     error: Option<String>,
     error_span: Option<ErrorSpan>,
@@ -45,16 +45,13 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
             let msg = Message::Request(Request::Run(query));
             
             match session.send_receive(msg).await {
-                Ok(Message::Response(Response::Value(value, duration))) | 
-                Ok(Message::Response(Response::Program(value, duration))) => {
-                    Ok(QueryResult {
-                        success: true,
-                        data: Some(value),
-                        duration,
-                        error: None,
-                        error_span: None,
-                    })
-                }
+                Ok(Message::Response(Response::Value(bson, duration))) => Ok(QueryResult {
+                    success: true,
+                    data: Some(bson),
+                    duration,
+                    error: None,
+                    error_span: None,
+                }),
                 Ok(Message::Response(Response::Error(err, duration))) => {
                     Ok(QueryResult {
                         success: false,

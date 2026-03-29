@@ -20,16 +20,7 @@ export function useQueryExecution() {
       tab.duration = res.duration
       
       if (res.success) {
-        // Parse stringified JSON — backend may send data as a string in some cases
-        let data = res.data
-        if (typeof data === 'string') {
-          try {
-            data = JSON.parse(data)
-          } catch {
-            // Keep original string if it's not valid JSON
-          }
-        }
-        tab.result = data
+        tab.result = res.data
       } else {
         tab.error = res.error || 'Query failed'
         tab.errorSpan = res.error_span ?? null
