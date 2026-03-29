@@ -1,5 +1,5 @@
-import init, { tokenize as wasmTokenize } from '../../src-rust/pkg/src_rust'
-import wasmUrl from '../../src-rust/pkg/src_rust_bg.wasm?url'
+import init, { tokenize as wasmTokenize } from '../../src-wasm/pkg/src_wasm'
+import wasmUrl from '../../src-wasm/pkg/src_wasm_bg.wasm?url'
 
 let initialized = false
 let initPromise: Promise<void> | null = null

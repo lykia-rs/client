@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
+    "build:wasm": "cd src-wasm && wasm-pack build --target web --release",
+    "build:full": "pnpm run build:wasm && pnpm run build",
     "preview": "vite preview",
     "tauri": "tauri",
     "test": "vitest run",
