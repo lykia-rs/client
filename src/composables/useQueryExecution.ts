@@ -26,13 +26,7 @@ export function useQueryExecution() {
           try {
             data = JSON.parse(data)
           } catch {
-            // Try fixing JS-object-notation (unquoted keys) before giving up
-            try {
-              const fixed = data.trim().replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')
-              data = JSON.parse(fixed)
-            } catch {
-              // Keep original string
-            }
+            // Keep original string if it's not valid JSON
           }
         }
         tab.result = data
