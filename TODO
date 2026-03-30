@@ -1,0 +1,31 @@
+- Error tooltip can be replaced with something more visible, maybe a red underline and a message in the status bar.
+- Parse information can be utilized for syntax highlighting
+- Highlighted spans can go misaligned sometimes (e.g. add an Ü): <span>functio</span><span>n</span>.
+
+Done
+
+- Lykiadb common should be patched instead of we do the patches in this repo.
+- The cursor is black in dark mode, making it invisible.
+- Error responses from server are not shown in the UI.
+- There are no tests for CodeEditor component.
+- There is a weird top padding in the code editor.
+- The editor is not using the full width (the div expands to right when a line is long)
+- We need to add parsing errors in addition to scanning errors.
+- Editor is not disabled when loading, allowing users to edit the query while it's being executed.
+- All the errors should be shown via tooltips in the errored span, and the errored span should be highlighted in red.
+- Disable execute button if there is a local parsing error.
+- Error tooltip can stay under other stuff, maybe use OS tooltip instead of a custom one.
+
+-------
+
+OK  - Execution time must be shown in the UI.
+
+- Input errors should be shown in the UI.
+- Executions can be aborted.
+
+- Connections must be persistent (no connect/disconnect).
+- Connections must be tracked and pinged, to ensure they are still alive.
+
+- Results must be shown in an interactive UI.
+- Results should be cursor-aware (i.e., support pagination).
+- Results in a session should be archived
