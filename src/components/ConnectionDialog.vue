@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import { X, Loader2 } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
+import Input from '@/components/ui/Input.vue'
+import Label from '@/components/ui/Label.vue'
 
 const props = defineProps<{
   connectHandler: (host: string, port: string) => Promise<void>
@@ -34,35 +36,33 @@ async function handleSubmit() {
 
 <template>
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200" @click.self="emit('close')">
-    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-300/80 dark:border-zinc-800/60 w-full max-w-md p-6 shadow-2xl shadow-black/30 animate-in zoom-in-95 duration-200">
+    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-border/60 w-full max-w-md p-6 shadow-2xl shadow-black/30 animate-in zoom-in-95 duration-200">
       <div class="flex items-center justify-between mb-5">
-        <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">New Connection</h2>
+        <h2 class="text-sm font-semibold text-foreground tracking-tight">New Connection</h2>
         <button 
           @click="emit('close')" 
-          class="text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-all duration-200"
+          class="text-muted-foreground hover:text-foreground p-1 hover:bg-accent rounded transition-all duration-200"
         >
           <X :size="16" />
         </button>
       </div>
       
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div>
-          <label class="block text-label font-semibold mb-1.5 text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Host</label>
-          <input
+        <div class="space-y-1.5">
+          <Label>Host</Label>
+          <Input
             v-model="host"
             type="text"
             placeholder="localhost"
-            class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-300/80 dark:border-zinc-800 rounded text-sm font-mono outline-none focus:border-[#4db6ac] focus:ring-2 focus:ring-[#4db6ac]/20 transition-all duration-150 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400/60"
           />
         </div>
         
-        <div>
-          <label class="block text-label font-semibold mb-1.5 text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Port</label>
-          <input
+        <div class="space-y-1.5">
+          <Label>Port</Label>
+          <Input
             v-model="port"
             type="text"
             placeholder="19191"
-            class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-300/80 dark:border-zinc-800 rounded text-sm font-mono outline-none focus:border-[#4db6ac] focus:ring-2 focus:ring-[#4db6ac]/20 transition-all duration-150 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400/60"
           />
         </div>
         

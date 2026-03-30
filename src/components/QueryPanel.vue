@@ -136,8 +136,8 @@ async function executeQuery() {
           />
         </div>
         
-        <div class="px-4 h-8 flex items-center border-b border-zinc-300/60 dark:border-zinc-800/30 bg-zinc-200/70 dark:bg-zinc-950/80">
-          <span class="text-label font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Results</span>
+        <div class="px-4 h-8 flex items-center border-b border-border/60 bg-zinc-200/70 dark:bg-zinc-950/80">
+          <span class="text-label font-semibold uppercase tracking-widest text-muted-foreground">Results</span>
         </div>
         
         <div class="flex-1 overflow-hidden flex flex-col">
@@ -157,7 +157,7 @@ async function executeQuery() {
         <!-- Status Bar -->
         <div 
           v-if="activeTab?.duration !== null && activeTab?.duration !== undefined"
-          class="px-4 h-8 border-t border-zinc-300/60 dark:border-zinc-800/30 bg-zinc-100/80 dark:bg-zinc-950/80 flex items-center gap-1.5"
+          class="px-4 h-8 border-t border-border/60 bg-zinc-100/80 dark:bg-zinc-950/80 flex items-center gap-1.5"
         >
           <Clock :size="12" class="text-zinc-400 dark:text-zinc-500" />
           <span class="text-label text-zinc-400 dark:text-zinc-500">Execution time:</span>

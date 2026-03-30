@@ -310,7 +310,7 @@ describe('ConnectionDialog.vue', () => {
     
     const inputs = wrapper.findAll('input')
     inputs.forEach(input => {
-      expect(input.classes()).toContain('focus:border-[#4db6ac]')
+      expect(input.classes()).toContain('focus-visible:border-primary')
     })
   })
 

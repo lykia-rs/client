@@ -2,8 +2,89 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+/*
+ * shadcn/ui CSS variable design system
+ * Mapped to LykiaDB brand colors (teal primary, zinc neutrals)
+ * Uses HSL values for Tailwind v4 compatibility
+ */
+@theme inline {
+  /* === Light theme (default) === */
+  --color-background: oklch(1 0 0);                   /* #ffffff */
+  --color-foreground: oklch(0.141 0.005 285.82);      /* zinc-950 */
+
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.141 0.005 285.82);
+
+  --color-popover: oklch(1 0 0);
+  --color-popover-foreground: oklch(0.141 0.005 285.82);
+
+  --color-primary: oklch(0.653 0.088 181.07);         /* #4db6ac — brand teal */
+  --color-primary-foreground: oklch(1 0 0);            /* white text on teal */
+
+  --color-secondary: oklch(0.967 0.001 286.38);       /* zinc-100 */
+  --color-secondary-foreground: oklch(0.141 0.005 285.82);
+
+  --color-muted: oklch(0.967 0.001 286.38);           /* zinc-100 */
+  --color-muted-foreground: oklch(0.552 0.016 285.94); /* zinc-500 */
+
+  --color-accent: oklch(0.967 0.001 286.38);          /* zinc-100 */
+  --color-accent-foreground: oklch(0.141 0.005 285.82);
+
+  --color-destructive: oklch(0.577 0.245 27.33);      /* red-600 */
+  --color-destructive-foreground: oklch(1 0 0);
+
+  --color-border: oklch(0.92 0.004 286.32);           /* zinc-200 */
+  --color-input: oklch(0.92 0.004 286.32);
+  --color-ring: oklch(0.653 0.088 181.07);            /* brand teal for focus rings */
+
+  /* Border radius — matching our current compact style */
+  --radius: 0.5rem;
+
+  /* === Font system (preserved from original) === */
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  /* Compact uppercase section labels */
+  --font-size-label: 0.5rem;
+  --font-size-label--line-height: 1.4;
+  /* General tool UI text */
+  --font-size-ui: 0.8125rem;
+  --font-size-ui--line-height: 1.5;
+}
+
+/* === Dark theme overrides === */
+.dark {
+  --color-background: oklch(0.141 0.005 285.82);      /* zinc-950 */
+  --color-foreground: oklch(0.985 0 0);                /* zinc-50 */
+
+  --color-card: oklch(0.21 0.006 285.88);             /* zinc-900 */
+  --color-card-foreground: oklch(0.985 0 0);
+
+  --color-popover: oklch(0.21 0.006 285.88);
+  --color-popover-foreground: oklch(0.985 0 0);
+
+  --color-primary: oklch(0.653 0.088 181.07);         /* brand teal stays the same */
+  --color-primary-foreground: oklch(1 0 0);
+
+  --color-secondary: oklch(0.274 0.006 286.03);       /* zinc-800 */
+  --color-secondary-foreground: oklch(0.985 0 0);
+
+  --color-muted: oklch(0.274 0.006 286.03);
+  --color-muted-foreground: oklch(0.552 0.016 285.94);
+
+  --color-accent: oklch(0.274 0.006 286.03);
+  --color-accent-foreground: oklch(0.985 0 0);
+
+  --color-destructive: oklch(0.577 0.245 27.33);
+  --color-destructive-foreground: oklch(1 0 0);
+
+  --color-border: oklch(0.274 0.006 286.03);          /* zinc-800 */
+  --color-input: oklch(0.274 0.006 286.03);
+  --color-ring: oklch(0.653 0.088 181.07);
+}
+
 * {
   box-sizing: border-box;
+  border-color: var(--color-border);
 }
 
 html {
@@ -12,22 +93,14 @@ html {
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 11px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-}
-
-@theme {
-  --font-mono: 'JetBrains Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
-  /* Compact uppercase section labels */
-  --font-size-label: 0.5rem;
-  --font-size-label--line-height: 1.4;
-  /* General tool UI text */
-  --font-size-ui: 0.8125rem;
-  --font-size-ui--line-height: 1.5;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 /* Splitpanes custom styling */

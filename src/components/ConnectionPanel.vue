@@ -18,8 +18,8 @@ const emit = defineEmits<{
 
 <template>
   <div class="flex flex-col h-full bg-zinc-100 dark:bg-zinc-900">
-    <div class="px-4 h-10 border-b border-zinc-300/70 dark:border-zinc-800/40 flex items-center justify-between bg-zinc-100 dark:bg-zinc-950/80">
-      <h2 class="text-label font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Connections</h2>
+    <div class="px-4 h-10 border-b border-border/70 flex items-center justify-between bg-zinc-100 dark:bg-zinc-950/80">
+      <h2 class="text-label font-semibold uppercase tracking-widest text-muted-foreground">Connections</h2>
       <button
         @click="emit('add')"
         class="p-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700/50 rounded transition-all duration-200"
@@ -88,7 +88,7 @@ const emit = defineEmits<{
     </div>
     
     <!-- Footer: settings & theme toggle -->
-    <div class="px-3 h-8 border-t border-zinc-300/70 dark:border-zinc-800/40 flex items-center justify-end bg-zinc-100 dark:bg-zinc-950/60">
+    <div class="px-3 h-8 border-t border-border/70 flex items-center justify-end bg-zinc-100 dark:bg-zinc-950/60">
       <ThemeToggle />
     </div>
   </div>
