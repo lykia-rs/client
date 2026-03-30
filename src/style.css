@@ -6,7 +6,7 @@
  * shadcn/ui CSS variable design system
  * Mapped to LykiaDB brand: teal primary (#4db6ac), zinc neutrals
  */
-@theme inline {
+@theme {
   /* Light theme colors */
   --color-background: oklch(1 0 0);                       /* white */
   --color-foreground: oklch(0.141 0.005 285.82);          /* zinc-950 */
@@ -94,6 +94,11 @@
 
 html {
   font-size: 100%;
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 body {
@@ -135,10 +140,12 @@ body {
 
 .splitpanes--horizontal > .splitpanes__splitter {
   height: 2px;
+  background-color: transparent;
 }
 
 .splitpanes--horizontal > .splitpanes__splitter:hover,
 .splitpanes--horizontal > .splitpanes__splitter:active {
   height: 6px;
+  background-color: #4db6ac;
 }
 

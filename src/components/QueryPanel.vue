@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { toRef, ref, watch } from 'vue'
-import { Play, Loader2, Plus, X, Clock } from 'lucide-vue-next'
+import { toRef, ref, watch, computed } from 'vue'
+import { Play, Loader2, Plus, X, Clock, AlertCircle } from 'lucide-vue-next'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
-import Button from '@/components/ui/Button.vue'
 import ResultTable from '@/components/ResultTable.vue'
 import CodeEditor from '@/components/CodeEditor.vue'
 import { cn } from '@/lib/utils'
@@ -21,6 +20,12 @@ const { executeQuery: executeQueryFn } = useQueryExecution()
 
 const editorRef = ref<InstanceType<typeof CodeEditor> | null>(null)
 const hasLocalError = ref(false)
+const parseErrorMessage = ref('')
+
+const statusBarError = computed(() => {
+  if (activeTab.value?.error && activeTab.value?.errorSpan) return activeTab.value.error
+  return ''
+})
 
 watch(() => activeTab.value?.errorSpan, (span) => {
   if (span) {
@@ -61,15 +66,15 @@ async function executeQuery() {
             />
             <span class="font-medium tracking-wide">{{ tab.name }}</span>
             
-            <!-- Show spinner when loading, close button when not -->
+            <!-- Show spinner when loading indicator is active, close button when not -->
             <Loader2
-              v-if="tab.loading"
+              v-if="tab.loadingIndicator"
               :size="12"
               class="animate-spin ml-0.5"
               :style="{ color: connection.color }"
             />
             <button
-              v-else-if="tabs.length > 1"
+              v-else-if="tabs.length > 1 && !tab.loading"
               @click.stop="closeTab(tab.id)"
               class="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all duration-150 ml-0.5"
               title="Close tab"
@@ -88,21 +93,18 @@ async function executeQuery() {
           
           <div class="flex-1 min-w-0" />
           
-          <div class="flex items-center px-3 shrink-0 border-l border-zinc-300/40 dark:border-zinc-800/30">
-            <Button 
+          <div class="flex items-center shrink-0 border-l border-zinc-300/40 dark:border-zinc-800/30">
+            <button 
+              data-testid="execute-button"
               @click="executeQuery"
               :disabled="activeTab?.loading || !activeTab?.query.trim() || hasLocalError"
-              size="sm"
-              class="gap-1.5 text-xs font-semibold tracking-wide disabled:opacity-40 disabled:cursor-not-allowed"
-              :style="{ 
-                backgroundColor: connection.color, 
-                borderColor: connection.color,
-              }"
+              class="flex items-center gap-1.5 h-full px-4 text-xs font-semibold tracking-wide text-white transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
+              :style="{ backgroundColor: connection.color }"
             >
-              <Loader2 v-if="activeTab?.loading" :size="12" class="animate-spin" />
+              <Loader2 v-if="activeTab?.loadingIndicator" :size="12" class="animate-spin" />
               <Play v-else :size="12" fill="currentColor" />
-              {{ activeTab?.loading ? 'Running...' : 'Execute' }}
-            </Button>
+              {{ activeTab?.loadingIndicator ? 'Running...' : 'Execute' }}
+            </button>
           </div>
         </div>
         
@@ -114,20 +116,27 @@ async function executeQuery() {
           :readonly="activeTab.loading"
           placeholder="Enter your query here..."
           @parse-error="hasLocalError = $event"
+          @parse-error-message="parseErrorMessage = $event"
         />
+        
+        <!-- Editor Status Bar (parse errors) -->
+        <div 
+          v-if="parseErrorMessage"
+          class="px-4 h-7 border-t border-red-300/40 dark:border-red-900/30 bg-red-50/80 dark:bg-red-950/20 flex items-center gap-1.5"
+        >
+          <AlertCircle :size="11" class="text-red-500 shrink-0" />
+          <span class="text-label text-red-500 truncate">{{ parseErrorMessage }}</span>
+        </div>
       </div>
     </Pane>
 
     <!-- Results -->
     <Pane :size="60" :min-size="20">
       <div class="flex flex-col h-full bg-zinc-100 dark:bg-zinc-900">
-        <!-- Loading Bar -->
-        <div 
-          v-if="activeTab?.loading" 
-          class="h-0.5 w-full relative overflow-hidden"
-          :style="{ backgroundColor: connection.color + '40' }"
-        >
+        <!-- Loading Bar (always reserves space to prevent layout shift) -->
+        <div class="h-0.5 w-full relative overflow-hidden">
           <div 
+            v-if="activeTab?.loadingIndicator"
             class="absolute inset-0 w-full h-full loading-shimmer"
             :style="{ 
               background: `linear-gradient(90deg, transparent 0%, ${connection.color} 50%, transparent 100%)`,
@@ -145,26 +154,31 @@ async function executeQuery() {
             {{ activeTab.error }}
           </div>
           
-          <div v-else-if="!activeTab?.result && !activeTab?.loading" class="text-ui text-zinc-400 dark:text-zinc-600 p-6">
-            Execute a query to see results
+          <div v-else-if="!activeTab?.result && !activeTab?.loading" class="flex-1 flex items-center justify-center">
+            <span class="text-sm text-zinc-400 dark:text-zinc-600">Execute a query to see results</span>
           </div>
           
           <div v-else-if="activeTab?.result" class="flex-1 overflow-hidden">
-            <ResultTable :data="activeTab.result" :is-locked="activeTab?.loading" />
+            <ResultTable :data="activeTab.result" :is-locked="activeTab?.loadingIndicator" />
           </div>
         </div>
         
         <!-- Status Bar -->
         <div 
-          v-if="activeTab?.duration !== null && activeTab?.duration !== undefined"
           class="px-4 h-8 border-t border-border/60 bg-zinc-100/80 dark:bg-zinc-950/80 flex items-center gap-1.5"
         >
-          <Clock :size="12" class="text-zinc-400 dark:text-zinc-500" />
-          <span class="text-label text-zinc-400 dark:text-zinc-500">Execution time:</span>
-          <span 
-            class="text-label font-semibold font-mono"
-            :style="{ color: connection.color }"
-          >{{ activeTab.duration }}ms</span>
+          <template v-if="statusBarError">
+            <AlertCircle :size="12" class="text-red-500 shrink-0" />
+            <span class="text-label text-red-500 truncate">{{ statusBarError }}</span>
+          </template>
+          <template v-else-if="!statusBarError && activeTab?.duration !== null && activeTab?.duration !== undefined">
+            <Clock :size="12" class="text-zinc-400 dark:text-zinc-500" />
+            <span class="text-label text-zinc-400 dark:text-zinc-500">Execution time:</span>
+            <span 
+              class="text-label font-semibold font-mono"
+              :style="{ color: connection.color }"
+            >{{ activeTab.duration }}ms</span>
+          </template>
         </div>
       </div>
     </Pane>

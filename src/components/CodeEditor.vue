@@ -22,6 +22,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'parseError', hasErrors: boolean): void
+  (e: 'parseErrorMessage', message: string): void
 }>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -31,18 +32,28 @@ let hasLocalErrors = false
 let editableCompartment: Compartment | null = null
 
 function applyParseErrors(v: EditorView, content: string) {
+  if (!content.trim()) {
+    if (hasLocalErrors) clearEditorErrors(v)
+    hasLocalErrors = false
+    emit('parseError', false)
+    emit('parseErrorMessage', '')
+    return
+  }
   const result = tokenize(content)
   if (!result) return
   if (result.errors.length > 0) {
     hasLocalErrors = true
+    const firstError = result.errors[0]
     setEditorErrors(v, result.errors.map(e => ({
       from: e.from, to: e.to, message: e.message, severity: 'error' as const,
     })))
     emit('parseError', true)
+    emit('parseErrorMessage', firstError.message)
   } else {
     if (hasLocalErrors) clearEditorErrors(v)
     hasLocalErrors = false
     emit('parseError', false)
+    emit('parseErrorMessage', '')
   }
 }
 

@@ -32,6 +32,7 @@ describe('useQueryExecution', () => {
       result: null,
       error: '',
       loading: false,
+      loadingIndicator: false,
       connectionId: 'conn1',
       duration: null,
       errorSpan: null,

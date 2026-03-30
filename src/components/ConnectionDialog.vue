@@ -37,7 +37,7 @@ async function handleSubmit() {
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200" @click.self="emit('close')">
     <div class="bg-white dark:bg-zinc-900 rounded-xl border border-border/60 w-full max-w-md p-6 shadow-2xl shadow-black/30 animate-in zoom-in-95 duration-200">
       <div class="flex items-center justify-between mb-5">
-        <h2 class="text-sm font-semibold text-foreground tracking-tight">New Connection</h2>
+        <h2 class="text-ui font-semibold text-muted-foreground tracking-tight">New Connection</h2>
         <button 
           @click="emit('close')" 
           class="text-muted-foreground hover:text-foreground p-1 hover:bg-accent rounded transition-all duration-200"
@@ -48,7 +48,7 @@ async function handleSubmit() {
       
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div class="space-y-1.5">
-          <Label class="text-label font-semibold uppercase tracking-wider text-muted-foreground">Host</Label>
+          <Label class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Host</Label>
           <Input
             v-model="host"
             type="text"
@@ -58,7 +58,7 @@ async function handleSubmit() {
         </div>
         
         <div class="space-y-1.5">
-          <Label class="text-label font-semibold uppercase tracking-wider text-muted-foreground">Port</Label>
+          <Label class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Port</Label>
           <Input
             v-model="port"
             type="text"
