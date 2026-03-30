@@ -310,7 +310,8 @@ describe('ConnectionDialog.vue', () => {
     
     const inputs = wrapper.findAll('input')
     inputs.forEach(input => {
-      expect(input.classes()).toContain('focus-visible:border-primary')
+      expect(input.classes()).toContain('focus-visible:ring-1')
+      expect(input.classes()).toContain('focus-visible:ring-ring')
     })
   })
 

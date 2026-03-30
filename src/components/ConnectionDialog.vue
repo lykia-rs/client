@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import { X, Loader2 } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
-import Input from '@/components/ui/Input.vue'
-import Label from '@/components/ui/Label.vue'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 const props = defineProps<{
   connectHandler: (host: string, port: string) => Promise<void>
@@ -26,7 +26,6 @@ async function handleSubmit() {
   
   try {
     await props.connectHandler(host.value.trim(), port.value.trim())
-    // If successful, the parent will close the dialog
   } catch (e: any) {
     error.value = e?.message || String(e) || 'Failed to connect to server'
     loading.value = false
@@ -49,20 +48,22 @@ async function handleSubmit() {
       
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div class="space-y-1.5">
-          <Label>Host</Label>
+          <Label class="text-label font-semibold uppercase tracking-wider text-muted-foreground">Host</Label>
           <Input
             v-model="host"
             type="text"
             placeholder="localhost"
+            class="font-mono"
           />
         </div>
         
         <div class="space-y-1.5">
-          <Label>Port</Label>
+          <Label class="text-label font-semibold uppercase tracking-wider text-muted-foreground">Port</Label>
           <Input
             v-model="port"
             type="text"
             placeholder="19191"
+            class="font-mono"
           />
         </div>
         
