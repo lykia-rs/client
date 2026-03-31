@@ -26,8 +26,8 @@ async function handleSubmit() {
 
   try {
     await props.connectHandler(host.value.trim(), port.value.trim())
-  } catch (e: any) {
-    error.value = e?.message || String(e) || 'Failed to connect to server'
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e) || 'Failed to connect to server'
     loading.value = false
   }
 }

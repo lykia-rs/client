@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ResultTable from '@/components/ResultTable.vue'
+import type { QueryResult } from '@/composables/useQueryTabs'
 
-const mountTable = (data: any, isLocked = false) =>
-  mount(ResultTable, { props: { data, ...(isLocked ? { isLocked } : {}) } })
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mountTable = (data: QueryResult | (Record<string, any>) | (string | number | boolean)[], isLocked = false) =>
+  mount(ResultTable, { props: { data: data as QueryResult, ...(isLocked ? { isLocked } : {}) } })
 
 describe('ResultTable.vue', () => {
   it('renders table for array data with objects', () => {

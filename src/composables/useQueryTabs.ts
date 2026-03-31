@@ -1,11 +1,15 @@
 import { ref, computed, watch, type Ref } from 'vue'
 import type { Connection } from './useConnections'
 
+export type QueryResultValue = string | number | boolean | null | undefined | QueryResultValue[] | { [key: string]: QueryResultValue }
+export type QueryResultRow = Record<string, QueryResultValue>
+export type QueryResult = QueryResultRow[] | null
+
 export interface QueryTab {
   id: string
   name: string
   query: string
-  result: any
+  result: QueryResult
   error: string
   errorSpan: { from: number; to: number } | null
   loading: boolean

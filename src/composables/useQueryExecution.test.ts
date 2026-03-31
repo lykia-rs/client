@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { invoke } from '@tauri-apps/api/core'
 import { useQueryExecution } from './useQueryExecution'
-import type { QueryTab } from './useQueryTabs'
+import type { QueryTab, QueryResult } from './useQueryTabs'
 import type { Connection } from './useConnections'
 import { flushPromises } from '@/test/utils'
 
@@ -33,9 +33,9 @@ const makeConn = (o: Partial<Connection> = {}): Connection => ({
   ...o,
 })
 
-const mockSuccess = (data: any = [], duration = 10) =>
+const mockSuccess = (data: QueryResult = [], duration = 10) =>
   vi.mocked(invoke).mockResolvedValue({ success: true, data, duration })
-const mockError = (error: string, extra: any = {}) =>
+const mockError = (error: string, extra: Record<string, string | number | boolean | { from: number; to: number }> = {}) =>
   vi.mocked(invoke).mockResolvedValue({ success: false, error, duration: 5, ...extra })
 
 describe('useQueryExecution', () => {
@@ -130,11 +130,11 @@ describe('useQueryExecution', () => {
   })
 
   it.each([
-    ['tab is null', () => [null as any, 'SELECT 1']],
+    ['tab is null', () => [null as unknown as QueryTab, 'SELECT 1']],
     ['query is empty', () => [makeTab({ query: '' }), '']],
     ['query is only whitespace', () => [makeTab({ query: '   \n\t  ' }), '']],
   ])('does not execute if %s', async (_, getArgs) => {
-    const [tabArg] = getArgs()
+    const [tabArg] = getArgs() as [QueryTab, string]
     const { executeQuery } = useQueryExecution()
     await executeQuery(tabArg, connection)
     expect(invoke).not.toHaveBeenCalled()

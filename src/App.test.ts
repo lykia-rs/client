@@ -5,6 +5,7 @@ import App from '@/App.vue'
 import ConnectionPanel from '@/components/ConnectionPanel.vue'
 import QueryPanel from '@/components/QueryPanel.vue'
 import ConnectionDialog from '@/components/ConnectionDialog.vue'
+import type { Connection } from '@/composables/useConnections'
 import { flushPromises } from '@/test/utils'
 
 vi.mock('@tauri-apps/api/core')
@@ -191,7 +192,7 @@ describe('App.vue', () => {
     const wrapper = mountApp()
     const cp = wrapper.findComponent(ConnectionPanel)
     const qp = wrapper.findComponent(QueryPanel)
-    const activeConn = cp.props('connections').find((c: any) => c.active)
+    const activeConn = cp.props('connections').find((c: Connection) => c.active)
     expect(qp.props('connection')).toEqual(activeConn)
   })
 })

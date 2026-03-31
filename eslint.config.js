@@ -16,5 +16,17 @@ export default tseslint.config(
       },
     },
   },
+  {
+    files: ['src/components/ui/**/*.vue'],
+    rules: {
+      'vue/multi-word-component-names': 'off',
+    },
+  },
+  {
+    files: ['**/*.ts', '**/*.vue'],
+    rules: {
+      'no-undef': 'off',
+    },
+  },
   eslintConfigPrettier,
 )

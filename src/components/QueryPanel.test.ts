@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, VueWrapper } from '@vue/test-utils'
 import { invoke } from '@tauri-apps/api/core'
 import QueryPanel from '@/components/QueryPanel.vue'
 import ResultTable from '@/components/ResultTable.vue'
 import { createMockConnection, flushPromises } from '@/test/utils'
 import { resetQueryTabsState } from '@/composables/useQueryTabs'
+import type { QueryResult } from '@/composables/useQueryTabs'
 
 vi.mock('@tauri-apps/api/core')
 
@@ -29,11 +30,11 @@ const stubs = {
 }
 const conn1 = (o = {}) => createMockConnection({ id: 'conn1', ...o })
 const conn2 = (o = {}) => createMockConnection({ id: 'conn2', ...o })
-const findTabs = (w: any) => w.findAll('button').filter((b: any) => b.text().includes('Query'))
+const findTabs = (w: VueWrapper) => w.findAll('button').filter((b) => b.text().includes('Query'))
 
-const mockSuccess = (data: any = [], duration = 10) =>
+const mockSuccess = (data: QueryResult = [], duration = 10) =>
   vi.mocked(invoke).mockResolvedValue({ success: true, data, duration })
-const mockError = (error: string, extra: any = {}) =>
+const mockError = (error: string, extra: Record<string, string | number | boolean | { from: number; to: number }> = {}) =>
   vi.mocked(invoke).mockResolvedValue({ success: false, error, duration: 10, ...extra })
 const mockSlow = () =>
   vi
@@ -61,14 +62,14 @@ describe('QueryPanel.vue', () => {
       global: { stubs },
     })
 
-  async function exec(wrapper: any, query: string) {
+  async function exec(wrapper: VueWrapper, query: string) {
     await wrapper.find('textarea').setValue(query)
     await wrapper.vm.$nextTick()
     await wrapper.find('[data-testid="execute-button"]').trigger('click')
     await flushPromises()
   }
 
-  async function startLoading(wrapper: any, query = 'SELECT * FROM test') {
+  async function startLoading(wrapper: VueWrapper, query = 'SELECT * FROM test') {
     vi.useFakeTimers()
     mockSlow()
     await wrapper.find('textarea').setValue(query)
@@ -78,7 +79,7 @@ describe('QueryPanel.vue', () => {
     await wrapper.vm.$nextTick()
   }
 
-  async function addTab(wrapper: any) {
+  async function addTab(wrapper: VueWrapper) {
     await wrapper.find('button[title="New Query"]').trigger('click')
     await wrapper.vm.$nextTick()
   }
@@ -430,7 +431,7 @@ describe('QueryPanel.vue', () => {
 
     const closeButtons = wrapper
       .findAll('button')
-      .filter((b: any) => b.attributes('title')?.includes('Close tab'))
+      .filter((b) => b.attributes('title')?.includes('Close tab'))
     expect(closeButtons.length).toBeGreaterThan(0)
     const initialSpinnerCount = wrapper.findAll('.animate-spin').length
 
@@ -448,7 +449,7 @@ describe('QueryPanel.vue', () => {
     const closeButtons = wrapper
       .findAll('button')
       .filter(
-        (b: any) => b.html().includes('Close tab') || b.attributes('title')?.includes('close'),
+        (b) => b.html().includes('Close tab') || b.attributes('title')?.includes('close'),
       )
     expect(closeButtons[0].attributes('disabled')).toBeUndefined()
   })

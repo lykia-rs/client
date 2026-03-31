@@ -12,10 +12,11 @@ import {
 } from '@tanstack/vue-table'
 import { ref } from 'vue'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-vue-next'
+import type { QueryResult, QueryResultRow, QueryResultValue } from '@/composables/useQueryTabs'
 
 const props = withDefaults(
   defineProps<{
-    data: any
+    data: QueryResult
     isLocked?: boolean
   }>(),
   {
@@ -27,15 +28,15 @@ const sorting = ref<SortingState>([])
 
 const isArray = computed(() => Array.isArray(props.data) && props.data.length > 0)
 
-const columns = computed<ColumnDef<any>[]>(() => {
+const columns = computed<ColumnDef<QueryResultRow>[]>(() => {
   if (!isArray.value) return []
-  const first = props.data[0]
+  const first = props.data![0]
   if (typeof first !== 'object' || first === null) return []
 
   return Object.keys(first).map((key) => ({
     accessorKey: key,
     header: key,
-    cell: (info: any) => formatValue(info.getValue()),
+    cell: (info) => formatValue(info.getValue() as QueryResultValue),
   }))
 })
 
@@ -44,7 +45,7 @@ const table = computed(() => {
 
   return useVueTable({
     get data() {
-      return props.data
+      return props.data!
     },
     get columns() {
       return columns.value
@@ -70,7 +71,7 @@ const table = computed(() => {
   })
 })
 
-function formatValue(val: any): string {
+function formatValue(val: QueryResultValue): string {
   if (val === null) return 'null'
   if (val === undefined) return 'undefined'
   if (typeof val === 'object') return JSON.stringify(val)

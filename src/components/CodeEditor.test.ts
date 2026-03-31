@@ -8,10 +8,10 @@ import { flushPromises } from '@/test/utils'
 
 vi.mock('@codemirror/view', () => {
   class EditorView {
-    state: any
+    state: { doc: { toString: () => string } }
     dispatch = vi.fn()
     destroy = vi.fn()
-    constructor({ state, parent }: any) {
+    constructor({ state, parent }: { state?: { doc: { toString: () => string } }; parent?: HTMLElement }) {
       this.state = state ?? { doc: { toString: () => '' } }
       if (parent) parent.setAttribute('data-codemirror', 'true')
     }
@@ -32,8 +32,8 @@ vi.mock('@codemirror/state', () => ({
     readOnly: { of: vi.fn(() => []) },
   },
   Compartment: class Compartment {
-    of = vi.fn((x: any) => x)
-    reconfigure = vi.fn((x: any) => x)
+    of = vi.fn((x: string[]) => x)
+    reconfigure = vi.fn((x: string[]) => x)
   },
   StateEffect: { define: vi.fn(() => ({ of: vi.fn() })) },
   StateField: { define: vi.fn(() => ({})) },
@@ -90,26 +90,26 @@ describe('CodeEditor.vue', () => {
 
   it('exposes showErrors method', () => {
     const wrapper = createWrapper()
-    expect(typeof (wrapper.vm as any).showErrors).toBe('function')
+    expect(typeof (wrapper.vm as InstanceType<typeof CodeEditor>).showErrors).toBe('function')
   })
 
   it('exposes hideErrors method', () => {
     const wrapper = createWrapper()
-    expect(typeof (wrapper.vm as any).hideErrors).toBe('function')
+    expect(typeof (wrapper.vm as InstanceType<typeof CodeEditor>).hideErrors).toBe('function')
   })
 
   it('calls setErrors when showErrors is invoked with a view', async () => {
     const wrapper = createWrapper()
     await flushPromises()
     const errors = [{ from: 0, to: 5, message: 'Test error', severity: 'error' as const }]
-    ;(wrapper.vm as any).showErrors(errors)
+    ;(wrapper.vm as InstanceType<typeof CodeEditor>).showErrors(errors)
     expect(setErrors).toHaveBeenCalledWith(expect.anything(), errors)
   })
 
   it('calls clearErrors when hideErrors is invoked', async () => {
     const wrapper = createWrapper()
     await flushPromises()
-    ;(wrapper.vm as any).hideErrors()
+    ;(wrapper.vm as InstanceType<typeof CodeEditor>).hideErrors()
     expect(clearErrors).toHaveBeenCalled()
   })
 
