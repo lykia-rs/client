@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest'
-import { Tree } from '@lezer/common'
 import { lykiaLanguage, lykiaHighlightStyle } from './lykia-lang'
 import type { TokenizeResult, TokenTree } from './wasm'
 

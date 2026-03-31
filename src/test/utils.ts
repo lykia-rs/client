@@ -1,26 +1,3 @@
-import { mount } from '@vue/test-utils'
-import { Component } from 'vue'
-
-/**
- * Helper function to create a component wrapper with common options
- */
-export function createWrapper(component: Component, options = {}) {
-  return mount(component, {
-    global: {
-      stubs: {
-        // Stub splitpanes to avoid issues in tests
-        Splitpanes: {
-          template: '<div><slot /></div>',
-        },
-        Pane: {
-          template: '<div><slot /></div>',
-        },
-      },
-    },
-    ...options,
-  })
-}
-
 /**
  * Wait for next tick and any pending promises
  */

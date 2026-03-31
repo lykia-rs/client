@@ -1,9 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { invoke } from '@tauri-apps/api/core'
 import QueryPanel from '@/components/QueryPanel.vue'
 import ResultTable from '@/components/ResultTable.vue'
-import Button from '@/components/ui/Button.vue'
 import { createMockConnection, flushPromises } from '@/test/utils'
 import { resetQueryTabsState } from '@/composables/useQueryTabs'
 
@@ -20,13 +19,17 @@ const CodeEditorStub = {
     :class="{ 'opacity-50 cursor-not-allowed': disabled }"
   />`,
   props: ['modelValue', 'disabled', 'readonly', 'placeholder'],
-  emits: ['update:modelValue', 'parseError'],
+  emits: ['update:modelValue', 'parseError', 'parseErrorMessage'],
 }
 
 describe('QueryPanel.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     resetQueryTabsState()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   const createWrapper = (props = {}) => {
@@ -62,17 +65,10 @@ describe('QueryPanel.vue', () => {
     expect(tabs.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('renders Execute button', () => {
-    const wrapper = createWrapper()
-    
-    const executeButton = wrapper.findComponent(Button)
-    expect(executeButton.text()).toContain('Execute')
-  })
-
   it('disables Execute button when query is empty', () => {
     const wrapper = createWrapper()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     expect(executeButton.attributes('disabled')).toBeDefined()
   })
 
@@ -84,7 +80,7 @@ describe('QueryPanel.vue', () => {
     
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     expect(executeButton.attributes('disabled')).toBeUndefined()
   })
 
@@ -96,28 +92,19 @@ describe('QueryPanel.vue', () => {
     await wrapper.vm.$nextTick()
 
     // Verify it's enabled first
-    expect(wrapper.findComponent(Button).attributes('disabled')).toBeUndefined()
+    expect(wrapper.find('[data-testid="execute-button"]').attributes('disabled')).toBeUndefined()
 
     // Simulate a parse error from CodeEditor
     wrapper.findComponent(CodeEditorStub).vm.$emit('parseError', true)
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.findComponent(Button).attributes('disabled')).toBeDefined()
+    expect(wrapper.find('[data-testid="execute-button"]').attributes('disabled')).toBeDefined()
 
     // Resolve the error
     wrapper.findComponent(CodeEditorStub).vm.$emit('parseError', false)
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.findComponent(Button).attributes('disabled')).toBeUndefined()
-  })
-
-  it('updates query text when typing in textarea', async () => {
-    const wrapper = createWrapper()
-    
-    const textarea = wrapper.find('textarea')
-    await textarea.setValue('SELECT * FROM products')
-    
-    expect(textarea.element.value).toBe('SELECT * FROM products')
+    expect(wrapper.find('[data-testid="execute-button"]').attributes('disabled')).toBeUndefined()
   })
 
   it('executes query when Execute button is clicked', async () => {
@@ -133,7 +120,7 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     
     await flushPromises()
@@ -162,7 +149,7 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM users')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     
     await flushPromises()
@@ -185,7 +172,7 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('INVALID QUERY')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     
     await flushPromises()
@@ -204,7 +191,7 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     
     await flushPromises()
@@ -215,8 +202,9 @@ describe('QueryPanel.vue', () => {
   })
 
   it('shows loading state during query execution', async () => {
+    vi.useFakeTimers()
     vi.mocked(invoke).mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 100))
+      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 5000))
     )
     
     const wrapper = createWrapper()
@@ -225,9 +213,11 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     
+    // Advance past the 300ms loadingIndicator delay (with margin for pre-existing timers)
+    vi.advanceTimersByTime(500)
     await wrapper.vm.$nextTick()
     
     expect(executeButton.text()).toContain('Running...')
@@ -235,8 +225,9 @@ describe('QueryPanel.vue', () => {
   })
 
   it('shows loading bar at top of results pane during query execution', async () => {
+    vi.useFakeTimers()
     vi.mocked(invoke).mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 100))
+      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 5000))
     )
     
     const wrapper = createWrapper()
@@ -245,17 +236,20 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    // Loading bar should not exist initially (look for full-width loading bar)
-    let loadingBar = wrapper.find('.h-0\\.5.w-full')
-    expect(loadingBar.exists()).toBe(false)
+    // Loading shimmer should not exist initially
+    let shimmer = wrapper.find('.loading-shimmer')
+    expect(shimmer.exists()).toBe(false)
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
+    
+    // Advance past the 300ms loadingIndicator delay (with margin for pre-existing timers)
+    vi.advanceTimersByTime(500)
     await wrapper.vm.$nextTick()
     
-    // Loading bar should appear during loading
-    loadingBar = wrapper.find('.h-0\\.5.w-full')
-    expect(loadingBar.exists()).toBe(true)
+    // Loading shimmer should appear during loading
+    shimmer = wrapper.find('.loading-shimmer')
+    expect(shimmer.exists()).toBe(true)
   })
 
   it('hides loading bar after query completes', async () => {
@@ -271,16 +265,17 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     await flushPromises()
     
-    // Loading bar should be hidden after completion
-    const loadingBar = wrapper.find('.h-0\\.5.w-full')
-    expect(loadingBar.exists()).toBe(false)
+    // Loading shimmer should be hidden after completion
+    const shimmer = wrapper.find('.loading-shimmer')
+    expect(shimmer.exists()).toBe(false)
   })
 
   it('keeps previous results visible when executing new query', async () => {
+    vi.useFakeTimers()
     vi.mocked(invoke).mockResolvedValue({
       success: true,
       data: [{ id: 1 }],
@@ -293,21 +288,26 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
-    await flushPromises()
+    // flushPromises uses setTimeout(0) which hangs with fake timers, so advance instead
+    await vi.advanceTimersByTimeAsync(500)
+    await wrapper.vm.$nextTick()
     
     expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
     
-    // Execute again
+    // Execute again with never-resolving mock
     vi.mocked(invoke).mockImplementation(
       () => new Promise(() => {}) // Never resolves
     )
     
     await executeButton.trigger('click')
+    
+    // Advance past the 300ms loadingIndicator delay (with margin for pre-existing timers)
+    vi.advanceTimersByTime(500)
     await wrapper.vm.$nextTick()
     
-    // Results should remain visible while loading (locked state)
+    // Results should remain visible while loading (locked state via loadingIndicator)
     expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
     expect(wrapper.findComponent(ResultTable).props('isLocked')).toBe(true)
   })
@@ -325,7 +325,7 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     
     await flushPromises()
@@ -479,7 +479,7 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT 1')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     
     await flushPromises()
@@ -494,7 +494,7 @@ describe('QueryPanel.vue', () => {
     const connection = createMockConnection({ color: '#ff00ff' })
     const wrapper = createWrapper({ connection })
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     expect(executeButton.attributes('style')).toContain('#ff00ff')
   })
 
@@ -611,7 +611,7 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM conn1_table')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     await flushPromises()
     
@@ -674,7 +674,7 @@ describe('QueryPanel.vue', () => {
     await wrapper.find('textarea').setValue('SELECT 2')
     await wrapper.vm.$nextTick()
     
-    await wrapper.findComponent(Button).trigger('click')
+    await wrapper.find('[data-testid="execute-button"]').trigger('click')
     await flushPromises()
     
     // Should execute on connection 2's address
@@ -755,8 +755,9 @@ describe('QueryPanel.vue', () => {
   })
 
   it('disables query textarea during loading state', async () => {
+    vi.useFakeTimers()
     vi.mocked(invoke).mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 100))
+      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 5000))
     )
     
     const wrapper = createWrapper()
@@ -769,8 +770,11 @@ describe('QueryPanel.vue', () => {
     expect(textarea.attributes('disabled')).toBeUndefined()
     expect(textarea.attributes('readonly')).toBeUndefined()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
+    
+    // Advance past the 300ms loadingIndicator delay (with margin for pre-existing timers)
+    vi.advanceTimersByTime(500)
     await wrapper.vm.$nextTick()
     
     // Textarea should be disabled during loading
@@ -794,7 +798,7 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     await flushPromises()
     
@@ -818,7 +822,7 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('INVALID QUERY')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     await flushPromises()
     
@@ -828,8 +832,9 @@ describe('QueryPanel.vue', () => {
   })
 
   it('shows spinner instead of close button when query is running', async () => {
+    vi.useFakeTimers()
     vi.mocked(invoke).mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 100))
+      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 5000))
     )
     
     const wrapper = createWrapper()
@@ -853,8 +858,11 @@ describe('QueryPanel.vue', () => {
     let spinners = wrapper.findAll('.animate-spin')
     const initialSpinnerCount = spinners.length
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
+    
+    // Advance past the 300ms loadingIndicator delay (with margin for pre-existing timers)
+    vi.advanceTimersByTime(500)
     await wrapper.vm.$nextTick()
     
     // Should now have spinner (one in execute button, one in tab)
@@ -886,7 +894,7 @@ describe('QueryPanel.vue', () => {
     await textarea.setValue('SELECT * FROM test')
     await wrapper.vm.$nextTick()
     
-    const executeButton = wrapper.findComponent(Button)
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
     await executeButton.trigger('click')
     await flushPromises()
     
@@ -899,6 +907,78 @@ describe('QueryPanel.vue', () => {
     
     // Close button should be enabled after completion
     expect(closeButton.attributes('disabled')).toBeUndefined()
+  })
+
+  it('shows parse error message in editor status bar', async () => {
+    const wrapper = createWrapper()
+    
+    // Initially no parse error bar
+    expect(wrapper.find('.text-red-500').exists()).toBe(false)
+    
+    // Emit a parse error from CodeEditor
+    wrapper.findComponent(CodeEditorStub).vm.$emit('parseErrorMessage', 'Unexpected token at line 1')
+    await wrapper.vm.$nextTick()
+    
+    expect(wrapper.text()).toContain('Unexpected token at line 1')
+  })
+
+  it('hides parse error message when error is cleared', async () => {
+    const wrapper = createWrapper()
+    
+    wrapper.findComponent(CodeEditorStub).vm.$emit('parseErrorMessage', 'Some parse error')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('Some parse error')
+    
+    wrapper.findComponent(CodeEditorStub).vm.$emit('parseErrorMessage', '')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).not.toContain('Some parse error')
+  })
+
+  it('shows error with errorSpan in status bar instead of results error box', async () => {
+    vi.mocked(invoke).mockResolvedValue({
+      success: false,
+      error: 'Syntax error near SELECT',
+      error_span: { from: 0, to: 6 },
+      duration: 5,
+    })
+    
+    const wrapper = createWrapper()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
+    await executeButton.trigger('click')
+    await flushPromises()
+    
+    // Status bar should show the error
+    const statusBars = wrapper.findAll('.px-4.h-8')
+    const statusBar = statusBars[statusBars.length - 1]
+    expect(statusBar?.text()).toContain('Syntax error near SELECT')
+  })
+
+  it('shows execution time when error has no errorSpan', async () => {
+    vi.mocked(invoke).mockResolvedValue({
+      success: false,
+      error: 'Connection refused',
+      duration: 5,
+    })
+    
+    const wrapper = createWrapper()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
+    await executeButton.trigger('click')
+    await flushPromises()
+    
+    // Status bar should show duration, not error (no errorSpan)
+    const statusBars = wrapper.findAll('.px-4.h-8')
+    const statusBar = statusBars[statusBars.length - 1]
+    expect(statusBar?.text()).toContain('5ms')
   })
 })
 

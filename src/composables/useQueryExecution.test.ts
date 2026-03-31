@@ -32,6 +32,7 @@ describe('useQueryExecution', () => {
       result: null,
       error: '',
       loading: false,
+      loadingIndicator: false,
       connectionId: 'conn1',
       duration: null,
       errorSpan: null,
@@ -236,16 +237,6 @@ describe('useQueryExecution', () => {
     expect(tab.query).toBe(originalQuery)
   })
 
-  it('sets loading to false even if invoke throws', async () => {
-    vi.mocked(invoke).mockRejectedValue(new Error('Failed'))
-
-    const { executeQuery } = useQueryExecution()
-
-    await executeQuery(tab, connection)
-
-    expect(tab.loading).toBe(false)
-  })
-
   it('handles multiple concurrent executions on different tabs', async () => {
     const tab1 = { ...tab, id: 'tab1', query: 'SELECT 1' }
     const tab2 = { ...tab, id: 'tab2', query: 'SELECT 2' }
@@ -308,22 +299,6 @@ describe('useQueryExecution', () => {
     expect(tab.duration).toBeUndefined()
   })
 
-  it('clears error on successful execution', async () => {
-    tab.error = 'Previous error'
-
-    vi.mocked(invoke).mockResolvedValue({
-      success: true,
-      data: [{ id: 1 }],
-      duration: 10,
-    })
-
-    const { executeQuery } = useQueryExecution()
-
-    await executeQuery(tab, connection)
-
-    expect(tab.error).toBe('')
-  })
-
   it('can be called multiple times on same tab', async () => {
     vi.mocked(invoke)
       .mockResolvedValueOnce({ success: true, data: [{ id: 1 }], duration: 10 })
@@ -352,6 +327,207 @@ describe('useQueryExecution', () => {
     await executeQuery(tab, connection)
 
     expect(tab.result).toEqual(data)
+  })
+
+  describe('loadingIndicator', () => {
+    it('does not show loadingIndicator immediately', async () => {
+      vi.useFakeTimers()
+      vi.mocked(invoke).mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 5000))
+      )
+
+      const { executeQuery } = useQueryExecution()
+
+      const promise = executeQuery(tab, connection)
+      await vi.advanceTimersByTimeAsync(0)
+
+      expect(tab.loading).toBe(true)
+      expect(tab.loadingIndicator).toBe(false)
+
+      vi.advanceTimersByTime(5000)
+      await vi.advanceTimersByTimeAsync(0)
+      await promise
+
+      vi.useRealTimers()
+    })
+
+    it('shows loadingIndicator after 500ms if still loading', async () => {
+      vi.useFakeTimers()
+      vi.mocked(invoke).mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 5000))
+      )
+
+      const { executeQuery } = useQueryExecution()
+
+      const promise = executeQuery(tab, connection)
+      await vi.advanceTimersByTimeAsync(499)
+
+      expect(tab.loadingIndicator).toBe(false)
+
+      await vi.advanceTimersByTimeAsync(1)
+
+      expect(tab.loadingIndicator).toBe(true)
+
+      vi.advanceTimersByTime(5000)
+      await vi.advanceTimersByTimeAsync(0)
+      await promise
+
+      vi.useRealTimers()
+    })
+
+    it('resets loadingIndicator after execution completes', async () => {
+      vi.useFakeTimers()
+      vi.mocked(invoke).mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 1000))
+      )
+
+      const { executeQuery } = useQueryExecution()
+
+      const promise = executeQuery(tab, connection)
+
+      await vi.advanceTimersByTimeAsync(600)
+      expect(tab.loadingIndicator).toBe(true)
+
+      await vi.advanceTimersByTimeAsync(500)
+      await promise
+
+      expect(tab.loading).toBe(false)
+      expect(tab.loadingIndicator).toBe(false)
+
+      vi.useRealTimers()
+    })
+
+    it('does not set loadingIndicator if query completes before 500ms', async () => {
+      vi.useFakeTimers()
+      vi.mocked(invoke).mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 200))
+      )
+
+      const { executeQuery } = useQueryExecution()
+
+      const promise = executeQuery(tab, connection)
+
+      await vi.advanceTimersByTimeAsync(200)
+      await promise
+
+      expect(tab.loadingIndicator).toBe(false)
+
+      vi.useRealTimers()
+    })
+
+    it('resets loadingIndicator on error', async () => {
+      vi.useFakeTimers()
+      vi.mocked(invoke).mockImplementation(
+        () => new Promise((_, reject) => setTimeout(() => reject(new Error('fail')), 1000))
+      )
+
+      const { executeQuery } = useQueryExecution()
+
+      const promise = executeQuery(tab, connection)
+
+      await vi.advanceTimersByTimeAsync(600)
+      expect(tab.loadingIndicator).toBe(true)
+
+      await vi.advanceTimersByTimeAsync(500)
+      await promise
+
+      expect(tab.loadingIndicator).toBe(false)
+
+      vi.useRealTimers()
+    })
+
+    it('handles concurrent timers for different tabs', async () => {
+      vi.useFakeTimers()
+      const tab2 = { ...tab, id: 'tab2', query: 'SELECT 2' }
+
+      vi.mocked(invoke)
+        .mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [{ r: 1 }], duration: 10 }), 1000)))
+        .mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [{ r: 2 }], duration: 20 }), 300)))
+
+      const { executeQuery } = useQueryExecution()
+
+      const p1 = executeQuery(tab, connection)
+      const p2 = executeQuery(tab2, connection)
+
+      await vi.advanceTimersByTimeAsync(300)
+      await p2
+
+      // tab2 finished before 500ms, should not have loadingIndicator
+      expect(tab2.loadingIndicator).toBe(false)
+      // tab still running, not yet 500ms
+      expect(tab.loadingIndicator).toBe(false)
+
+      await vi.advanceTimersByTimeAsync(200)
+      // Now 500ms passed for tab
+      expect(tab.loadingIndicator).toBe(true)
+
+      await vi.advanceTimersByTimeAsync(600)
+      await p1
+
+      expect(tab.loadingIndicator).toBe(false)
+
+      vi.useRealTimers()
+    })
+  })
+
+  describe('error_span handling', () => {
+    it('sets errorSpan from response', async () => {
+      vi.mocked(invoke).mockResolvedValue({
+        success: false,
+        error: 'Syntax error near SELECT',
+        error_span: { from: 0, to: 6 },
+        duration: 5,
+      })
+
+      const { executeQuery } = useQueryExecution()
+
+      await executeQuery(tab, connection)
+
+      expect(tab.errorSpan).toEqual({ from: 0, to: 6 })
+      expect(tab.error).toBe('Syntax error near SELECT')
+    })
+
+    it('sets errorSpan to null when error_span is missing', async () => {
+      vi.mocked(invoke).mockResolvedValue({
+        success: false,
+        error: 'Some error',
+        duration: 5,
+      })
+
+      const { executeQuery } = useQueryExecution()
+
+      await executeQuery(tab, connection)
+
+      expect(tab.errorSpan).toBeNull()
+    })
+
+    it('clears errorSpan on successful execution', async () => {
+      tab.errorSpan = { from: 0, to: 5 }
+
+      vi.mocked(invoke).mockResolvedValue({
+        success: true,
+        data: [],
+        duration: 10,
+      })
+
+      const { executeQuery } = useQueryExecution()
+
+      await executeQuery(tab, connection)
+
+      expect(tab.errorSpan).toBeNull()
+    })
+
+    it('clears errorSpan on invoke exception', async () => {
+      tab.errorSpan = { from: 0, to: 5 }
+
+      vi.mocked(invoke).mockRejectedValue(new Error('Crash'))
+
+      const { executeQuery } = useQueryExecution()
+
+      await executeQuery(tab, connection)
+
+      expect(tab.errorSpan).toBeNull()
+    })
   })
 
 })

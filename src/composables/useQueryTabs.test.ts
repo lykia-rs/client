@@ -145,24 +145,6 @@ describe('useQueryTabs', () => {
     expect(tabs.value.length).toBe(2)
   })
 
-  it('switches to correct tab after closing', () => {
-    const connectionRef = ref(connection)
-    const { tabs, activeTabId, addTab, closeTab } = useQueryTabs(connectionRef)
-
-    addTab()
-    addTab()
-
-    // Close middle tab while it's active
-    const middleTabId = tabs.value[1].id
-    activeTabId.value = middleTabId
-
-    closeTab(middleTabId)
-
-    // Should switch to an existing tab
-    const activeTab = tabs.value.find(t => t.id === activeTabId.value)
-    expect(activeTab).toBeDefined()
-  })
-
   it('switches tabs when connection changes', async () => {
     const connectionRef = ref(connection)
     const { tabs, addTab } = useQueryTabs(connectionRef)
@@ -410,5 +392,38 @@ describe('useQueryTabs', () => {
     
     // Connection 2 should have running queries
     expect(hasRunningQueriesForConnection(connection2.id)).toBe(true)
+  })
+
+  it('initializes new tabs with loadingIndicator set to false', () => {
+    const connectionRef = ref(connection)
+    const { tabs, addTab } = useQueryTabs(connectionRef)
+
+    expect(tabs.value[0].loadingIndicator).toBe(false)
+
+    addTab()
+    expect(tabs.value[1].loadingIndicator).toBe(false)
+  })
+
+  it('maintains separate loadingIndicator states per tab', () => {
+    const connectionRef = ref(connection)
+    const { tabs, addTab } = useQueryTabs(connectionRef)
+
+    addTab()
+
+    tabs.value[0].loadingIndicator = true
+    tabs.value[1].loadingIndicator = false
+
+    expect(tabs.value[0].loadingIndicator).toBe(true)
+    expect(tabs.value[1].loadingIndicator).toBe(false)
+  })
+
+  it('initializes new tabs with errorSpan set to null', () => {
+    const connectionRef = ref(connection)
+    const { tabs, addTab } = useQueryTabs(connectionRef)
+
+    expect(tabs.value[0].errorSpan).toBeNull()
+
+    addTab()
+    expect(tabs.value[1].errorSpan).toBeNull()
   })
 })

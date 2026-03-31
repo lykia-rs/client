@@ -23,7 +23,7 @@ function buildDecorations(errors: ErrorMarker[], docLength: number): DecorationS
       const from = Math.max(0, Math.min(e.from, docLength))
       const to = Math.max(from, Math.min(e.to, docLength))
       if (from === to) return null
-      return Decoration.mark({ class: markClass(e.severity), attributes: { title: e.message } }).range(from, to)
+      return Decoration.mark({ class: markClass(e.severity) }).range(from, to)
     })
     .filter((d): d is NonNullable<typeof d> => d !== null)
     .sort((a, b) => a.from - b.from)
