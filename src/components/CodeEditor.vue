@@ -167,141 +167,41 @@ defineExpose({ showErrors, hideErrors })
 </template>
 
 <style>
-/* CodeMirror base theming */
-.code-editor .cm-editor {
-  height: 100%;
-}
+.code-editor .cm-editor { height: 100%; }
+:root { --cm-cursor-color: #18181b; }
+.dark { --cm-cursor-color: #e4e4e7; }
 
-:root {
-  --cm-cursor-color: #18181b;
-}
+/* Syntax highlighting */
+.code-editor .cm-keyword { color: #7c3aed; font-weight: 600; }
+.code-editor .cm-sqlkeyword { color: #2563eb; font-weight: 600; }
+.code-editor .cm-string { color: #16a34a; }
+.code-editor .cm-number,
+.code-editor .cm-boolean { color: #d97706; }
+.code-editor .cm-symbol { color: #71717a; }
+.code-editor .cm-identifier { color: #18181b; }
+.code-editor .cm-variable { color: #dc2626; }
+.code-editor .cm-null { color: #71717a; font-style: italic; }
 
-.dark {
-  --cm-cursor-color: #e4e4e7;
-}
-
-/* Syntax highlighting — Light theme */
-.code-editor .cm-keyword {
-  color: #7c3aed;
-  font-weight: 600;
-}
-
-.code-editor .cm-sqlkeyword {
-  color: #2563eb;
-  font-weight: 600;
-}
-
-.code-editor .cm-string {
-  color: #16a34a;
-}
-
-.code-editor .cm-number {
-  color: #d97706;
-}
-
-.code-editor .cm-boolean {
-  color: #d97706;
-}
-
-.code-editor .cm-symbol {
-  color: #71717a;
-}
-
-.code-editor .cm-identifier {
-  color: #18181b;
-}
-
-.code-editor .cm-variable {
-  color: #dc2626;
-}
-
-.code-editor .cm-null {
-  color: #71717a;
-  font-style: italic;
-}
-
-/* Error / warning / info marks */
-.code-editor .cm-error-span {
-  text-decoration: wavy underline;
-  text-decoration-color: #ef4444;
-  text-underline-offset: 3px;
-}
-
-.code-editor .cm-error-warning {
-  text-decoration: wavy underline;
-  text-decoration-color: #eab308;
-  text-underline-offset: 3px;
-}
-
-.code-editor .cm-error-info {
-  text-decoration: wavy underline;
-  text-decoration-color: #3b82f6;
-  text-underline-offset: 3px;
-}
+/* Error marks */
+.code-editor .cm-error-span,
+.code-editor .cm-error-warning,
+.code-editor .cm-error-info { text-decoration: wavy underline; text-underline-offset: 3px; }
+.code-editor .cm-error-span { text-decoration-color: #ef4444; }
+.code-editor .cm-error-warning { text-decoration-color: #eab308; }
+.code-editor .cm-error-info { text-decoration-color: #3b82f6; }
 
 /* Dark theme */
-.dark .code-editor .cm-keyword {
-  color: #a78bfa;
-  font-weight: 600;
-}
-
-.dark .code-editor .cm-sqlkeyword {
-  color: #60a5fa;
-  font-weight: 600;
-}
-
-.dark .code-editor .cm-string {
-  color: #4ade80;
-}
-
-.dark .code-editor .cm-number {
-  color: #fbbf24;
-}
-
-.dark .code-editor .cm-boolean {
-  color: #fbbf24;
-}
-
-.dark .code-editor .cm-symbol {
-  color: #a1a1aa;
-}
-
-.dark .code-editor .cm-identifier {
-  color: #e4e4e7;
-}
-
-.dark .code-editor .cm-variable {
-  color: #f87171;
-}
-
-.dark .code-editor .cm-null {
-  color: #a1a1aa;
-  font-style: italic;
-}
-
-.dark .code-editor .cm-error-span {
-  text-decoration-color: #ef4444;
-}
-
-.dark .code-editor .cm-error-warning {
-  text-decoration-color: #eab308;
-}
-
-.dark .code-editor .cm-error-info {
-  text-decoration-color: #3b82f6;
-}
-
-/* Dark theme editor background */
-.dark .code-editor .cm-editor {
-  color: #e4e4e7;
-}
-
-.dark .code-editor .cm-activeLine {
-  background-color: rgba(255, 255, 255, 0.04);
-}
-
+.dark .code-editor .cm-keyword { color: #a78bfa; }
+.dark .code-editor .cm-sqlkeyword { color: #60a5fa; }
+.dark .code-editor .cm-string { color: #4ade80; }
+.dark .code-editor .cm-number,
+.dark .code-editor .cm-boolean { color: #fbbf24; }
+.dark .code-editor .cm-symbol,
+.dark .code-editor .cm-null { color: #a1a1aa; }
+.dark .code-editor .cm-identifier { color: #e4e4e7; }
+.dark .code-editor .cm-variable { color: #f87171; }
+.dark .code-editor .cm-editor { color: #e4e4e7; }
+.dark .code-editor .cm-activeLine { background-color: rgba(255, 255, 255, 0.04); }
 .dark .code-editor .cm-selectionBackground,
-.dark .code-editor .cm-focused .cm-selectionBackground {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-}
+.dark .code-editor .cm-focused .cm-selectionBackground { background-color: rgba(255, 255, 255, 0.1) !important; }
 </style>
