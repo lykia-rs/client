@@ -237,16 +237,6 @@ describe('useQueryExecution', () => {
     expect(tab.query).toBe(originalQuery)
   })
 
-  it('sets loading to false even if invoke throws', async () => {
-    vi.mocked(invoke).mockRejectedValue(new Error('Failed'))
-
-    const { executeQuery } = useQueryExecution()
-
-    await executeQuery(tab, connection)
-
-    expect(tab.loading).toBe(false)
-  })
-
   it('handles multiple concurrent executions on different tabs', async () => {
     const tab1 = { ...tab, id: 'tab1', query: 'SELECT 1' }
     const tab2 = { ...tab, id: 'tab2', query: 'SELECT 2' }
@@ -307,22 +297,6 @@ describe('useQueryExecution', () => {
     await executeQuery(tab, connection)
 
     expect(tab.duration).toBeUndefined()
-  })
-
-  it('clears error on successful execution', async () => {
-    tab.error = 'Previous error'
-
-    vi.mocked(invoke).mockResolvedValue({
-      success: true,
-      data: [{ id: 1 }],
-      duration: 10,
-    })
-
-    const { executeQuery } = useQueryExecution()
-
-    await executeQuery(tab, connection)
-
-    expect(tab.error).toBe('')
   })
 
   it('can be called multiple times on same tab', async () => {

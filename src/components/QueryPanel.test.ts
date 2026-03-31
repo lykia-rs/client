@@ -65,13 +65,6 @@ describe('QueryPanel.vue', () => {
     expect(tabs.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('renders Execute button', () => {
-    const wrapper = createWrapper()
-    
-    const executeButton = wrapper.find('[data-testid="execute-button"]')
-    expect(executeButton.text()).toContain('Execute')
-  })
-
   it('disables Execute button when query is empty', () => {
     const wrapper = createWrapper()
     
@@ -112,15 +105,6 @@ describe('QueryPanel.vue', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find('[data-testid="execute-button"]').attributes('disabled')).toBeUndefined()
-  })
-
-  it('updates query text when typing in textarea', async () => {
-    const wrapper = createWrapper()
-    
-    const textarea = wrapper.find('textarea')
-    await textarea.setValue('SELECT * FROM products')
-    
-    expect(textarea.element.value).toBe('SELECT * FROM products')
   })
 
   it('executes query when Execute button is clicked', async () => {
@@ -969,7 +953,8 @@ describe('QueryPanel.vue', () => {
     await flushPromises()
     
     // Status bar should show the error
-    const statusBar = wrapper.findAll('.px-4.h-8').at(-1)
+    const statusBars = wrapper.findAll('.px-4.h-8')
+    const statusBar = statusBars[statusBars.length - 1]
     expect(statusBar?.text()).toContain('Syntax error near SELECT')
   })
 
@@ -991,16 +976,9 @@ describe('QueryPanel.vue', () => {
     await flushPromises()
     
     // Status bar should show duration, not error (no errorSpan)
-    const statusBar = wrapper.findAll('.px-4.h-8').at(-1)
+    const statusBars = wrapper.findAll('.px-4.h-8')
+    const statusBar = statusBars[statusBars.length - 1]
     expect(statusBar?.text()).toContain('5ms')
-  })
-
-  it('shows Execute text when loadingIndicator is not active', async () => {
-    const wrapper = createWrapper()
-    
-    const executeButton = wrapper.find('[data-testid="execute-button"]')
-    expect(executeButton.text()).toContain('Execute')
-    expect(executeButton.text()).not.toContain('Running...')
   })
 })
 

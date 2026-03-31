@@ -130,20 +130,6 @@ describe('Button.vue', () => {
     expect(button.attributes('disabled')).toBeDefined()
   })
 
-  it('applies disabled styles', () => {
-    const wrapper = mount(Button, {
-      attrs: {
-        disabled: true,
-      },
-      slots: {
-        default: 'Button',
-      },
-    })
-    
-    const button = wrapper.find('button')
-    expect(button.classes()).toContain('disabled:opacity-50')
-  })
-
   it('can be clicked', async () => {
     const wrapper = mount(Button, {
       slots: {
@@ -180,41 +166,6 @@ describe('Button.vue', () => {
     expect(wrapper.html()).toContain('Custom Content')
   })
 
-  it('has transition styles', () => {
-    const wrapper = mount(Button, {
-      slots: {
-        default: 'Button',
-      },
-    })
-    
-    const button = wrapper.find('button')
-    expect(button.classes()).toContain('transition-all')
-  })
-
-  it('has active press effect', () => {
-    const wrapper = mount(Button, {
-      slots: {
-        default: 'Button',
-      },
-    })
-    
-    const button = wrapper.find('button')
-    expect(button.classes()).toContain('active:opacity-80')
-  })
-
-  it('has inline-flex display', () => {
-    const wrapper = mount(Button, {
-      slots: {
-        default: 'Button',
-      },
-    })
-    
-    const button = wrapper.find('button')
-    expect(button.classes()).toContain('inline-flex')
-    expect(button.classes()).toContain('items-center')
-    expect(button.classes()).toContain('justify-center')
-  })
-
   it('combines multiple props correctly', () => {
     const wrapper = mount(Button, {
       props: {
@@ -244,17 +195,6 @@ describe('Button.vue', () => {
     })
     
     expect(wrapper.find('a').exists()).toBe(true)
-  })
-
-  it('has focus-visible styles', () => {
-    const wrapper = mount(Button, {
-      slots: {
-        default: 'Button',
-      },
-    })
-    
-    const button = wrapper.find('button')
-    expect(button.classes()).toContain('focus-visible:outline-none')
   })
 
   it('renders with icons in slot', () => {

@@ -40,26 +40,33 @@ describe('useTheme', () => {
     expect(theme.value).toBe(currentTheme)
   })
 
-  it('should set theme and update document class', async () => {
+  it('should update document class when toggling theme', async () => {
+    mockMatchMedia.mockReturnValue({ matches: false })
     const { useTheme } = await import('./useTheme')
-    const { setTheme } = useTheme()
+    const { theme, toggleTheme } = useTheme()
     
-    setTheme('dark')
+    // Starts as light (no dark class)
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
+    
+    toggleTheme()
+    expect(theme.value).toBe('dark')
     expect(document.documentElement.classList.contains('dark')).toBe(true)
     
-    setTheme('light')
+    toggleTheme()
+    expect(theme.value).toBe('light')
     expect(document.documentElement.classList.contains('dark')).toBe(false)
   })
 
-  it('should persist theme to localStorage', async () => {
+  it('should persist theme to localStorage when toggling', async () => {
+    mockMatchMedia.mockReturnValue({ matches: false })
     const { useTheme } = await import('./useTheme')
-    const { setTheme } = useTheme()
+    const { toggleTheme } = useTheme()
     
-    setTheme('light')
-    expect(localStorage.getItem('lykiadb-theme')).toBe('light')
-    
-    setTheme('dark')
+    toggleTheme()
     expect(localStorage.getItem('lykiadb-theme')).toBe('dark')
+    
+    toggleTheme()
+    expect(localStorage.getItem('lykiadb-theme')).toBe('light')
   })
 
   it('should restore theme from localStorage on init', async () => {

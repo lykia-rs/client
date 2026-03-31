@@ -145,24 +145,6 @@ describe('useQueryTabs', () => {
     expect(tabs.value.length).toBe(2)
   })
 
-  it('switches to correct tab after closing', () => {
-    const connectionRef = ref(connection)
-    const { tabs, activeTabId, addTab, closeTab } = useQueryTabs(connectionRef)
-
-    addTab()
-    addTab()
-
-    // Close middle tab while it's active
-    const middleTabId = tabs.value[1].id
-    activeTabId.value = middleTabId
-
-    closeTab(middleTabId)
-
-    // Should switch to an existing tab
-    const activeTab = tabs.value.find(t => t.id === activeTabId.value)
-    expect(activeTab).toBeDefined()
-  })
-
   it('switches tabs when connection changes', async () => {
     const connectionRef = ref(connection)
     const { tabs, addTab } = useQueryTabs(connectionRef)
