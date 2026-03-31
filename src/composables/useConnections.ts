@@ -17,16 +17,16 @@ const CONNECTION_COLORS = ['#4db6ac', '#a5d6a7', '#81c784', '#64b5f6', '#ba68c8'
 
 export function useConnections() {
   const connections = ref<Connection[]>([
-    { 
-      id: '1', 
-      name: 'localhost', 
-      address: 'localhost:19191', 
-      host: 'localhost', 
-      port: '19191', 
-      color: CONNECTION_COLORS[0], 
-      active: true, 
-      connected: false 
-    }
+    {
+      id: '1',
+      name: 'localhost',
+      address: 'localhost:19191',
+      host: 'localhost',
+      port: '19191',
+      color: CONNECTION_COLORS[0],
+      active: true,
+      connected: false,
+    },
   ])
 
   const activeConnection = ref(connections.value[0])
@@ -42,22 +42,22 @@ export function useConnections() {
   }
 
   function selectConnection(conn: Connection) {
-    connections.value.forEach(c => c.active = false)
+    connections.value.forEach((c) => (c.active = false))
     conn.active = true
     activeConnection.value = conn
   }
 
   async function addConnection(host: string, port: string) {
     const address = `${host}:${port}`
-    
+
     // Test connection first - this will throw if it fails
     await invoke('test_connection', { address })
-    
+
     // Only add if connection succeeds
     const id = String(Date.now())
     const color = CONNECTION_COLORS[colorIndex % CONNECTION_COLORS.length]
     colorIndex++
-    
+
     const newConn: Connection = {
       id,
       name: host,
@@ -66,20 +66,20 @@ export function useConnections() {
       port,
       color,
       active: false,
-      connected: true
+      connected: true,
     }
-    
+
     connections.value.push(newConn)
     selectConnection(newConn)
   }
 
   function removeConnection(id: string) {
-    const index = connections.value.findIndex(c => c.id === id)
+    const index = connections.value.findIndex((c) => c.id === id)
     if (index === -1 || connections.value.length === 1) return
-    
+
     // Prevent removing connections with running queries
     if (hasRunningQueriesForConnection(id)) return
-    
+
     connections.value.splice(index, 1)
     if (activeConnection.value.id === id) {
       selectConnection(connections.value[0])
@@ -95,6 +95,6 @@ export function useConnections() {
     testConnection,
     selectConnection,
     addConnection,
-    removeConnection
+    removeConnection,
   }
 }

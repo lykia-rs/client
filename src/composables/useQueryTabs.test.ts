@@ -4,9 +4,15 @@ import { useQueryTabs, hasRunningQueriesForConnection, resetQueryTabsState } fro
 import type { Connection } from './useConnections'
 
 const makeConn = (o: Partial<Connection> = {}): Connection => ({
-  id: 'conn1', name: 'Test DB', address: 'localhost:19191',
-  host: 'localhost', port: '19191', color: '#4db6ac',
-  active: true, connected: true, ...o,
+  id: 'conn1',
+  name: 'Test DB',
+  address: 'localhost:19191',
+  host: 'localhost',
+  port: '19191',
+  color: '#4db6ac',
+  active: true,
+  connected: true,
+  ...o,
 })
 
 describe('useQueryTabs', () => {
@@ -23,8 +29,13 @@ describe('useQueryTabs', () => {
 
     expect(tabs.value).toHaveLength(1)
     expect(tabs.value[0]).toMatchObject({
-      name: 'Query 1', query: '', result: null, error: '',
-      loading: false, connectionId: 'conn1', duration: null,
+      name: 'Query 1',
+      query: '',
+      result: null,
+      error: '',
+      loading: false,
+      connectionId: 'conn1',
+      duration: null,
     })
     expect(tabs.value[0].id).toBeDefined()
     expect(activeTab.value).toBe(tabs.value[0])
@@ -37,7 +48,7 @@ describe('useQueryTabs', () => {
     addTab()
 
     expect(tabs.value).toHaveLength(3)
-    expect(tabs.value.every(t => t.connectionId === 'conn1')).toBe(true)
+    expect(tabs.value.every((t) => t.connectionId === 'conn1')).toBe(true)
   })
 
   it('can add new tabs', () => {
@@ -58,7 +69,7 @@ describe('useQueryTabs', () => {
     addTab()
     addTab()
 
-    expect(tabs.value.map(t => t.name)).toEqual(['Query 1', 'Query 2', 'Query 3', 'Query 4'])
+    expect(tabs.value.map((t) => t.name)).toEqual(['Query 1', 'Query 2', 'Query 3', 'Query 4'])
   })
 
   it('makes new tab active when added', () => {
@@ -98,7 +109,7 @@ describe('useQueryTabs', () => {
     activeTabId.value = secondTabId
     closeTab(secondTabId)
 
-    expect(tabs.value.find(t => t.id === activeTabId.value)).toBeDefined()
+    expect(tabs.value.find((t) => t.id === activeTabId.value)).toBeDefined()
     expect(tabs.value.length).toBe(2)
   })
 
@@ -109,7 +120,7 @@ describe('useQueryTabs', () => {
     expect(tabs.value).toHaveLength(2)
 
     connectionRef.value = makeConn({ id: 'conn2' })
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
     expect(tabs.value.length).toBeGreaterThanOrEqual(1)
   })
@@ -120,7 +131,7 @@ describe('useQueryTabs', () => {
     addTab()
 
     connectionRef.value = makeConn({ id: 'conn2' })
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
     expect(tabs.value.length).toBeGreaterThanOrEqual(1)
     if (tabs.value.length > 0) {
@@ -135,13 +146,13 @@ describe('useQueryTabs', () => {
     const conn1TabCount = tabs.value.length
 
     connectionRef.value = makeConn({ id: 'conn2' })
-    await new Promise(resolve => setTimeout(resolve, 0))
-    expect(tabs.value.every(t => t.connectionId === 'conn2')).toBe(true)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(tabs.value.every((t) => t.connectionId === 'conn2')).toBe(true)
 
     connectionRef.value = connection
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise((resolve) => setTimeout(resolve, 0))
     expect(tabs.value.length).toBe(conn1TabCount)
-    expect(tabs.value.every(t => t.connectionId === 'conn1')).toBe(true)
+    expect(tabs.value.every((t) => t.connectionId === 'conn1')).toBe(true)
   })
 
   it('maintains separate state per tab', () => {
@@ -180,7 +191,7 @@ describe('useQueryTabs', () => {
     addTab()
     addTab()
 
-    const ids = tabs.value.map(t => t.id)
+    const ids = tabs.value.map((t) => t.id)
     expect(new Set(ids).size).toBe(ids.length)
   })
 
@@ -214,7 +225,7 @@ describe('useQueryTabs', () => {
     closeTab(tabId)
 
     expect(tabs.value).toHaveLength(1)
-    expect(tabs.value.find(t => t.id === tabId)).toBeUndefined()
+    expect(tabs.value.find((t) => t.id === tabId)).toBeUndefined()
   })
 
   it('detects running queries for a connection', () => {
@@ -230,7 +241,14 @@ describe('useQueryTabs', () => {
   })
 
   it('detects running queries only for specific connection', () => {
-    const conn2 = makeConn({ id: 'conn2', name: 'Test DB 2', address: 'localhost:19192', port: '19192', color: '#a5d6a7', active: false })
+    const conn2 = makeConn({
+      id: 'conn2',
+      name: 'Test DB 2',
+      address: 'localhost:19192',
+      port: '19192',
+      color: '#a5d6a7',
+      active: false,
+    })
     const connectionRef1 = ref(connection)
     const connectionRef2 = ref(conn2)
 

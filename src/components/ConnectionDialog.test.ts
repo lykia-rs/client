@@ -5,7 +5,9 @@ import Button from '@/components/ui/Button.vue'
 import { flushPromises } from '@/test/utils'
 
 describe('ConnectionDialog.vue', () => {
-  beforeEach(() => { vi.clearAllMocks() })
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
   const createWrapper = (props = {}) =>
     mount(ConnectionDialog, {
@@ -34,7 +36,9 @@ describe('ConnectionDialog.vue', () => {
 
   it('emits close event when close button is clicked', async () => {
     const wrapper = createWrapper()
-    const closeButton = wrapper.findAll('button').find(btn => !btn.classes().includes('inline-flex'))!
+    const closeButton = wrapper
+      .findAll('button')
+      .find((btn) => !btn.classes().includes('inline-flex'))!
     await closeButton.trigger('click')
     expect(wrapper.emitted('close')).toHaveLength(1)
   })
@@ -91,7 +95,7 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('shows loading state and disables buttons when connecting', async () => {
-    const connectHandler = vi.fn(() => new Promise(resolve => setTimeout(resolve, 100)))
+    const connectHandler = vi.fn(() => new Promise((resolve) => setTimeout(resolve, 100)))
     const wrapper = createWrapper({ connectHandler })
     await wrapper.find('form').trigger('submit')
     await wrapper.vm.$nextTick()
@@ -132,7 +136,8 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('clears error message when retrying', async () => {
-    const connectHandler = vi.fn()
+    const connectHandler = vi
+      .fn()
       .mockRejectedValueOnce(new Error('First error'))
       .mockResolvedValueOnce(undefined)
     const wrapper = createWrapper({ connectHandler })
@@ -182,10 +187,12 @@ describe('ConnectionDialog.vue', () => {
   })
 
   it('has focus styles on inputs', () => {
-    createWrapper().findAll('input').forEach(input => {
-      expect(input.classes()).toContain('focus-visible:ring-1')
-      expect(input.classes()).toContain('focus-visible:ring-ring')
-    })
+    createWrapper()
+      .findAll('input')
+      .forEach((input) => {
+        expect(input.classes()).toContain('focus-visible:ring-1')
+        expect(input.classes()).toContain('focus-visible:ring-ring')
+      })
   })
 
   it('applies animation classes to dialog', () => {

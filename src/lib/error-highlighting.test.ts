@@ -24,9 +24,7 @@ describe('error-highlighting', () => {
   describe('setErrors / clearErrors', () => {
     it('dispatches without throwing for valid errors', () => {
       const view = createView()
-      const errors: ErrorMarker[] = [
-        { from: 0, to: 6, message: 'Bad keyword', severity: 'error' },
-      ]
+      const errors: ErrorMarker[] = [{ from: 0, to: 6, message: 'Bad keyword', severity: 'error' }]
       expect(() => setErrors(view, errors)).not.toThrow()
       view.destroy()
     })
@@ -49,26 +47,20 @@ describe('error-highlighting', () => {
 
     it('handles default (no) severity', () => {
       const view = createView()
-      expect(() =>
-        setErrors(view, [{ from: 0, to: 3, message: 'err' }]),
-      ).not.toThrow()
+      expect(() => setErrors(view, [{ from: 0, to: 3, message: 'err' }])).not.toThrow()
       view.destroy()
     })
 
     it('clamps out-of-range positions to document bounds', () => {
       const view = createView('abc') // length 3
-      expect(() =>
-        setErrors(view, [{ from: -5, to: 100, message: 'overflow' }]),
-      ).not.toThrow()
+      expect(() => setErrors(view, [{ from: -5, to: 100, message: 'overflow' }])).not.toThrow()
       view.destroy()
     })
 
     it('skips zero-length markers (from === to after clamping)', () => {
       const view = createView('abc')
       // Both from and to exceed doc length → clamped to 3, so from === to
-      expect(() =>
-        setErrors(view, [{ from: 50, to: 50, message: 'no range' }]),
-      ).not.toThrow()
+      expect(() => setErrors(view, [{ from: 50, to: 50, message: 'no range' }])).not.toThrow()
       view.destroy()
     })
 
@@ -102,9 +94,7 @@ describe('error-highlighting', () => {
       const view = createView('hello world')
       setErrors(view, [{ from: 6, to: 11, message: 'err' }])
       // Insert text before the error — decorations should remap
-      expect(() =>
-        view.dispatch({ changes: { from: 0, to: 0, insert: 'XXX' } }),
-      ).not.toThrow()
+      expect(() => view.dispatch({ changes: { from: 0, to: 0, insert: 'XXX' } })).not.toThrow()
       view.destroy()
     })
 

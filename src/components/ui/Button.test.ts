@@ -2,8 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import Button from '@/components/ui/Button.vue'
 
-const mountBtn = (props = {}, slots = { default: 'Button' }) =>
-  mount(Button, { props, slots })
+const mountBtn = (props = {}, slots = { default: 'Button' }) => mount(Button, { props, slots })
 
 describe('Button.vue', () => {
   it('renders button with default variant', () => {
@@ -27,7 +26,7 @@ describe('Button.vue', () => {
     ['lg', ['h-10', 'px-6']],
   ] as const)('applies %s size styles', (size, expectedClasses) => {
     const classes = mountBtn({ size }).find('button').classes()
-    expectedClasses.forEach(c => expect(classes).toContain(c))
+    expectedClasses.forEach((c) => expect(classes).toContain(c))
   })
 
   it('accepts custom class prop', () => {
@@ -51,11 +50,15 @@ describe('Button.vue', () => {
   })
 
   it('renders slot content', () => {
-    expect(mountBtn({}, { default: '<span>Custom Content</span>' }).html()).toContain('Custom Content')
+    expect(mountBtn({}, { default: '<span>Custom Content</span>' }).html()).toContain(
+      'Custom Content',
+    )
   })
 
   it('combines multiple props correctly', () => {
-    const classes = mountBtn({ variant: 'outline', size: 'sm', class: 'my-custom-class' }).find('button').classes()
+    const classes = mountBtn({ variant: 'outline', size: 'sm', class: 'my-custom-class' })
+      .find('button')
+      .classes()
     expect(classes).toContain('border')
     expect(classes).toContain('h-7')
     expect(classes).toContain('my-custom-class')

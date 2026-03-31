@@ -7,7 +7,10 @@ const mountTable = (data: any, isLocked = false) =>
 
 describe('ResultTable.vue', () => {
   it('renders table for array data with objects', () => {
-    const wrapper = mountTable([{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }])
+    const wrapper = mountTable([
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' },
+    ])
     expect(wrapper.find('table').exists()).toBe(true)
     expect(wrapper.find('thead').exists()).toBe(true)
     expect(wrapper.find('tbody').exists()).toBe(true)
@@ -67,7 +70,12 @@ describe('ResultTable.vue', () => {
   })
 
   it('handles mixed data types in columns', () => {
-    const data = [{ value: 'string' }, { value: 123 }, { value: null }, { value: { nested: 'object' } }]
+    const data = [
+      { value: 'string' },
+      { value: 123 },
+      { value: null },
+      { value: { nested: 'object' } },
+    ]
     const rows = mountTable(data).findAll('tbody tr')
     expect(rows).toHaveLength(4)
     expect(rows[0].find('td').text()).toBe('string')
@@ -102,11 +110,19 @@ describe('ResultTable.vue', () => {
   })
 
   it('has hover effect on table rows', () => {
-    expect(mountTable([{ id: 1 }]).find('tbody tr').classes()).toContain('hover:bg-zinc-50')
+    expect(
+      mountTable([{ id: 1 }])
+        .find('tbody tr')
+        .classes(),
+    ).toContain('hover:bg-zinc-50')
   })
 
   it('uses monospace font for cell values', () => {
-    expect(mountTable([{ code: 'SELECT' }]).find('tbody td').classes()).toContain('font-mono')
+    expect(
+      mountTable([{ code: 'SELECT' }])
+        .find('tbody td')
+        .classes(),
+    ).toContain('font-mono')
   })
 
   it('handles large datasets', () => {
@@ -115,12 +131,20 @@ describe('ResultTable.vue', () => {
   })
 
   it('handles objects with many columns', () => {
-    const data = [Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`col${i + 1}`, String.fromCharCode(97 + i)]))]
+    const data = [
+      Object.fromEntries(
+        Array.from({ length: 10 }, (_, i) => [`col${i + 1}`, String.fromCharCode(97 + i)]),
+      ),
+    ]
     expect(mountTable(data).findAll('th')).toHaveLength(10)
   })
 
   it('has scrollable container', () => {
-    expect(mountTable([{ id: 1 }]).find('.overflow-auto').exists()).toBe(true)
+    expect(
+      mountTable([{ id: 1 }])
+        .find('.overflow-auto')
+        .exists(),
+    ).toBe(true)
   })
 
   it('renders without locked state by default', () => {
@@ -142,12 +166,26 @@ describe('ResultTable.vue', () => {
   })
 
   it('applies opacity when locked, not when unlocked', () => {
-    expect(mountTable([{ id: 1 }], true).find('.opacity-50').exists()).toBe(true)
-    expect(mountTable([{ id: 1 }], false).find('.opacity-50').exists()).toBe(false)
+    expect(
+      mountTable([{ id: 1 }], true)
+        .find('.opacity-50')
+        .exists(),
+    ).toBe(true)
+    expect(
+      mountTable([{ id: 1 }], false)
+        .find('.opacity-50')
+        .exists(),
+    ).toBe(false)
   })
 
   it('renders table data correctly when locked', () => {
-    const wrapper = mountTable([{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }], true)
+    const wrapper = mountTable(
+      [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' },
+      ],
+      true,
+    )
     expect(wrapper.find('table').exists()).toBe(true)
     expect(wrapper.findAll('tbody tr')).toHaveLength(2)
   })

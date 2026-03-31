@@ -8,15 +8,29 @@ import { flushPromises } from '@/test/utils'
 vi.mock('@tauri-apps/api/core')
 
 const makeTab = (o: Partial<QueryTab> = {}): QueryTab => ({
-  id: 'tab1', name: 'Query 1', query: 'SELECT * FROM users',
-  result: null, error: '', loading: false, loadingIndicator: false,
-  connectionId: 'conn1', duration: null, errorSpan: null, ...o,
+  id: 'tab1',
+  name: 'Query 1',
+  query: 'SELECT * FROM users',
+  result: null,
+  error: '',
+  loading: false,
+  loadingIndicator: false,
+  connectionId: 'conn1',
+  duration: null,
+  errorSpan: null,
+  ...o,
 })
 
 const makeConn = (o: Partial<Connection> = {}): Connection => ({
-  id: 'conn1', name: 'Test DB', address: 'localhost:19191',
-  host: 'localhost', port: '19191', color: '#4db6ac',
-  active: true, connected: true, ...o,
+  id: 'conn1',
+  name: 'Test DB',
+  address: 'localhost:19191',
+  host: 'localhost',
+  port: '19191',
+  color: '#4db6ac',
+  active: true,
+  connected: true,
+  ...o,
 })
 
 const mockSuccess = (data: any = [], duration = 10) =>
@@ -40,7 +54,8 @@ describe('useQueryExecution', () => {
     await executeQuery(tab, connection)
 
     expect(invoke).toHaveBeenCalledWith('execute_query', {
-      address: 'localhost:19191', query: 'SELECT * FROM users',
+      address: 'localhost:19191',
+      query: 'SELECT * FROM users',
     })
     expect(tab.result).toEqual([{ id: 1, name: 'Alice' }])
     expect(tab.duration).toBe(42)
@@ -50,7 +65,10 @@ describe('useQueryExecution', () => {
 
   it('sets loading to true during execution', async () => {
     vi.mocked(invoke).mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 100))
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 100),
+        ),
     )
     const { executeQuery } = useQueryExecution()
     const promise = executeQuery(tab, connection)
@@ -128,7 +146,8 @@ describe('useQueryExecution', () => {
     const { executeQuery } = useQueryExecution()
     await executeQuery(tab, connection)
     expect(invoke).toHaveBeenCalledWith('execute_query', {
-      address: 'localhost:19191', query: '  SELECT 1  ',
+      address: 'localhost:19191',
+      query: '  SELECT 1  ',
     })
   })
 
@@ -138,7 +157,8 @@ describe('useQueryExecution', () => {
     const { executeQuery } = useQueryExecution()
     await executeQuery(tab, connection)
     expect(invoke).toHaveBeenCalledWith('execute_query', {
-      address: 'custom.host:9999', query: tab.query,
+      address: 'custom.host:9999',
+      query: tab.query,
     })
   })
 
@@ -207,7 +227,10 @@ describe('useQueryExecution', () => {
     it('does not show loadingIndicator immediately', async () => {
       vi.useFakeTimers()
       vi.mocked(invoke).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 5000))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 5000),
+          ),
       )
       const { executeQuery } = useQueryExecution()
       const promise = executeQuery(tab, connection)
@@ -225,7 +248,10 @@ describe('useQueryExecution', () => {
     it('shows loadingIndicator after 500ms if still loading', async () => {
       vi.useFakeTimers()
       vi.mocked(invoke).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 5000))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 5000),
+          ),
       )
       const { executeQuery } = useQueryExecution()
       const promise = executeQuery(tab, connection)
@@ -244,7 +270,10 @@ describe('useQueryExecution', () => {
     it('resets loadingIndicator after execution completes', async () => {
       vi.useFakeTimers()
       vi.mocked(invoke).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 1000))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 1000),
+          ),
       )
       const { executeQuery } = useQueryExecution()
       const promise = executeQuery(tab, connection)
@@ -262,7 +291,10 @@ describe('useQueryExecution', () => {
     it('does not set loadingIndicator if query completes before 500ms', async () => {
       vi.useFakeTimers()
       vi.mocked(invoke).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 200))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ success: true, data: [], duration: 10 }), 200),
+          ),
       )
       const { executeQuery } = useQueryExecution()
       const promise = executeQuery(tab, connection)
@@ -276,7 +308,7 @@ describe('useQueryExecution', () => {
     it('resets loadingIndicator on error', async () => {
       vi.useFakeTimers()
       vi.mocked(invoke).mockImplementation(
-        () => new Promise((_, reject) => setTimeout(() => reject(new Error('fail')), 1000))
+        () => new Promise((_, reject) => setTimeout(() => reject(new Error('fail')), 1000)),
       )
       const { executeQuery } = useQueryExecution()
       const promise = executeQuery(tab, connection)
@@ -295,8 +327,18 @@ describe('useQueryExecution', () => {
       const tab2 = makeTab({ id: 'tab2', query: 'SELECT 2' })
 
       vi.mocked(invoke)
-        .mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [{ r: 1 }], duration: 10 }), 1000)))
-        .mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [{ r: 2 }], duration: 20 }), 300)))
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) =>
+              setTimeout(() => resolve({ success: true, data: [{ r: 1 }], duration: 10 }), 1000),
+            ),
+        )
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) =>
+              setTimeout(() => resolve({ success: true, data: [{ r: 2 }], duration: 20 }), 300),
+            ),
+        )
 
       const { executeQuery } = useQueryExecution()
       const p1 = executeQuery(tab, connection)
@@ -327,23 +369,32 @@ describe('useQueryExecution', () => {
     })
 
     it.each([
-      ['error without error_span', async (t: QueryTab, c: Connection) => {
-        mockError('Some error')
-        const { executeQuery } = useQueryExecution()
-        await executeQuery(t, c)
-      }],
-      ['successful execution', async (t: QueryTab, c: Connection) => {
-        t.errorSpan = { from: 0, to: 5 }
-        mockSuccess()
-        const { executeQuery } = useQueryExecution()
-        await executeQuery(t, c)
-      }],
-      ['invoke exception', async (t: QueryTab, c: Connection) => {
-        t.errorSpan = { from: 0, to: 5 }
-        vi.mocked(invoke).mockRejectedValue(new Error('Crash'))
-        const { executeQuery } = useQueryExecution()
-        await executeQuery(t, c)
-      }],
+      [
+        'error without error_span',
+        async (t: QueryTab, c: Connection) => {
+          mockError('Some error')
+          const { executeQuery } = useQueryExecution()
+          await executeQuery(t, c)
+        },
+      ],
+      [
+        'successful execution',
+        async (t: QueryTab, c: Connection) => {
+          t.errorSpan = { from: 0, to: 5 }
+          mockSuccess()
+          const { executeQuery } = useQueryExecution()
+          await executeQuery(t, c)
+        },
+      ],
+      [
+        'invoke exception',
+        async (t: QueryTab, c: Connection) => {
+          t.errorSpan = { from: 0, to: 5 }
+          vi.mocked(invoke).mockRejectedValue(new Error('Crash'))
+          const { executeQuery } = useQueryExecution()
+          await executeQuery(t, c)
+        },
+      ],
     ])('clears errorSpan on %s', async (_, run) => {
       await run(tab, connection)
       expect(tab.errorSpan).toBeNull()

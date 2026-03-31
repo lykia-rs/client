@@ -32,13 +32,13 @@ function buildDecorations(errors: ErrorMarker[], docLength: number): DecorationS
 }
 
 const errorDecorationField = StateField.define<DecorationSet>({
-  create() { return Decoration.none },
+  create() {
+    return Decoration.none
+  },
   update(decorations, tr) {
     for (const effect of tr.effects) {
-      if (effect.is(setErrorsEffect))
-        return buildDecorations(effect.value, tr.state.doc.length)
-      if (effect.is(clearErrorsEffect))
-        return Decoration.none
+      if (effect.is(setErrorsEffect)) return buildDecorations(effect.value, tr.state.doc.length)
+      if (effect.is(clearErrorsEffect)) return Decoration.none
     }
     if (tr.docChanged) return decorations.map(tr.changes)
     return decorations

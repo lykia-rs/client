@@ -42,4 +42,3 @@ if (typeof window !== 'undefined') {
     applyTheme(prefersDark ? 'dark' : 'light')
   }
 }
-

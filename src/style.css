@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @variant dark (&:where(.dark, .dark *));
 
@@ -8,25 +8,25 @@
  */
 @theme {
   /* Light theme colors */
-  --color-background: oklch(1 0 0);                       /* white */
-  --color-foreground: oklch(0.141 0.005 285.82);          /* zinc-950 */
+  --color-background: oklch(1 0 0); /* white */
+  --color-foreground: oklch(0.141 0.005 285.82); /* zinc-950 */
   --color-card: oklch(1 0 0);
   --color-card-foreground: oklch(0.141 0.005 285.82);
   --color-popover: oklch(1 0 0);
   --color-popover-foreground: oklch(0.141 0.005 285.82);
-  --color-primary: oklch(0.653 0.088 181.07);             /* #4db6ac brand teal */
+  --color-primary: oklch(0.653 0.088 181.07); /* #4db6ac brand teal */
   --color-primary-foreground: oklch(1 0 0);
-  --color-secondary: oklch(0.967 0.001 286.38);           /* zinc-100 */
+  --color-secondary: oklch(0.967 0.001 286.38); /* zinc-100 */
   --color-secondary-foreground: oklch(0.141 0.005 285.82);
   --color-muted: oklch(0.967 0.001 286.38);
-  --color-muted-foreground: oklch(0.552 0.016 285.94);    /* zinc-500 */
+  --color-muted-foreground: oklch(0.552 0.016 285.94); /* zinc-500 */
   --color-accent: oklch(0.967 0.001 286.38);
   --color-accent-foreground: oklch(0.141 0.005 285.82);
   --color-destructive: oklch(0.577 0.245 27.33);
   --color-destructive-foreground: oklch(1 0 0);
-  --color-border: oklch(0.92 0.004 286.32);               /* zinc-200 */
+  --color-border: oklch(0.92 0.004 286.32); /* zinc-200 */
   --color-input: oklch(0.92 0.004 286.32);
-  --color-ring: oklch(0.653 0.088 181.07);                /* brand teal */
+  --color-ring: oklch(0.653 0.088 181.07); /* brand teal */
   --color-chart-1: oklch(0.646 0.222 41.116);
   --color-chart-2: oklch(0.6 0.118 184.714);
   --color-chart-3: oklch(0.398 0.07 227.392);
@@ -43,8 +43,10 @@
   --radius: 0.5rem;
 
   /* Font system */
-  --font-mono: 'JetBrains Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono:
+    'JetBrains Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', system-ui, sans-serif;
   --font-size-label: 0.5rem;
   --font-size-label--line-height: 1.4;
   --font-size-ui: 0.8125rem;
@@ -53,15 +55,15 @@
 
 /* Dark theme overrides */
 .dark {
-  --color-background: oklch(0.141 0.005 285.82);          /* zinc-950 */
-  --color-foreground: oklch(0.985 0 0);                    /* zinc-50 */
-  --color-card: oklch(0.21 0.006 285.88);                 /* zinc-900 */
+  --color-background: oklch(0.141 0.005 285.82); /* zinc-950 */
+  --color-foreground: oklch(0.985 0 0); /* zinc-50 */
+  --color-card: oklch(0.21 0.006 285.88); /* zinc-900 */
   --color-card-foreground: oklch(0.985 0 0);
   --color-popover: oklch(0.21 0.006 285.88);
   --color-popover-foreground: oklch(0.985 0 0);
-  --color-primary: oklch(0.653 0.088 181.07);             /* brand teal stays same */
+  --color-primary: oklch(0.653 0.088 181.07); /* brand teal stays same */
   --color-primary-foreground: oklch(1 0 0);
-  --color-secondary: oklch(0.274 0.006 286.03);           /* zinc-800 */
+  --color-secondary: oklch(0.274 0.006 286.03); /* zinc-800 */
   --color-secondary-foreground: oklch(0.985 0 0);
   --color-muted: oklch(0.274 0.006 286.03);
   --color-muted-foreground: oklch(0.552 0.016 285.94);
@@ -69,7 +71,7 @@
   --color-accent-foreground: oklch(0.985 0 0);
   --color-destructive: oklch(0.577 0.245 27.33);
   --color-destructive-foreground: oklch(1 0 0);
-  --color-border: oklch(0.274 0.006 286.03);              /* zinc-800 */
+  --color-border: oklch(0.274 0.006 286.03); /* zinc-800 */
   --color-input: oklch(0.274 0.006 286.03);
   --color-ring: oklch(0.653 0.088 181.07);
   --color-chart-1: oklch(0.488 0.243 264.376);
@@ -148,4 +150,3 @@ body {
   height: 6px;
   background-color: #4db6ac;
 }
-

@@ -44,7 +44,9 @@ describe('ConnectionPanel.vue', () => {
 
   it('displays connection name and address', () => {
     const wrapper = createWrapper({
-      connections: [createMockConnection({ name: 'Production DB', address: 'prod.example.com:5432' })],
+      connections: [
+        createMockConnection({ name: 'Production DB', address: 'prod.example.com:5432' }),
+      ],
     })
     expect(wrapper.text()).toContain('Production DB')
     expect(wrapper.text()).toContain('prod.example.com:5432')
@@ -62,7 +64,10 @@ describe('ConnectionPanel.vue', () => {
 
   it('highlights active connection', () => {
     const wrapper = createWrapper({
-      connections: [createMockConnection({ id: '1', active: true }), createMockConnection({ id: '2', active: false })],
+      connections: [
+        createMockConnection({ id: '1', active: true }),
+        createMockConnection({ id: '2', active: false }),
+      ],
     })
     expect(wrapper.findAll('.group')[0].classes()).toContain('bg-zinc-200')
   })
@@ -78,17 +83,17 @@ describe('ConnectionPanel.vue', () => {
 
   it('shows remove button on hover for multiple connections', () => {
     const wrapper = createWrapper({ connections: twoConns() })
-    const removeButtons = wrapper.findAll('button').filter(btn =>
-      btn.html().includes('X') || btn.findComponent(X).exists()
-    )
+    const removeButtons = wrapper
+      .findAll('button')
+      .filter((btn) => btn.html().includes('X') || btn.findComponent(X).exists())
     expect(removeButtons.length).toBeGreaterThan(0)
   })
 
   it('does not show remove button when only one connection exists', () => {
     const wrapper = createWrapper()
-    const removeButtons = wrapper.findAll('button').filter(btn =>
-      btn.html().includes('group-hover:opacity-100')
-    )
+    const removeButtons = wrapper
+      .findAll('button')
+      .filter((btn) => btn.html().includes('group-hover:opacity-100'))
     expect(removeButtons.length).toBe(0)
   })
 
@@ -103,7 +108,10 @@ describe('ConnectionPanel.vue', () => {
 
   it('prevents remove event from triggering select', async () => {
     const wrapper = createWrapper({ connections: twoConns() })
-    await wrapper.findAll('.group')[1].find('button[class*="group-hover:opacity-100"]').trigger('click')
+    await wrapper
+      .findAll('.group')[1]
+      .find('button[class*="group-hover:opacity-100"]')
+      .trigger('click')
 
     expect(wrapper.emitted('remove')).toBeTruthy()
     expect(wrapper.emitted('select')).toBeFalsy()
@@ -134,7 +142,11 @@ describe('ConnectionPanel.vue', () => {
 
   it('truncates long connection names', () => {
     const wrapper = createWrapper({
-      connections: [createMockConnection({ name: 'This is a very long database connection name that should be truncated' })],
+      connections: [
+        createMockConnection({
+          name: 'This is a very long database connection name that should be truncated',
+        }),
+      ],
     })
     expect(wrapper.find('.text-xs.font-medium.truncate').classes()).toContain('truncate')
   })
@@ -156,21 +168,25 @@ describe('ConnectionPanel.vue', () => {
       connections: twoConns(),
       hasRunningQueries: (connId: string) => connId === '2',
     })
-    const removeButtons = wrapper.findAll('button').filter(btn =>
-      btn.html().includes('Remove connection') || btn.html().includes('Cannot remove')
-    )
+    const removeButtons = wrapper
+      .findAll('button')
+      .filter(
+        (btn) => btn.html().includes('Remove connection') || btn.html().includes('Cannot remove'),
+      )
     expect(removeButtons.length).toBeGreaterThan(0)
-    const disabledButton = removeButtons.find(btn => btn.attributes('title')?.includes('Cannot remove'))
+    const disabledButton = removeButtons.find((btn) =>
+      btn.attributes('title')?.includes('Cannot remove'),
+    )
     expect(disabledButton).toBeDefined()
     expect(disabledButton?.attributes('disabled')).toBeDefined()
   })
 
   it('enables remove button when connection has no running queries', () => {
     const wrapper = createWrapper({ connections: twoConns() })
-    const removeButtons = wrapper.findAll('button').filter(btn =>
-      btn.attributes('title')?.includes('Remove connection')
-    )
-    removeButtons.forEach(btn => {
+    const removeButtons = wrapper
+      .findAll('button')
+      .filter((btn) => btn.attributes('title')?.includes('Remove connection'))
+    removeButtons.forEach((btn) => {
       expect(btn.attributes('disabled')).toBeUndefined()
     })
   })
@@ -180,9 +196,9 @@ describe('ConnectionPanel.vue', () => {
       connections: twoConns(),
       hasRunningQueries: (connId: string) => connId === '2',
     })
-    const disabledButton = wrapper.findAll('button').find(btn =>
-      btn.attributes('title')?.includes('Cannot remove')
-    )
+    const disabledButton = wrapper
+      .findAll('button')
+      .find((btn) => btn.attributes('title')?.includes('Cannot remove'))
     expect(disabledButton).toBeDefined()
     if (disabledButton) await disabledButton.trigger('click')
     expect(wrapper.emitted('remove')).toBeFalsy()

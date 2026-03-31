@@ -56,9 +56,17 @@ describe('lykia-lang', () => {
           { name: 'String', children: null, span: { start: 7, end: 12, line: 1, line_end: 1 } },
           { name: 'Number', children: null, span: { start: 13, end: 15, line: 1, line_end: 1 } },
           { name: 'Boolean', children: null, span: { start: 16, end: 20, line: 1, line_end: 1 } },
-          { name: 'Identifier', children: null, span: { start: 21, end: 25, line: 1, line_end: 1 } },
+          {
+            name: 'Identifier',
+            children: null,
+            span: { start: 21, end: 25, line: 1, line_end: 1 },
+          },
           { name: 'Variable', children: null, span: { start: 26, end: 30, line: 1, line_end: 1 } },
-          { name: 'SqlKeyword', children: null, span: { start: 31, end: 37, line: 1, line_end: 1 } },
+          {
+            name: 'SqlKeyword',
+            children: null,
+            span: { start: 31, end: 37, line: 1, line_end: 1 },
+          },
           { name: 'Symbol', children: null, span: { start: 38, end: 39, line: 1, line_end: 1 } },
         ],
         span: { start: 0, end: 39, line: 1, line_end: 1 },
@@ -74,7 +82,11 @@ describe('lykia-lang', () => {
           {
             name: 'Keyword',
             children: [
-              { name: 'Identifier', children: null, span: { start: 1, end: 3, line: 1, line_end: 1 } },
+              {
+                name: 'Identifier',
+                children: null,
+                span: { start: 1, end: 3, line: 1, line_end: 1 },
+              },
             ],
             span: { start: 0, end: 5, line: 1, line_end: 1 },
           },

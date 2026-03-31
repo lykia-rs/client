@@ -44,9 +44,15 @@ function applyParseErrors(v: EditorView, content: string) {
   if (result.errors.length > 0) {
     hasLocalErrors = true
     const firstError = result.errors[0]
-    setEditorErrors(v, result.errors.map(e => ({
-      from: e.from, to: e.to, message: e.message, severity: 'error' as const,
-    })))
+    setEditorErrors(
+      v,
+      result.errors.map((e) => ({
+        from: e.from,
+        to: e.to,
+        message: e.message,
+        severity: 'error' as const,
+      })),
+    )
     emit('parseError', true)
     emit('parseErrorMessage', firstError.message)
   } else {
@@ -110,18 +116,15 @@ onMounted(async () => {
   applyParseErrors(view, props.modelValue)
 })
 
-watch(
-  [() => props.disabled, () => props.readonly],
-  ([disabled, readonly]) => {
-    if (!view || !editableCompartment) return
-    view.dispatch({
-      effects: editableCompartment.reconfigure([
-        EditorState.readOnly.of(!!readonly),
-        EditorView.editable.of(!disabled),
-      ]),
-    })
-  },
-)
+watch([() => props.disabled, () => props.readonly], ([disabled, readonly]) => {
+  if (!view || !editableCompartment) return
+  view.dispatch({
+    effects: editableCompartment.reconfigure([
+      EditorState.readOnly.of(!!readonly),
+      EditorView.editable.of(!disabled),
+    ]),
+  })
+})
 
 onBeforeUnmount(() => {
   view?.destroy()
@@ -143,7 +146,7 @@ watch(
 
 function showErrors(errors: ErrorMarker[]) {
   if (view) {
-    hasLocalErrors = false  // External errors override local state
+    hasLocalErrors = false // External errors override local state
     setEditorErrors(view, errors)
   }
 }
@@ -167,41 +170,95 @@ defineExpose({ showErrors, hideErrors })
 </template>
 
 <style>
-.code-editor .cm-editor { height: 100%; }
-:root { --cm-cursor-color: #18181b; }
-.dark { --cm-cursor-color: #e4e4e7; }
+.code-editor .cm-editor {
+  height: 100%;
+}
+:root {
+  --cm-cursor-color: #18181b;
+}
+.dark {
+  --cm-cursor-color: #e4e4e7;
+}
 
 /* Syntax highlighting */
-.code-editor .cm-keyword { color: #7c3aed; font-weight: 600; }
-.code-editor .cm-sqlkeyword { color: #2563eb; font-weight: 600; }
-.code-editor .cm-string { color: #16a34a; }
+.code-editor .cm-keyword {
+  color: #7c3aed;
+  font-weight: 600;
+}
+.code-editor .cm-sqlkeyword {
+  color: #2563eb;
+  font-weight: 600;
+}
+.code-editor .cm-string {
+  color: #16a34a;
+}
 .code-editor .cm-number,
-.code-editor .cm-boolean { color: #d97706; }
-.code-editor .cm-symbol { color: #71717a; }
-.code-editor .cm-identifier { color: #18181b; }
-.code-editor .cm-variable { color: #dc2626; }
-.code-editor .cm-null { color: #71717a; font-style: italic; }
+.code-editor .cm-boolean {
+  color: #d97706;
+}
+.code-editor .cm-symbol {
+  color: #71717a;
+}
+.code-editor .cm-identifier {
+  color: #18181b;
+}
+.code-editor .cm-variable {
+  color: #dc2626;
+}
+.code-editor .cm-null {
+  color: #71717a;
+  font-style: italic;
+}
 
 /* Error marks */
 .code-editor .cm-error-span,
 .code-editor .cm-error-warning,
-.code-editor .cm-error-info { text-decoration: wavy underline; text-underline-offset: 3px; }
-.code-editor .cm-error-span { text-decoration-color: #ef4444; }
-.code-editor .cm-error-warning { text-decoration-color: #eab308; }
-.code-editor .cm-error-info { text-decoration-color: #3b82f6; }
+.code-editor .cm-error-info {
+  text-decoration: wavy underline;
+  text-underline-offset: 3px;
+}
+.code-editor .cm-error-span {
+  text-decoration-color: #ef4444;
+}
+.code-editor .cm-error-warning {
+  text-decoration-color: #eab308;
+}
+.code-editor .cm-error-info {
+  text-decoration-color: #3b82f6;
+}
 
 /* Dark theme */
-.dark .code-editor .cm-keyword { color: #a78bfa; }
-.dark .code-editor .cm-sqlkeyword { color: #60a5fa; }
-.dark .code-editor .cm-string { color: #4ade80; }
+.dark .code-editor .cm-keyword {
+  color: #a78bfa;
+}
+.dark .code-editor .cm-sqlkeyword {
+  color: #60a5fa;
+}
+.dark .code-editor .cm-string {
+  color: #4ade80;
+}
 .dark .code-editor .cm-number,
-.dark .code-editor .cm-boolean { color: #fbbf24; }
+.dark .code-editor .cm-boolean {
+  color: #fbbf24;
+}
 .dark .code-editor .cm-symbol,
-.dark .code-editor .cm-null { color: #a1a1aa; }
-.dark .code-editor .cm-identifier { color: #e4e4e7; }
-.dark .code-editor .cm-variable { color: #f87171; }
-.dark .code-editor .cm-editor { color: #e4e4e7; }
-.dark .code-editor .cm-activeLine { background-color: rgba(255, 255, 255, 0.04); }
+.dark .code-editor .cm-null {
+  color: #a1a1aa;
+}
+.dark .code-editor .cm-identifier {
+  color: #e4e4e7;
+}
+.dark .code-editor .cm-variable {
+  color: #f87171;
+}
+.dark .code-editor .cm-editor {
+  color: #e4e4e7;
+}
+.dark .code-editor .cm-activeLine {
+  background-color: rgba(255, 255, 255, 0.04);
+}
 .dark .code-editor .cm-selectionBackground,
-.dark .code-editor .cm-focused .cm-selectionBackground { background-color: rgba(255, 255, 255, 0.1) !important; }
+.dark .code-editor .cm-focused .cm-selectionBackground {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
 </style>

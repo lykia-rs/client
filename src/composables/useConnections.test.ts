@@ -11,9 +11,14 @@ vi.mock('./useQueryTabs', () => ({
 }))
 
 const extraConn = {
-  id: '2', name: 'test', address: 'test:8080',
-  host: 'test', port: '8080', color: '#ffffff',
-  active: false, connected: true,
+  id: '2',
+  name: 'test',
+  address: 'test:8080',
+  host: 'test',
+  port: '8080',
+  color: '#ffffff',
+  active: false,
+  connected: true,
 }
 
 describe('useConnections', () => {
@@ -26,8 +31,13 @@ describe('useConnections', () => {
 
     expect(connections.value).toHaveLength(1)
     expect(connections.value[0]).toMatchObject({
-      id: '1', name: 'localhost', address: 'localhost:19191',
-      host: 'localhost', port: '19191', active: true, connected: false,
+      id: '1',
+      name: 'localhost',
+      address: 'localhost:19191',
+      host: 'localhost',
+      port: '19191',
+      active: true,
+      connected: false,
     })
     expect(connections.value[0].color).toBeDefined()
     expect(activeConnection.value).toBe(connections.value[0])
@@ -70,8 +80,11 @@ describe('useConnections', () => {
 
     expect(connections.value).toHaveLength(2)
     expect(connections.value[1]).toMatchObject({
-      name: 'newhost', address: 'newhost:9999',
-      host: 'newhost', port: '9999', connected: true,
+      name: 'newhost',
+      address: 'newhost:9999',
+      host: 'newhost',
+      port: '9999',
+      connected: true,
     })
     expect(connections.value[1].id).toBeDefined()
     expect(connections.value[1].color).toBeDefined()
@@ -102,7 +115,7 @@ describe('useConnections', () => {
     await addConnection('host2', '8081')
     await addConnection('host3', '8082')
 
-    const colors = connections.value.map(c => c.color)
+    const colors = connections.value.map((c) => c.color)
     expect(new Set(colors).size).toBeGreaterThan(1)
     expect(colors[0]).toBe(firstColor)
   })
@@ -114,7 +127,7 @@ describe('useConnections', () => {
 
     removeConnection('2')
     expect(connections.value).toHaveLength(1)
-    expect(connections.value.find(c => c.id === '2')).toBeUndefined()
+    expect(connections.value.find((c) => c.id === '2')).toBeUndefined()
   })
 
   it('switches to first connection when removing active connection', () => {
@@ -152,9 +165,7 @@ describe('useConnections', () => {
   })
 
   it('handles manual connection test failure', async () => {
-    vi.mocked(invoke)
-      .mockResolvedValueOnce(undefined)
-      .mockRejectedValueOnce(new Error('Failed'))
+    vi.mocked(invoke).mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('Failed'))
     const { connections, testConnection } = useConnections()
     await flushPromises()
 
@@ -202,6 +213,6 @@ describe('useConnections', () => {
     const id = connections.value[1].id
     removeConnection(id)
     expect(connections.value).toHaveLength(1)
-    expect(connections.value.find(c => c.id === id)).toBeUndefined()
+    expect(connections.value.find((c) => c.id === id)).toBeUndefined()
   })
 })

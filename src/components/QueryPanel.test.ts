@@ -36,9 +36,14 @@ const mockSuccess = (data: any = [], duration = 10) =>
 const mockError = (error: string, extra: any = {}) =>
   vi.mocked(invoke).mockResolvedValue({ success: false, error, duration: 10, ...extra })
 const mockSlow = () =>
-  vi.mocked(invoke).mockImplementation(
-    () => new Promise(resolve => setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 5000))
-  )
+  vi
+    .mocked(invoke)
+    .mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ success: true, data: [], duration: 50 }), 5000),
+        ),
+    )
 
 describe('QueryPanel.vue', () => {
   beforeEach(() => {
@@ -90,7 +95,9 @@ describe('QueryPanel.vue', () => {
   })
 
   it('disables Execute button when query is empty', () => {
-    expect(createWrapper().find('[data-testid="execute-button"]').attributes('disabled')).toBeDefined()
+    expect(
+      createWrapper().find('[data-testid="execute-button"]').attributes('disabled'),
+    ).toBeDefined()
   })
 
   it('enables Execute button when query has content', async () => {
@@ -126,7 +133,10 @@ describe('QueryPanel.vue', () => {
   })
 
   it('displays results after successful query execution', async () => {
-    const data = [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }]
+    const data = [
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' },
+    ]
     mockSuccess(data, 25)
     const wrapper = createWrapper()
     await exec(wrapper, 'SELECT * FROM users')
@@ -232,7 +242,7 @@ describe('QueryPanel.vue', () => {
   it('can close tabs when multiple exist', async () => {
     const wrapper = createWrapper()
     await addTab(wrapper)
-    let tabs = findTabs(wrapper)
+    const tabs = findTabs(wrapper)
     const count = tabs.length
     await tabs[1].find('button').trigger('click')
     await wrapper.vm.$nextTick()
@@ -246,7 +256,7 @@ describe('QueryPanel.vue', () => {
   it('switches to another tab when closing active tab', async () => {
     const wrapper = createWrapper()
     await addTab(wrapper)
-    let tabs = findTabs(wrapper)
+    const tabs = findTabs(wrapper)
     expect(tabs[1].classes()).toContain('bg-white')
     await tabs[1].find('button').trigger('click')
     await wrapper.vm.$nextTick()
@@ -259,9 +269,14 @@ describe('QueryPanel.vue', () => {
 
   it('uses connection address in query execution', async () => {
     mockSuccess()
-    const wrapper = createWrapper({ connection: createMockConnection({ address: 'custom.host:8080' }) })
+    const wrapper = createWrapper({
+      connection: createMockConnection({ address: 'custom.host:8080' }),
+    })
     await exec(wrapper, 'SELECT 1')
-    expect(invoke).toHaveBeenCalledWith('execute_query', { address: 'custom.host:8080', query: 'SELECT 1' })
+    expect(invoke).toHaveBeenCalledWith('execute_query', {
+      address: 'custom.host:8080',
+      query: 'SELECT 1',
+    })
   })
 
   it('applies connection color to execute button', () => {
@@ -348,7 +363,10 @@ describe('QueryPanel.vue', () => {
     await wrapper.setProps({ connection: conn2({ address: 'host2:9002' }) })
     await wrapper.vm.$nextTick()
     await exec(wrapper, 'SELECT 2')
-    expect(invoke).toHaveBeenCalledWith('execute_query', { address: 'host2:9002', query: 'SELECT 2' })
+    expect(invoke).toHaveBeenCalledWith('execute_query', {
+      address: 'host2:9002',
+      query: 'SELECT 2',
+    })
   })
 
   it('maintains separate active tabs per connection', async () => {
@@ -410,9 +428,9 @@ describe('QueryPanel.vue', () => {
     const wrapper = createWrapper()
     await addTab(wrapper)
 
-    const closeButtons = wrapper.findAll('button').filter((b: any) =>
-      b.attributes('title')?.includes('Close tab')
-    )
+    const closeButtons = wrapper
+      .findAll('button')
+      .filter((b: any) => b.attributes('title')?.includes('Close tab'))
     expect(closeButtons.length).toBeGreaterThan(0)
     const initialSpinnerCount = wrapper.findAll('.animate-spin').length
 
@@ -427,16 +445,20 @@ describe('QueryPanel.vue', () => {
     await addTab(wrapper)
     await exec(wrapper, 'SELECT * FROM test')
 
-    const closeButtons = wrapper.findAll('button').filter((b: any) =>
-      b.html().includes('Close tab') || b.attributes('title')?.includes('close')
-    )
+    const closeButtons = wrapper
+      .findAll('button')
+      .filter(
+        (b: any) => b.html().includes('Close tab') || b.attributes('title')?.includes('close'),
+      )
     expect(closeButtons[0].attributes('disabled')).toBeUndefined()
   })
 
   it('shows parse error message in editor status bar', async () => {
     const wrapper = createWrapper()
     expect(wrapper.find('.text-red-500').exists()).toBe(false)
-    wrapper.findComponent(CodeEditorStub).vm.$emit('parseErrorMessage', 'Unexpected token at line 1')
+    wrapper
+      .findComponent(CodeEditorStub)
+      .vm.$emit('parseErrorMessage', 'Unexpected token at line 1')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('Unexpected token at line 1')
   })
@@ -461,11 +483,14 @@ describe('QueryPanel.vue', () => {
   })
 
   it('shows execution time when error has no errorSpan', async () => {
-    vi.mocked(invoke).mockResolvedValue({ success: false, error: 'Connection refused', duration: 5 })
+    vi.mocked(invoke).mockResolvedValue({
+      success: false,
+      error: 'Connection refused',
+      duration: 5,
+    })
     const wrapper = createWrapper()
     await exec(wrapper, 'SELECT * FROM test')
     const statusBars = wrapper.findAll('.px-4.h-8')
     expect(statusBars[statusBars.length - 1]?.text()).toContain('5ms')
   })
 })
-
