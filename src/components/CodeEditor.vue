@@ -32,35 +32,25 @@ let hasLocalErrors = false
 let editableCompartment: Compartment | null = null
 
 function applyParseErrors(v: EditorView, content: string) {
-  if (!content.trim()) {
-    if (hasLocalErrors) clearEditorErrors(v)
-    hasLocalErrors = false
-    emit('parseError', false)
-    emit('parseErrorMessage', '')
-    return
-  }
-  const result = tokenize(content)
-  if (!result) return
-  if (result.errors.length > 0) {
+  const result = content.trim() ? tokenize(content) : null
+  const errors = result?.errors ?? []
+  if (errors.length > 0) {
     hasLocalErrors = true
-    const firstError = result.errors[0]
     setEditorErrors(
       v,
-      result.errors.map((e) => ({
+      errors.map((e) => ({
         from: e.from,
         to: e.to,
         message: e.message,
         severity: 'error' as const,
       })),
     )
-    emit('parseError', true)
-    emit('parseErrorMessage', firstError.message)
-  } else {
-    if (hasLocalErrors) clearEditorErrors(v)
+  } else if (hasLocalErrors) {
+    clearEditorErrors(v)
     hasLocalErrors = false
-    emit('parseError', false)
-    emit('parseErrorMessage', '')
   }
+  emit('parseError', errors.length > 0)
+  emit('parseErrorMessage', errors.length > 0 ? errors[0].message : '')
 }
 
 onMounted(async () => {
@@ -170,47 +160,61 @@ defineExpose({ showErrors, hideErrors })
 </template>
 
 <style>
-.code-editor .cm-editor {
-  height: 100%;
-}
 :root {
   --cm-cursor-color: #18181b;
+  --cm-keyword: #7c3aed;
+  --cm-sqlkeyword: #2563eb;
+  --cm-string: #16a34a;
+  --cm-number: #d97706;
+  --cm-symbol: #71717a;
+  --cm-identifier: #18181b;
+  --cm-variable: #dc2626;
+  --cm-base: inherit;
 }
 .dark {
   --cm-cursor-color: #e4e4e7;
+  --cm-keyword: #a78bfa;
+  --cm-sqlkeyword: #60a5fa;
+  --cm-string: #4ade80;
+  --cm-number: #fbbf24;
+  --cm-symbol: #a1a1aa;
+  --cm-identifier: #e4e4e7;
+  --cm-variable: #f87171;
+  --cm-base: #e4e4e7;
 }
-
-/* Syntax highlighting */
+.code-editor .cm-editor {
+  height: 100%;
+  color: var(--cm-base);
+}
 .code-editor .cm-keyword {
-  color: #7c3aed;
+  color: var(--cm-keyword);
   font-weight: 600;
 }
 .code-editor .cm-sqlkeyword {
-  color: #2563eb;
+  color: var(--cm-sqlkeyword);
   font-weight: 600;
 }
 .code-editor .cm-string {
-  color: #16a34a;
+  color: var(--cm-string);
 }
 .code-editor .cm-number,
 .code-editor .cm-boolean {
-  color: #d97706;
+  color: var(--cm-number);
 }
 .code-editor .cm-symbol {
-  color: #71717a;
+  color: var(--cm-symbol);
 }
 .code-editor .cm-identifier {
-  color: #18181b;
+  color: var(--cm-identifier);
 }
 .code-editor .cm-variable {
-  color: #dc2626;
+  color: var(--cm-variable);
 }
 .code-editor .cm-null {
-  color: #71717a;
+  color: var(--cm-symbol);
   font-style: italic;
 }
 
-/* Error marks */
 .code-editor .cm-error-span,
 .code-editor .cm-error-warning,
 .code-editor .cm-error-info {
@@ -227,33 +231,6 @@ defineExpose({ showErrors, hideErrors })
   text-decoration-color: #3b82f6;
 }
 
-/* Dark theme */
-.dark .code-editor .cm-keyword {
-  color: #a78bfa;
-}
-.dark .code-editor .cm-sqlkeyword {
-  color: #60a5fa;
-}
-.dark .code-editor .cm-string {
-  color: #4ade80;
-}
-.dark .code-editor .cm-number,
-.dark .code-editor .cm-boolean {
-  color: #fbbf24;
-}
-.dark .code-editor .cm-symbol,
-.dark .code-editor .cm-null {
-  color: #a1a1aa;
-}
-.dark .code-editor .cm-identifier {
-  color: #e4e4e7;
-}
-.dark .code-editor .cm-variable {
-  color: #f87171;
-}
-.dark .code-editor .cm-editor {
-  color: #e4e4e7;
-}
 .dark .code-editor .cm-activeLine {
   background-color: rgba(255, 255, 255, 0.04);
 }

@@ -18,21 +18,25 @@ export interface QueryTab {
 const allTabs = ref<QueryTab[]>([])
 let tabIdCounter = 1
 
+function createTab(connectionId: string, id?: string): QueryTab {
+  const n = allTabs.value.filter((t) => t.connectionId === connectionId).length + 1
+  return {
+    id: id ?? `${Date.now()}-${tabIdCounter++}`,
+    name: `Query ${n}`,
+    query: '',
+    result: null,
+    error: '',
+    errorSpan: null,
+    loading: false,
+    loadingIndicator: false,
+    connectionId,
+    duration: null,
+  }
+}
+
 export function useQueryTabs(connectionRef: Ref<Connection>) {
-  // Initialize first tab if needed
   if (allTabs.value.length === 0) {
-    allTabs.value.push({
-      id: '0',
-      name: 'Query 1',
-      query: '',
-      result: null,
-      error: '',
-      errorSpan: null,
-      loading: false,
-      loadingIndicator: false,
-      connectionId: connectionRef.value.id,
-      duration: null,
-    })
+    allTabs.value.push(createTab(connectionRef.value.id, '0'))
   }
 
   const activeTabId = ref('0')
@@ -56,19 +60,7 @@ export function useQueryTabs(connectionRef: Ref<Connection>) {
   )
 
   function addTab() {
-    const connTabs = tabs.value
-    const newTab: QueryTab = {
-      id: `${Date.now()}-${tabIdCounter++}`,
-      name: `Query ${connTabs.length + 1}`,
-      query: '',
-      result: null,
-      error: '',
-      errorSpan: null,
-      loading: false,
-      loadingIndicator: false,
-      connectionId: connectionRef.value.id,
-      duration: null,
-    }
+    const newTab = createTab(connectionRef.value.id)
     allTabs.value.push(newTab)
     activeTabId.value = newTab.id
   }

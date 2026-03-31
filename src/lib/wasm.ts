@@ -7,12 +7,7 @@ let initPromise: Promise<void> | null = null
 export interface TokenTree {
   name: string
   children: TokenTree[] | null
-  span: {
-    start: number
-    end: number
-    line: number
-    line_end: number
-  }
+  span: { start: number; end: number; line: number; line_end: number }
 }
 
 export interface ParseError {
@@ -28,11 +23,9 @@ export interface TokenizeResult {
 
 export function initWasm(): Promise<void> {
   if (initialized) return Promise.resolve()
-  if (initPromise) return initPromise
-  initPromise = init({ module_or_path: wasmUrl }).then(() => {
+  return (initPromise ??= init({ module_or_path: wasmUrl }).then(() => {
     initialized = true
-  })
-  return initPromise
+  }))
 }
 
 export function tokenize(source: string): TokenizeResult {
