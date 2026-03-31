@@ -171,7 +171,7 @@ async function executeQuery() {
             <AlertCircle :size="12" class="text-red-500 shrink-0" />
             <span class="text-label text-red-500 truncate">{{ statusBarError }}</span>
           </template>
-          <template v-else-if="!statusBarError && activeTab?.duration !== null && activeTab?.duration !== undefined">
+          <template v-else-if="activeTab?.duration !== null && activeTab?.duration !== undefined">
             <Clock :size="12" class="text-zinc-400 dark:text-zinc-500" />
             <span class="text-label text-zinc-400 dark:text-zinc-500">Execution time:</span>
             <span 

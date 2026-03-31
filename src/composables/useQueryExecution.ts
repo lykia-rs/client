@@ -14,7 +14,6 @@ export function useQueryExecution() {
     tab.errorSpan = null
     tab.duration = null
     
-    // After 300ms, if still loading, show the loading indicator
     const timer = setTimeout(() => {
       if (tab.loading) {
         tab.loadingIndicator = true

@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils'
 
 interface CardProps {
   as?: string
-  asChild?: boolean
   class?: HTMLAttributes['class']
 }
 

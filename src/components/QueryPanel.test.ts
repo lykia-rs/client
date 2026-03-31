@@ -924,5 +924,83 @@ describe('QueryPanel.vue', () => {
     // Close button should be enabled after completion
     expect(closeButton.attributes('disabled')).toBeUndefined()
   })
+
+  it('shows parse error message in editor status bar', async () => {
+    const wrapper = createWrapper()
+    
+    // Initially no parse error bar
+    expect(wrapper.find('.text-red-500').exists()).toBe(false)
+    
+    // Emit a parse error from CodeEditor
+    wrapper.findComponent(CodeEditorStub).vm.$emit('parseErrorMessage', 'Unexpected token at line 1')
+    await wrapper.vm.$nextTick()
+    
+    expect(wrapper.text()).toContain('Unexpected token at line 1')
+  })
+
+  it('hides parse error message when error is cleared', async () => {
+    const wrapper = createWrapper()
+    
+    wrapper.findComponent(CodeEditorStub).vm.$emit('parseErrorMessage', 'Some parse error')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('Some parse error')
+    
+    wrapper.findComponent(CodeEditorStub).vm.$emit('parseErrorMessage', '')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).not.toContain('Some parse error')
+  })
+
+  it('shows error with errorSpan in status bar instead of results error box', async () => {
+    vi.mocked(invoke).mockResolvedValue({
+      success: false,
+      error: 'Syntax error near SELECT',
+      error_span: { from: 0, to: 6 },
+      duration: 5,
+    })
+    
+    const wrapper = createWrapper()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
+    await executeButton.trigger('click')
+    await flushPromises()
+    
+    // Status bar should show the error
+    const statusBar = wrapper.findAll('.px-4.h-8').at(-1)
+    expect(statusBar?.text()).toContain('Syntax error near SELECT')
+  })
+
+  it('shows execution time when error has no errorSpan', async () => {
+    vi.mocked(invoke).mockResolvedValue({
+      success: false,
+      error: 'Connection refused',
+      duration: 5,
+    })
+    
+    const wrapper = createWrapper()
+    
+    const textarea = wrapper.find('textarea')
+    await textarea.setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
+    await executeButton.trigger('click')
+    await flushPromises()
+    
+    // Status bar should show duration, not error (no errorSpan)
+    const statusBar = wrapper.findAll('.px-4.h-8').at(-1)
+    expect(statusBar?.text()).toContain('5ms')
+  })
+
+  it('shows Execute text when loadingIndicator is not active', async () => {
+    const wrapper = createWrapper()
+    
+    const executeButton = wrapper.find('[data-testid="execute-button"]')
+    expect(executeButton.text()).toContain('Execute')
+    expect(executeButton.text()).not.toContain('Running...')
+  })
 })
 

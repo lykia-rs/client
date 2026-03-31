@@ -411,4 +411,37 @@ describe('useQueryTabs', () => {
     // Connection 2 should have running queries
     expect(hasRunningQueriesForConnection(connection2.id)).toBe(true)
   })
+
+  it('initializes new tabs with loadingIndicator set to false', () => {
+    const connectionRef = ref(connection)
+    const { tabs, addTab } = useQueryTabs(connectionRef)
+
+    expect(tabs.value[0].loadingIndicator).toBe(false)
+
+    addTab()
+    expect(tabs.value[1].loadingIndicator).toBe(false)
+  })
+
+  it('maintains separate loadingIndicator states per tab', () => {
+    const connectionRef = ref(connection)
+    const { tabs, addTab } = useQueryTabs(connectionRef)
+
+    addTab()
+
+    tabs.value[0].loadingIndicator = true
+    tabs.value[1].loadingIndicator = false
+
+    expect(tabs.value[0].loadingIndicator).toBe(true)
+    expect(tabs.value[1].loadingIndicator).toBe(false)
+  })
+
+  it('initializes new tabs with errorSpan set to null', () => {
+    const connectionRef = ref(connection)
+    const { tabs, addTab } = useQueryTabs(connectionRef)
+
+    expect(tabs.value[0].errorSpan).toBeNull()
+
+    addTab()
+    expect(tabs.value[1].errorSpan).toBeNull()
+  })
 })
