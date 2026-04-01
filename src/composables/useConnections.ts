@@ -15,22 +15,33 @@ export interface Connection {
 
 const CONNECTION_COLORS = ['#4db6ac', '#a5d6a7', '#81c784', '#64b5f6', '#ba68c8', '#ff8a65']
 
+function makeConnection(
+  id: string,
+  host: string,
+  port: string,
+  color: string,
+  overrides: Partial<Connection> = {},
+): Connection {
+  return {
+    id,
+    name: host,
+    address: `${host}:${port}`,
+    host,
+    port,
+    color,
+    active: false,
+    connected: false,
+    ...overrides,
+  }
+}
+
 export function useConnections() {
   const connections = ref<Connection[]>([
-    { 
-      id: '1', 
-      name: 'localhost', 
-      address: 'localhost:19191', 
-      host: 'localhost', 
-      port: '19191', 
-      color: CONNECTION_COLORS[0], 
-      active: true, 
-      connected: false 
-    }
+    makeConnection('1', 'localhost', '19191', CONNECTION_COLORS[0], { active: true }),
   ])
 
   const activeConnection = ref(connections.value[0])
-  let colorIndex = 1 // Start from next color since we used the first one
+  let colorIndex = 1
 
   async function testConnection(conn: Connection) {
     try {
@@ -42,51 +53,30 @@ export function useConnections() {
   }
 
   function selectConnection(conn: Connection) {
-    connections.value.forEach(c => c.active = false)
+    connections.value.forEach((c) => (c.active = false))
     conn.active = true
     activeConnection.value = conn
   }
 
   async function addConnection(host: string, port: string) {
-    const address = `${host}:${port}`
-    
-    // Test connection first - this will throw if it fails
-    await invoke('test_connection', { address })
-    
-    // Only add if connection succeeds
-    const id = String(Date.now())
-    const color = CONNECTION_COLORS[colorIndex % CONNECTION_COLORS.length]
-    colorIndex++
-    
-    const newConn: Connection = {
-      id,
-      name: host,
-      address,
-      host,
-      port,
-      color,
-      active: false,
-      connected: true
-    }
-    
+    await invoke('test_connection', { address: `${host}:${port}` })
+    const color = CONNECTION_COLORS[colorIndex++ % CONNECTION_COLORS.length]
+    const newConn = makeConnection(String(Date.now()), host, port, color, { connected: true })
     connections.value.push(newConn)
     selectConnection(newConn)
   }
 
   function removeConnection(id: string) {
-    const index = connections.value.findIndex(c => c.id === id)
+    const index = connections.value.findIndex((c) => c.id === id)
     if (index === -1 || connections.value.length === 1) return
-    
-    // Prevent removing connections with running queries
     if (hasRunningQueriesForConnection(id)) return
-    
+
     connections.value.splice(index, 1)
     if (activeConnection.value.id === id) {
       selectConnection(connections.value[0])
     }
   }
 
-  // Test initial connection
   testConnection(connections.value[0])
 
   return {
@@ -95,6 +85,6 @@ export function useConnections() {
     testConnection,
     selectConnection,
     addConnection,
-    removeConnection
+    removeConnection,
   }
 }

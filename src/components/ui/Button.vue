@@ -8,12 +8,10 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default: 'bg-[#4db6ac] text-white shadow-xs hover:brightness-110',
-        destructive:
-          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
+        destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
         outline:
           'border border-zinc-300 dark:border-zinc-700 bg-transparent shadow-xs hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200',
-        secondary:
-          'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
+        secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
         ghost: 'hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300',
         link: 'text-primary underline-offset-4 hover:underline',
       },
@@ -48,6 +46,9 @@ interface Props extends PrimitiveProps {
 
 const props = withDefaults(defineProps<Props>(), {
   as: 'button',
+  variant: 'default',
+  size: 'default',
+  class: undefined,
 })
 </script>
 

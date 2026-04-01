@@ -27,17 +27,25 @@ const makeType = (name: string, top = false) =>
   NodeType.define({ id: _nodeId++, name, top, props: [highlight] })
 
 const TOKEN_TYPES: Record<string, NodeType> = Object.fromEntries(
-  ['Program', 'Keyword', 'SqlKeyword', 'String', 'Number', 'Boolean',
-   'Identifier', 'Variable', 'Symbol', 'Eof', 'Undefined']
-    .map((name) => [name, makeType(name)]),
+  [
+    'Program',
+    'Keyword',
+    'SqlKeyword',
+    'String',
+    'Number',
+    'Boolean',
+    'Identifier',
+    'Variable',
+    'Symbol',
+    'Eof',
+    'Undefined',
+  ].map((name) => [name, makeType(name)]),
 )
 const ROOT_TYPE = makeType('_root', true)
 
 function convertToLezerTree(node: TokenTree): Tree {
   if (!node.span) return Tree.empty
-  const children = (node.children ?? [])
-    .slice()
-    .sort((a, b) => a.span.start - b.span.start)
+  const children = (node.children ?? []).slice().sort((a, b) => a.span.start - b.span.start)
   return new Tree(
     TOKEN_TYPES[node.name] ?? makeType(node.name),
     children.map(convertToLezerTree),
@@ -86,9 +94,7 @@ export const lykiaHighlightStyle = HighlightStyle.define([
   { tag: t.null, class: 'cm-null' },
 ])
 
-export function lykiaLanguage(
-  tokenizeFn: (source: string) => TokenizeResult,
-): LanguageSupport {
+export function lykiaLanguage(tokenizeFn: (source: string) => TokenizeResult): LanguageSupport {
   const facet = defineLanguageFacet()
   const parser = new LykiaParser(tokenizeFn)
   const lang = new Language(facet, parser, [], 'lykia')

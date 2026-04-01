@@ -1,0 +1,6 @@
+dist
+coverage
+src-tauri/target
+src-wasm/pkg
+src-wasm/target
+pnpm-lock.yaml
