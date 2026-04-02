@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
 import { invoke } from '@tauri-apps/api/core'
 import QueryPanel from '@/components/QueryPanel.vue'
-import ResultTable from '@/components/ResultTable.vue'
+import ResultView from '@/components/ResultView.vue'
 import { createMockConnection, flushPromises } from '@/test/utils'
 import { resetQueryTabsState } from '@/composables/useQueryTabs'
 import type { QueryResult } from '@/composables/useQueryTabs'
@@ -141,9 +141,9 @@ describe('QueryPanel.vue', () => {
     mockSuccess(data, 25)
     const wrapper = createWrapper()
     await exec(wrapper, 'SELECT * FROM users')
-    const rt = wrapper.findComponent(ResultTable)
-    expect(rt.exists()).toBe(true)
-    expect(rt.props('data')).toEqual(data)
+    const rv = wrapper.findComponent(ResultView)
+    expect(rv.exists()).toBe(true)
+    expect(rv.props('data')).toEqual(data)
   })
 
   it('displays error message when query fails', async () => {
@@ -196,14 +196,14 @@ describe('QueryPanel.vue', () => {
     await wrapper.find('[data-testid="execute-button"]').trigger('click')
     await vi.advanceTimersByTimeAsync(500)
     await wrapper.vm.$nextTick()
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+    expect(wrapper.findComponent(ResultView).exists()).toBe(true)
 
     vi.mocked(invoke).mockImplementation(() => new Promise(() => {}))
     await wrapper.find('[data-testid="execute-button"]').trigger('click')
     vi.advanceTimersByTime(500)
     await wrapper.vm.$nextTick()
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
-    expect(wrapper.findComponent(ResultTable).props('isLocked')).toBe(true)
+    expect(wrapper.findComponent(ResultView).exists()).toBe(true)
+    expect(wrapper.findComponent(ResultView).props('isLocked')).toBe(true)
   })
 
   it('displays execution time after query completes', async () => {
@@ -336,15 +336,15 @@ describe('QueryPanel.vue', () => {
     mockSuccess([{ id: 1, name: 'Result 1' }], 20)
     const wrapper = createWrapper({ connection: conn1() })
     await exec(wrapper, 'SELECT * FROM conn1_table')
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+    expect(wrapper.findComponent(ResultView).exists()).toBe(true)
 
     await wrapper.setProps({ connection: conn2() })
     await wrapper.vm.$nextTick()
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(false)
+    expect(wrapper.findComponent(ResultView).exists()).toBe(false)
 
     await wrapper.setProps({ connection: conn1() })
     await wrapper.vm.$nextTick()
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+    expect(wrapper.findComponent(ResultView).exists()).toBe(true)
   })
 
   it('creates new tab for new connection if none exists', async () => {
@@ -493,5 +493,79 @@ describe('QueryPanel.vue', () => {
     await exec(wrapper, 'SELECT * FROM test')
     const statusBars = wrapper.findAll('.px-4.h-8')
     expect(statusBars[statusBars.length - 1]?.text()).toContain('5ms')
+  })
+
+  describe('view mode toggle', () => {
+    it('does not show toggle buttons when no results', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('[title="Table view"]').exists()).toBe(false)
+      expect(wrapper.find('[title="JSON view"]').exists()).toBe(false)
+    })
+
+    it('shows toggle buttons after query returns results', async () => {
+      mockSuccess([{ id: 1 }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT 1')
+      expect(wrapper.find('[title="Table view"]').exists()).toBe(true)
+      expect(wrapper.find('[title="JSON view"]').exists()).toBe(true)
+    })
+
+    it('defaults to table view mode', async () => {
+      mockSuccess([{ id: 1, name: 'Alice' }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT * FROM users')
+      expect(wrapper.findComponent(ResultView).props('viewMode')).toBe('table')
+    })
+
+    it('switches to JSON view when JSON button is clicked', async () => {
+      mockSuccess([{ id: 1, name: 'Alice' }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT * FROM users')
+      await wrapper.find('[title="JSON view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.findComponent(ResultView).props('viewMode')).toBe('json')
+    })
+
+    it('switches back to table view when Table button is clicked', async () => {
+      mockSuccess([{ id: 1, name: 'Alice' }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT * FROM users')
+      await wrapper.find('[title="JSON view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      await wrapper.find('[title="Table view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.findComponent(ResultView).props('viewMode')).toBe('table')
+    })
+
+    it('highlights active view mode button', async () => {
+      mockSuccess([{ id: 1 }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT 1')
+      const tableBtn = wrapper.find('[title="Table view"]')
+      const jsonBtn = wrapper.find('[title="JSON view"]')
+      // Table mode is active by default
+      expect(tableBtn.classes()).toContain('bg-zinc-300/60')
+      expect(jsonBtn.classes()).not.toContain('bg-zinc-300/60')
+      // Switch to JSON mode
+      await jsonBtn.trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.find('[title="JSON view"]').classes()).toContain('bg-zinc-300/60')
+      expect(wrapper.find('[title="Table view"]').classes()).not.toContain('bg-zinc-300/60')
+    })
+
+    it('preserves view mode per tab', async () => {
+      mockSuccess([{ id: 1 }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT 1')
+      // Switch first tab to JSON
+      await wrapper.find('[title="JSON view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      // Add new tab — it should default to table
+      await wrapper.find('[title="New Query"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      mockSuccess([{ id: 2 }])
+      await exec(wrapper, 'SELECT 2')
+      expect(wrapper.findComponent(ResultView).props('viewMode')).toBe('table')
+    })
   })
 })

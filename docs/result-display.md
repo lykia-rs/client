@@ -2,7 +2,13 @@
 
 ## Overview
 
-`ResultTable` renders query results as a sortable, paginated table (for arrays of objects) or as formatted JSON (for all other data shapes).
+Query results are displayed through a layered component architecture:
+
+- **`ResultView`** — switcher component that handles view mode (table vs JSON), lock overlay during loading, and expand/collapse all controls
+- **`ResultTable`** — pure table renderer using TanStack Vue Table (sorting, pagination)
+- **`JsonTreeView`** — recursive collapsible JSON tree (MongoDB Compass-style)
+
+Users can switch between views using toggle buttons in the results header bar.
 
 ## Data Types
 
@@ -12,31 +18,62 @@ type QueryResultValue = string | number | boolean | null | undefined
                       | { [key: string]: QueryResultValue }
 type QueryResultRow = Record<string, QueryResultValue>
 type QueryResult = QueryResultRow[] | null
+type ResultViewMode = 'table' | 'json'
 ```
 
-## Props
+## Component Props
 
-| Prop       | Type          | Default | Description                        |
-|------------|---------------|---------|------------------------------------|
-| `data`     | `QueryResult` | —       | Query result data                  |
-| `isLocked` | `boolean`     | `false` | Overlay + disable during loading   |
+### ResultView
+
+| Prop       | Type              | Default   | Description                          |
+|------------|-------------------|-----------|--------------------------------------|
+| `data`     | `QueryResult`     | —         | Query result data                    |
+| `isLocked` | `boolean`         | `false`   | Overlay + disable during loading     |
+| `viewMode` | `ResultViewMode`  | `'table'` | Display mode: table or JSON tree     |
+
+### ResultTable
+
+| Prop   | Type          | Default | Description       |
+|--------|---------------|---------|-------------------|
+| `data` | `QueryResult` | —       | Query result data |
+
+## View Mode Toggle
+
+Toggle buttons appear in the results header bar (next to the "Results" label) once results are available. Each tab remembers its own view mode.
+
+- **Table icon** (`Table2`): switches to table mode
+- **JSON icon** (`Braces`): switches to JSON tree mode
+- The active mode button is highlighted with a background color
 
 ## Rendering Modes
 
-### Table Mode
+### Table Mode (default)
 
-Activated when `data` is a non-empty array of objects.
+Activated when `viewMode` is `'table'` and `data` is a non-empty array of objects.
 
 - **Columns**: auto-detected from keys of the first row.
 - **Headers**: `<th>` elements with uppercase styling, sticky (`position: sticky; top: 0`).
 - **Rows**: `<tbody tr>` with hover highlight.
 - **Cells**: monospace font, `text-[12px]`.
 
-### JSON Mode
+### JSON Tree Mode
 
-Activated for all other data: `null`, empty arrays, plain objects, arrays of primitives.
+Activated when `viewMode` is `'json'`, or when data is not a tableable array (empty arrays, plain objects, arrays of primitives).
 
-- Rendered in `<pre>` element with `JSON.stringify(data, null, 2)`.
+Renders using `JsonTreeView` — a recursive, collapsible tree component (MongoDB Compass-style):
+
+- **Root arrays**: each item displayed as a numbered "Document N" with expand/collapse
+- **Objects**: show field count when collapsed (e.g., `{ 3 fields }`), key-value pairs when expanded
+- **Arrays**: show item count when collapsed (e.g., `[ 5 items ]`), indexed items when expanded
+- **Nested structures**: recursively expandable to any depth
+- **Syntax highlighting** by type:
+  - Strings: green (`text-green-600`)
+  - Numbers: blue (`text-blue-600`)
+  - Booleans: purple (`text-purple-600`)
+  - Null/undefined: gray italic (`text-zinc-400 italic`)
+- **Default collapsed**: all nodes are collapsed by default
+- **Expand/Collapse all**: toolbar button toggles between expanding and collapsing all nodes
+- **Indentation**: nested levels have left border + indent for visual hierarchy
 
 ### Empty State
 
@@ -73,25 +110,28 @@ When `data` is `null` and no query has been executed: "Execute a query to see re
 
 ## Lock Overlay
 
-When `isLocked: true` (query running):
+When `isLocked: true` (query running), rendered by `ResultView`:
 
 - Semi-transparent overlay: `.absolute.inset-0` with backdrop blur.
 - Text: "Query running...".
-- Table content has `opacity-50`.
+- Content has `opacity-50`.
 - Pointer events disabled on entire component (`pointer-events-none select-none`).
 
 ## DOM Selectors
 
-| Element           | Selector                                   |
-|-------------------|--------------------------------------------|
-| Table             | `table`                                    |
-| Header row        | `thead tr`                                 |
-| Column header     | `th` (clickable)                           |
-| Data rows         | `tbody tr`                                 |
-| Data cells        | `tbody td`                                 |
-| JSON display      | `pre`                                      |
-| Scroll container  | `.overflow-auto`                           |
-| Lock overlay      | `.absolute.inset-0` (within ResultTable)   |
-| Lock message      | Text "Query running..."                    |
-| Pagination prev   | Button containing "Previous"               |
-| Pagination next   | Button containing "Next"                   |
+| Element                  | Selector                                   |
+|--------------------------|--------------------------------------------|
+| Table                    | `table`                                    |
+| Header row               | `thead tr`                                 |
+| Column header            | `th` (clickable)                           |
+| Data rows                | `tbody tr`                                 |
+| Data cells               | `tbody td`                                 |
+| JSON tree container      | `[data-testid="json-tree"]`                |
+| Expand/collapse all btn  | `[data-testid="expand-collapse-all"]`      |
+| Scroll container         | `.overflow-auto`                           |
+| Lock overlay             | `.absolute.inset-0` (within ResultView)    |
+| Lock message             | Text "Query running..."                    |
+| Pagination prev          | Button containing "Previous"               |
+| Pagination next          | Button containing "Next"                   |
+| Table view toggle        | `[title="Table view"]`                     |
+| JSON view toggle         | `[title="JSON view"]`                      |

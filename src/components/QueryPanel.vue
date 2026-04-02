@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { toRef, ref, watch, computed } from 'vue'
-import { Play, Loader2, Plus, X, Clock, AlertCircle } from 'lucide-vue-next'
+import { Play, Loader2, Plus, X, Clock, AlertCircle, Table2, Braces } from 'lucide-vue-next'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
-import ResultTable from '@/components/ResultTable.vue'
+import ResultView from '@/components/ResultView.vue'
 import CodeEditor from '@/components/CodeEditor.vue'
 import { cn } from '@/lib/utils'
 import { useQueryTabs } from '@/composables/useQueryTabs'
@@ -164,6 +164,24 @@ async function executeQuery() {
           <span class="text-label font-semibold uppercase tracking-widest text-muted-foreground"
             >Results</span
           >
+          <div class="flex-1" />
+          <div v-if="activeTab?.result" class="flex items-center gap-0.5">
+            <button
+              v-for="m in (['table', 'json'] as const)"
+              :key="m"
+              :class="[
+                'p-1 rounded transition-colors',
+                activeTab?.viewMode === m
+                  ? 'text-zinc-800 dark:text-zinc-200 bg-zinc-300/60 dark:bg-zinc-700/60'
+                  : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300',
+              ]"
+              :title="m === 'table' ? 'Table view' : 'JSON view'"
+              @click="activeTab!.viewMode = m"
+            >
+              <Table2 v-if="m === 'table'" :size="14" />
+              <Braces v-else :size="14" />
+            </button>
+          </div>
         </div>
 
         <div class="flex-1 overflow-hidden flex flex-col">
@@ -184,7 +202,7 @@ async function executeQuery() {
           </div>
 
           <div v-else-if="activeTab?.result" class="flex-1 overflow-hidden">
-            <ResultTable :data="activeTab.result" :is-locked="activeTab?.loadingIndicator" />
+            <ResultView :data="activeTab.result" :is-locked="activeTab?.loadingIndicator" :view-mode="activeTab.viewMode" />
           </div>
         </div>
 

@@ -18,6 +18,7 @@ const makeTab = (o: Partial<QueryTab> = {}): QueryTab => ({
   connectionId: 'conn1',
   duration: null,
   errorSpan: null,
+  viewMode: 'table',
   ...o,
 })
 
