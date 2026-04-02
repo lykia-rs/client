@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import ConnectionDialog from '@/components/ConnectionDialog.vue'
+import ConnectionDialog from '@/components/connection/ConnectionDialog.vue'
 import Button from '@/components/ui/Button.vue'
 import { flushPromises } from '@/test/utils'
 

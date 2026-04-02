@@ -1,32 +1,35 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
 import { invoke } from '@tauri-apps/api/core'
-import QueryPanel from '@/components/QueryPanel.vue'
-import ResultTable from '@/components/ResultTable.vue'
+import QueryPanel from '@/components/query/QueryPanel.vue'
+import ResultPanel from '@/components/results/ResultPanel.vue'
 import { createMockConnection, flushPromises } from '@/test/utils'
 import { resetQueryTabsState } from '@/composables/useQueryTabs'
 import type { QueryResult } from '@/composables/useQueryTabs'
 
 vi.mock('@tauri-apps/api/core')
 
-const CodeEditorStub = {
-  name: 'CodeEditor',
+const QueryEditorStub = {
+  name: 'QueryEditor',
   template: `<textarea
     :value="modelValue"
     :disabled="disabled"
     :readonly="readonly"
     @input="$emit('update:modelValue', $event.target.value)"
     class="code-editor-stub"
-    :class="{ 'opacity-50 cursor-not-allowed': disabled }"
+    :class="{
+      'opacity-50 cursor-not-allowed': dimmed,
+      'cursor-wait': disabled && !dimmed,
+    }"
   />`,
-  props: ['modelValue', 'disabled', 'readonly', 'placeholder'],
+  props: ['modelValue', 'disabled', 'readonly', 'dimmed', 'placeholder'],
   emits: ['update:modelValue', 'parseError', 'parseErrorMessage'],
 }
 
 const stubs = {
   Splitpanes: { template: '<div class="splitpanes"><slot /></div>' },
   Pane: { template: '<div class="pane"><slot /></div>' },
-  CodeEditor: CodeEditorStub,
+  QueryEditor: QueryEditorStub,
 }
 const conn1 = (o = {}) => createMockConnection({ id: 'conn1', ...o })
 const conn2 = (o = {}) => createMockConnection({ id: 'conn2', ...o })
@@ -114,11 +117,11 @@ describe('QueryPanel.vue', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('[data-testid="execute-button"]').attributes('disabled')).toBeUndefined()
 
-    wrapper.findComponent(CodeEditorStub).vm.$emit('parseError', true)
+    wrapper.findComponent(QueryEditorStub).vm.$emit('parseError', true)
     await wrapper.vm.$nextTick()
     expect(wrapper.find('[data-testid="execute-button"]').attributes('disabled')).toBeDefined()
 
-    wrapper.findComponent(CodeEditorStub).vm.$emit('parseError', false)
+    wrapper.findComponent(QueryEditorStub).vm.$emit('parseError', false)
     await wrapper.vm.$nextTick()
     expect(wrapper.find('[data-testid="execute-button"]').attributes('disabled')).toBeUndefined()
   })
@@ -141,9 +144,9 @@ describe('QueryPanel.vue', () => {
     mockSuccess(data, 25)
     const wrapper = createWrapper()
     await exec(wrapper, 'SELECT * FROM users')
-    const rt = wrapper.findComponent(ResultTable)
-    expect(rt.exists()).toBe(true)
-    expect(rt.props('data')).toEqual(data)
+    const rv = wrapper.findComponent(ResultPanel)
+    expect(rv.exists()).toBe(true)
+    expect(rv.props('data')).toEqual(data)
   })
 
   it('displays error message when query fails', async () => {
@@ -196,14 +199,15 @@ describe('QueryPanel.vue', () => {
     await wrapper.find('[data-testid="execute-button"]').trigger('click')
     await vi.advanceTimersByTimeAsync(500)
     await wrapper.vm.$nextTick()
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+    expect(wrapper.findComponent(ResultPanel).exists()).toBe(true)
 
     vi.mocked(invoke).mockImplementation(() => new Promise(() => {}))
     await wrapper.find('[data-testid="execute-button"]').trigger('click')
     vi.advanceTimersByTime(500)
     await wrapper.vm.$nextTick()
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
-    expect(wrapper.findComponent(ResultTable).props('isLocked')).toBe(true)
+    expect(wrapper.findComponent(ResultPanel).exists()).toBe(true)
+    expect(wrapper.findComponent(ResultPanel).props('isLocked')).toBe(true)
+    expect(wrapper.findComponent(ResultPanel).props('showOverlay')).toBe(true)
   })
 
   it('displays execution time after query completes', async () => {
@@ -336,15 +340,15 @@ describe('QueryPanel.vue', () => {
     mockSuccess([{ id: 1, name: 'Result 1' }], 20)
     const wrapper = createWrapper({ connection: conn1() })
     await exec(wrapper, 'SELECT * FROM conn1_table')
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+    expect(wrapper.findComponent(ResultPanel).exists()).toBe(true)
 
     await wrapper.setProps({ connection: conn2() })
     await wrapper.vm.$nextTick()
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(false)
+    expect(wrapper.findComponent(ResultPanel).exists()).toBe(false)
 
     await wrapper.setProps({ connection: conn1() })
     await wrapper.vm.$nextTick()
-    expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+    expect(wrapper.findComponent(ResultPanel).exists()).toBe(true)
   })
 
   it('creates new tab for new connection if none exists', async () => {
@@ -425,6 +429,58 @@ describe('QueryPanel.vue', () => {
     expect(textarea.classes()).not.toContain('cursor-not-allowed')
   })
 
+  it('does not dim editor before 500ms but locks it', async () => {
+    vi.useFakeTimers()
+    mockSlow()
+    const wrapper = createWrapper()
+    await wrapper.find('textarea').setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('[data-testid="execute-button"]').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // Before 500ms: disabled (locked) but not dimmed
+    const textarea = wrapper.find('textarea')
+    expect(textarea.attributes('disabled')).toBeDefined()
+    expect(textarea.attributes('readonly')).toBeDefined()
+    expect(textarea.element.closest('.cursor-wait')).not.toBeNull()
+    expect(textarea.element.closest('.opacity-50')).toBeNull()
+
+    // After 500ms: dimmed
+    vi.advanceTimersByTime(500)
+    await wrapper.vm.$nextTick()
+    expect(textarea.element.closest('.opacity-50')).not.toBeNull()
+  })
+
+  it('locks results immediately on loading and shows overlay after 500ms', async () => {
+    vi.useFakeTimers()
+    mockSuccess([{ id: 1 }], 20)
+    const wrapper = createWrapper()
+
+    await wrapper.find('textarea').setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('[data-testid="execute-button"]').trigger('click')
+    await vi.advanceTimersByTimeAsync(500)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent(ResultPanel).exists()).toBe(true)
+
+    // Start a slow second query
+    vi.mocked(invoke).mockImplementation(() => new Promise(() => {}))
+    await wrapper.find('textarea').setValue('SELECT * FROM slow')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('[data-testid="execute-button"]').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // Before 500ms: locked but no overlay
+    expect(wrapper.findComponent(ResultPanel).props('isLocked')).toBe(true)
+    expect(wrapper.findComponent(ResultPanel).props('showOverlay')).toBe(false)
+
+    // After 500ms: locked with overlay
+    vi.advanceTimersByTime(500)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent(ResultPanel).props('isLocked')).toBe(true)
+    expect(wrapper.findComponent(ResultPanel).props('showOverlay')).toBe(true)
+  })
+
   it('shows spinner instead of close button when query is running', async () => {
     const wrapper = createWrapper()
     await addTab(wrapper)
@@ -458,7 +514,7 @@ describe('QueryPanel.vue', () => {
     const wrapper = createWrapper()
     expect(wrapper.find('.text-red-500').exists()).toBe(false)
     wrapper
-      .findComponent(CodeEditorStub)
+      .findComponent(QueryEditorStub)
       .vm.$emit('parseErrorMessage', 'Unexpected token at line 1')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('Unexpected token at line 1')
@@ -466,11 +522,11 @@ describe('QueryPanel.vue', () => {
 
   it('hides parse error message when error is cleared', async () => {
     const wrapper = createWrapper()
-    wrapper.findComponent(CodeEditorStub).vm.$emit('parseErrorMessage', 'Some parse error')
+    wrapper.findComponent(QueryEditorStub).vm.$emit('parseErrorMessage', 'Some parse error')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('Some parse error')
 
-    wrapper.findComponent(CodeEditorStub).vm.$emit('parseErrorMessage', '')
+    wrapper.findComponent(QueryEditorStub).vm.$emit('parseErrorMessage', '')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).not.toContain('Some parse error')
   })
@@ -493,5 +549,92 @@ describe('QueryPanel.vue', () => {
     await exec(wrapper, 'SELECT * FROM test')
     const statusBars = wrapper.findAll('.px-4.h-8')
     expect(statusBars[statusBars.length - 1]?.text()).toContain('5ms')
+  })
+
+  describe('view mode toggle', () => {
+    it('does not show toggle buttons when no results', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('[title="List view"]').exists()).toBe(false)
+      expect(wrapper.find('[title="Table view"]').exists()).toBe(false)
+      expect(wrapper.find('[title="JSON view"]').exists()).toBe(false)
+    })
+
+    it('shows toggle buttons after query returns results', async () => {
+      mockSuccess([{ id: 1 }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT 1')
+      expect(wrapper.find('[title="List view"]').exists()).toBe(true)
+      expect(wrapper.find('[title="Table view"]').exists()).toBe(true)
+      expect(wrapper.find('[title="JSON view"]').exists()).toBe(true)
+    })
+
+    it('defaults to list view mode', async () => {
+      mockSuccess([{ id: 1, name: 'Alice' }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT * FROM users')
+      expect(wrapper.findComponent(ResultPanel).props('viewMode')).toBe('list')
+    })
+
+    it('switches to table view when Table button is clicked', async () => {
+      mockSuccess([{ id: 1, name: 'Alice' }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT * FROM users')
+      await wrapper.find('[title="Table view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.findComponent(ResultPanel).props('viewMode')).toBe('table')
+    })
+
+    it('switches to JSON view when JSON button is clicked', async () => {
+      mockSuccess([{ id: 1, name: 'Alice' }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT * FROM users')
+      await wrapper.find('[title="JSON view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.findComponent(ResultPanel).props('viewMode')).toBe('json')
+    })
+
+    it('switches back to list view when List button is clicked', async () => {
+      mockSuccess([{ id: 1, name: 'Alice' }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT * FROM users')
+      await wrapper.find('[title="Table view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      await wrapper.find('[title="List view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.findComponent(ResultPanel).props('viewMode')).toBe('list')
+    })
+
+    it('highlights active view mode button', async () => {
+      mockSuccess([{ id: 1 }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT 1')
+      const tableBtn = wrapper.find('[title="Table view"]')
+      const jsonBtn = wrapper.find('[title="JSON view"]')
+      const listBtn = wrapper.find('[title="List view"]')
+      // List mode is active by default
+      expect(listBtn.classes()).toContain('bg-zinc-300/60')
+      expect(tableBtn.classes()).not.toContain('bg-zinc-300/60')
+      expect(jsonBtn.classes()).not.toContain('bg-zinc-300/60')
+      // Switch to JSON mode
+      await jsonBtn.trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.find('[title="JSON view"]').classes()).toContain('bg-zinc-300/60')
+      expect(wrapper.find('[title="Table view"]').classes()).not.toContain('bg-zinc-300/60')
+    })
+
+    it('preserves view mode per tab', async () => {
+      mockSuccess([{ id: 1 }])
+      const wrapper = createWrapper()
+      await exec(wrapper, 'SELECT 1')
+      // Switch first tab to JSON
+      await wrapper.find('[title="JSON view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      // Add new tab — it should default to list
+      await wrapper.find('[title="New Query"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      mockSuccess([{ id: 2 }])
+      await exec(wrapper, 'SELECT 2')
+      expect(wrapper.findComponent(ResultPanel).props('viewMode')).toBe('list')
+    })
   })
 })

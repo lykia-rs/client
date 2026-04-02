@@ -1,13 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import ResultTable from '@/components/ResultTable.vue'
-import type { QueryResult } from '@/composables/useQueryTabs'
+import TableView from '@/components/results/TableView.vue'
+import type { QueryResultRow, QueryResultValue } from '@/composables/useQueryTabs'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mountTable = (data: QueryResult | (Record<string, any>) | (string | number | boolean)[], isLocked = false) =>
-  mount(ResultTable, { props: { data: data as QueryResult, ...(isLocked ? { isLocked } : {}) } })
+const mountTable = (data: QueryResultRow[] | QueryResultRow | QueryResultValue[] | null) =>
+  mount(TableView, { props: { data: data as QueryResultRow[] | null } })
 
-describe('ResultTable.vue', () => {
+describe('TableView.vue', () => {
   it('renders table for array data with objects', () => {
     const wrapper = mountTable([
       { id: 1, name: 'Alice' },
@@ -90,17 +89,9 @@ describe('ResultTable.vue', () => {
     ['empty array', []],
     ['non-array data', { message: 'Not an array' }],
     ['primitive array', [1, 2, 3, 'string', true]],
-  ])('shows JSON for %s', (_, data) => {
+  ])('does not render table for %s', (_, data) => {
     const wrapper = mountTable(data)
     expect(wrapper.find('table').exists()).toBe(false)
-    expect(wrapper.find('pre').exists()).toBe(true)
-  })
-
-  it('renders JSON with proper formatting for non-table data', () => {
-    const data = { status: 'success', count: 42, items: ['a', 'b', 'c'] }
-    const pre = mountTable(data).find('pre')
-    expect(pre.text()).toContain('"status": "success"')
-    expect(pre.text()).toContain('"count": 42')
   })
 
   it('has sticky table header with uppercase styling', () => {
@@ -147,54 +138,5 @@ describe('ResultTable.vue', () => {
         .find('.overflow-auto')
         .exists(),
     ).toBe(true)
-  })
-
-  it('renders without locked state by default', () => {
-    const wrapper = mountTable([{ id: 1, name: 'Test' }])
-    expect(wrapper.find('.bg-zinc-100\\/50').exists()).toBe(false)
-    const container = wrapper.find('.relative')
-    expect(container.classes()).not.toContain('pointer-events-none')
-    expect(container.classes()).not.toContain('select-none')
-  })
-
-  it('renders locked state with overlay when isLocked is true', () => {
-    const wrapper = mountTable([{ id: 1, name: 'Test' }], true)
-    const overlay = wrapper.find('.bg-zinc-100\\/50')
-    expect(overlay.exists()).toBe(true)
-    expect(overlay.text()).toContain('Query running...')
-    const container = wrapper.find('.relative')
-    expect(container.classes()).toContain('pointer-events-none')
-    expect(container.classes()).toContain('select-none')
-  })
-
-  it('applies opacity when locked, not when unlocked', () => {
-    expect(
-      mountTable([{ id: 1 }], true)
-        .find('.opacity-50')
-        .exists(),
-    ).toBe(true)
-    expect(
-      mountTable([{ id: 1 }], false)
-        .find('.opacity-50')
-        .exists(),
-    ).toBe(false)
-  })
-
-  it('renders table data correctly when locked', () => {
-    const wrapper = mountTable(
-      [
-        { id: 1, name: 'Alice' },
-        { id: 2, name: 'Bob' },
-      ],
-      true,
-    )
-    expect(wrapper.find('table').exists()).toBe(true)
-    expect(wrapper.findAll('tbody tr')).toHaveLength(2)
-  })
-
-  it('shows overlay on non-tabular data when locked', () => {
-    const wrapper = mountTable({ message: 'OK', status: 200 }, true)
-    expect(wrapper.find('.bg-zinc-100\\/50').exists()).toBe(true)
-    expect(wrapper.find('pre').exists()).toBe(true)
   })
 })

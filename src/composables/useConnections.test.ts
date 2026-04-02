@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { invoke } from '@tauri-apps/api/core'
-import { useConnections } from './useConnections'
+import { useConnections, resetConnectionsState } from './useConnections'
 import { flushPromises } from '@/test/utils'
 
 vi.mock('@tauri-apps/api/core')
@@ -24,6 +24,7 @@ const extraConn = {
 describe('useConnections', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    resetConnectionsState()
   })
 
   it('initializes with default localhost connection', () => {

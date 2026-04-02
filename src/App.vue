@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
-import ConnectionPanel from '@/components/ConnectionPanel.vue'
-import QueryPanel from '@/components/QueryPanel.vue'
-import ConnectionDialog from '@/components/ConnectionDialog.vue'
+import ConnectionPanel from '@/components/connection/ConnectionPanel.vue'
+import QueryPanel from '@/components/query/QueryPanel.vue'
+import ConnectionDialog from '@/components/connection/ConnectionDialog.vue'
 import { useConnections } from '@/composables/useConnections'
 import { hasRunningQueriesForConnection } from '@/composables/useQueryTabs'
 

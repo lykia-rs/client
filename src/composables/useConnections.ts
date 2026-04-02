@@ -35,49 +35,53 @@ function makeConnection(
   }
 }
 
+// Module-level singleton state (consistent with useQueryTabs pattern)
+const connections = ref<Connection[]>([
+  makeConnection('1', 'localhost', '19191', CONNECTION_COLORS[0], { active: true }),
+])
+const activeConnection = ref<Connection>(connections.value[0])
+let colorIndex = 1
+let initialized = false
+
+async function testConnection(conn: Connection) {
+  try {
+    await invoke('test_connection', { address: conn.address })
+    conn.connected = true
+  } catch {
+    conn.connected = false
+  }
+}
+
+function selectConnection(conn: Connection) {
+  connections.value.forEach((c) => (c.active = false))
+  conn.active = true
+  activeConnection.value = conn
+}
+
+async function addConnection(host: string, port: string) {
+  await invoke('test_connection', { address: `${host}:${port}` })
+  const color = CONNECTION_COLORS[colorIndex++ % CONNECTION_COLORS.length]
+  const newConn = makeConnection(String(Date.now()), host, port, color, { connected: true })
+  connections.value.push(newConn)
+  selectConnection(newConn)
+}
+
+function removeConnection(id: string) {
+  const index = connections.value.findIndex((c) => c.id === id)
+  if (index === -1 || connections.value.length === 1) return
+  if (hasRunningQueriesForConnection(id)) return
+
+  connections.value.splice(index, 1)
+  if (activeConnection.value.id === id) {
+    selectConnection(connections.value[0])
+  }
+}
+
 export function useConnections() {
-  const connections = ref<Connection[]>([
-    makeConnection('1', 'localhost', '19191', CONNECTION_COLORS[0], { active: true }),
-  ])
-
-  const activeConnection = ref(connections.value[0])
-  let colorIndex = 1
-
-  async function testConnection(conn: Connection) {
-    try {
-      await invoke('test_connection', { address: conn.address })
-      conn.connected = true
-    } catch {
-      conn.connected = false
-    }
+  if (!initialized) {
+    initialized = true
+    testConnection(connections.value[0])
   }
-
-  function selectConnection(conn: Connection) {
-    connections.value.forEach((c) => (c.active = false))
-    conn.active = true
-    activeConnection.value = conn
-  }
-
-  async function addConnection(host: string, port: string) {
-    await invoke('test_connection', { address: `${host}:${port}` })
-    const color = CONNECTION_COLORS[colorIndex++ % CONNECTION_COLORS.length]
-    const newConn = makeConnection(String(Date.now()), host, port, color, { connected: true })
-    connections.value.push(newConn)
-    selectConnection(newConn)
-  }
-
-  function removeConnection(id: string) {
-    const index = connections.value.findIndex((c) => c.id === id)
-    if (index === -1 || connections.value.length === 1) return
-    if (hasRunningQueriesForConnection(id)) return
-
-    connections.value.splice(index, 1)
-    if (activeConnection.value.id === id) {
-      selectConnection(connections.value[0])
-    }
-  }
-
-  testConnection(connections.value[0])
 
   return {
     connections,
@@ -87,4 +91,13 @@ export function useConnections() {
     addConnection,
     removeConnection,
   }
+}
+
+export function resetConnectionsState() {
+  connections.value = [
+    makeConnection('1', 'localhost', '19191', CONNECTION_COLORS[0], { active: true }),
+  ]
+  activeConnection.value = connections.value[0]
+  colorIndex = 1
+  initialized = false
 }
