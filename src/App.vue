@@ -4,10 +4,12 @@ import { Splitpanes, Pane } from 'splitpanes'
 import ConnectionPanel from '@/components/connection/ConnectionPanel.vue'
 import QueryPanel from '@/components/query/QueryPanel.vue'
 import ConnectionDialog from '@/components/connection/ConnectionDialog.vue'
+import SettingsDialog from '@/components/settings/SettingsDialog.vue'
 import { useConnections } from '@/composables/useConnections'
 import { hasRunningQueriesForConnection } from '@/composables/useQueryTabs'
 
 const showConnectionDialog = ref(false)
+const showSettingsDialog = ref(false)
 
 const { connections, activeConnection, selectConnection, addConnection, removeConnection } =
   useConnections()
@@ -28,6 +30,7 @@ async function handleAddConnection(host: string, port: string) {
           @select="selectConnection"
           @add="showConnectionDialog = true"
           @remove="removeConnection"
+          @open-settings="showSettingsDialog = true"
         />
       </Pane>
 
@@ -40,6 +43,11 @@ async function handleAddConnection(host: string, port: string) {
       v-if="showConnectionDialog"
       :connect-handler="handleAddConnection"
       @close="showConnectionDialog = false"
+    />
+
+    <SettingsDialog
+      v-if="showSettingsDialog"
+      @close="showSettingsDialog = false"
     />
   </div>
 </template>

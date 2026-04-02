@@ -14,6 +14,8 @@ import { resetQueryTabsState } from '@/composables/useQueryTabs'
 import type { QueryResult } from '@/composables/useQueryTabs'
 import type { Connection } from '@/composables/useConnections'
 import { resetConnectionsState } from '@/composables/useConnections'
+import { resetSettingsState } from '@/composables/useSettings'
+import SettingsDialog from '@/components/settings/SettingsDialog.vue'
 import { flushPromises } from '@/test/utils'
 
 vi.mock('@tauri-apps/api/core')
@@ -122,6 +124,7 @@ describe('Integration: Connection → Query → Results', () => {
     vi.clearAllMocks()
     resetQueryTabsState()
     resetConnectionsState()
+    resetSettingsState()
   })
 
   afterEach(() => {
@@ -534,6 +537,39 @@ describe('Integration: Connection → Query → Results', () => {
       expect(rv.text()).toContain('Document 0')
       // Content is collapsed by default, shows field count
       expect(rv.text()).toContain('3 fields')
+    })
+  })
+
+  describe('Settings dialog', () => {
+    it('opens settings dialog from connection panel', async () => {
+      mockIPC()
+      const wrapper = mountApp()
+      await flushPromises()
+
+      // Settings dialog not visible initially
+      expect(wrapper.findComponent(SettingsDialog).exists()).toBe(false)
+
+      // Click settings button
+      const cp = wrapper.findComponent(ConnectionPanel)
+      await cp.vm.$emit('openSettings')
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.findComponent(SettingsDialog).exists()).toBe(true)
+    })
+
+    it('closes settings dialog', async () => {
+      mockIPC()
+      const wrapper = mountApp()
+      await flushPromises()
+
+      const cp = wrapper.findComponent(ConnectionPanel)
+      await cp.vm.$emit('openSettings')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.findComponent(SettingsDialog).exists()).toBe(true)
+
+      wrapper.findComponent(SettingsDialog).vm.$emit('close')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.findComponent(SettingsDialog).exists()).toBe(false)
     })
   })
 })

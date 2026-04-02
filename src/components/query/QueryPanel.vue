@@ -8,6 +8,7 @@ import QueryEditor from '@/components/query/QueryEditor.vue'
 import { cn } from '@/lib/utils'
 import { useQueryTabs } from '@/composables/useQueryTabs'
 import { useQueryExecution } from '@/composables/useQueryExecution'
+import { useSettings } from '@/composables/useSettings'
 import type { Connection } from '@/composables/useConnections'
 
 const props = defineProps<{
@@ -17,6 +18,7 @@ const props = defineProps<{
 const connectionRef = toRef(props, 'connection')
 const { tabs, activeTab, activeTabId, addTab, closeTab } = useQueryTabs(connectionRef)
 const { executeQuery: executeQueryFn } = useQueryExecution()
+const { settings } = useSettings()
 
 const editorRef = ref<InstanceType<typeof QueryEditor> | null>(null)
 const hasLocalError = ref(false)
@@ -128,6 +130,7 @@ async function executeQuery() {
           :disabled="activeTab.loading"
           :readonly="activeTab.loading"
           :dimmed="activeTab.loadingIndicator"
+          :line-numbers="settings.showLineNumbers"
           placeholder="Enter your query here..."
           @parse-error="hasLocalError = $event"
           @parse-error-message="parseErrorMessage = $event"
@@ -147,20 +150,8 @@ async function executeQuery() {
     <!-- Results -->
     <Pane :size="60" :min-size="20">
       <div class="flex flex-col h-full bg-zinc-100 dark:bg-zinc-900">
-        <!-- Loading Bar (always reserves space to prevent layout shift) -->
-        <div class="h-0.5 w-full relative overflow-hidden">
-          <div
-            v-if="activeTab?.loadingIndicator"
-            class="absolute inset-0 w-full h-full loading-shimmer"
-            :style="{
-              background: `linear-gradient(90deg, transparent 0%, ${connection.color} 50%, transparent 100%)`,
-              boxShadow: `0 0 8px ${connection.color}`,
-            }"
-          />
-        </div>
-
         <div
-          class="px-4 h-8 flex items-center border-b border-border/60 bg-zinc-200/70 dark:bg-zinc-950/80"
+          class="px-4 h-8 pb-px flex items-center border-b border-border/60 bg-zinc-200/70 dark:bg-zinc-950/80"
         >
           <span class="text-label font-semibold uppercase tracking-widest text-muted-foreground"
             >Results</span
@@ -184,6 +175,18 @@ async function executeQuery() {
               <Braces v-else :size="14" />
             </button>
           </div>
+        </div>
+
+        <!-- Loading Bar (always reserves space to prevent layout shift) -->
+        <div class="h-0.5 w-full relative overflow-hidden">
+          <div
+            v-if="activeTab?.loadingIndicator"
+            class="absolute inset-0 w-full h-full loading-shimmer"
+            :style="{
+              background: `linear-gradient(90deg, transparent 0%, ${connection.color} 50%, transparent 100%)`,
+              boxShadow: `0 0 8px ${connection.color}`,
+            }"
+          />
         </div>
 
         <div class="flex-1 overflow-hidden flex flex-col">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { EditorView, keymap, drawSelection } from '@codemirror/view'
+import { EditorView, keymap, drawSelection, lineNumbers as lineNumbersExtension } from '@codemirror/view'
 import { EditorState, Compartment } from '@codemirror/state'
 import { defaultKeymap, indentWithTab } from '@codemirror/commands'
 import { lykiaLanguage } from '@/lib/lykia-lang'
@@ -18,6 +18,7 @@ const props = defineProps<{
   readonly?: boolean
   dimmed?: boolean
   placeholder?: string
+  lineNumbers?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -31,6 +32,7 @@ let view: EditorView | null = null
 let suppressUpdate = false
 let hasLocalErrors = false
 let editableCompartment: Compartment | null = null
+let lineNumbersCompartment: Compartment | null = null
 
 function applyParseErrors(v: EditorView, content: string) {
   const result = content.trim() ? tokenize(content) : null
@@ -59,12 +61,14 @@ onMounted(async () => {
   if (!containerRef.value) return
 
   editableCompartment = new Compartment()
+  lineNumbersCompartment = new Compartment()
 
   const state = EditorState.create({
     doc: props.modelValue,
     extensions: [
       keymap.of([...defaultKeymap, indentWithTab]),
       drawSelection(),
+      lineNumbersCompartment.of(props.lineNumbers !== false ? lineNumbersExtension() : []),
       lykiaLanguage(tokenize),
       errorHighlighting(),
       EditorView.updateListener.of((update) => {
@@ -91,7 +95,18 @@ onMounted(async () => {
           caretColor: 'transparent',
         },
         '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--cm-cursor-color, #000)' },
-        '.cm-gutters': { display: 'none' },
+        '.cm-gutters': {
+          backgroundColor: 'transparent',
+          borderRight: '1px solid var(--cm-gutter-border, rgba(0,0,0,0.08))',
+        },
+        '.cm-lineNumbers .cm-gutterElement': {
+          fontFamily:
+            "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+          fontSize: '0.75rem',
+          color: 'var(--cm-line-number, #a1a1aa)',
+          padding: '0 8px 0 4px',
+          minWidth: '2.5em',
+        },
         '.cm-focused': { outline: 'none' },
         '&.cm-editor': { background: 'transparent' },
       }),
@@ -116,6 +131,16 @@ watch([() => props.disabled, () => props.readonly], ([disabled, readonly]) => {
     ]),
   })
 })
+
+watch(
+  () => props.lineNumbers,
+  (show) => {
+    if (!view || !lineNumbersCompartment) return
+    view.dispatch({
+      effects: lineNumbersCompartment.reconfigure(show !== false ? lineNumbersExtension() : []),
+    })
+  },
+)
 
 onBeforeUnmount(() => {
   view?.destroy()
@@ -174,6 +199,8 @@ defineExpose({ showErrors, hideErrors })
   --cm-identifier: #18181b;
   --cm-variable: #dc2626;
   --cm-base: inherit;
+  --cm-line-number: #a1a1aa;
+  --cm-gutter-border: rgba(0, 0, 0, 0.08);
 }
 .dark {
   --cm-cursor-color: #e4e4e7;
@@ -185,6 +212,8 @@ defineExpose({ showErrors, hideErrors })
   --cm-identifier: #e4e4e7;
   --cm-variable: #f87171;
   --cm-base: #e4e4e7;
+  --cm-line-number: #52525b;
+  --cm-gutter-border: rgba(255, 255, 255, 0.06);
 }
 .code-editor .cm-editor {
   height: 100%;

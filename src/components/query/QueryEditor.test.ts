@@ -23,6 +23,7 @@ vi.mock('@codemirror/view', () => {
     EditorView,
     keymap: { of: vi.fn(() => []) },
     drawSelection: vi.fn(() => []),
+    lineNumbers: vi.fn(() => []),
   }
 })
 
@@ -125,5 +126,15 @@ describe('QueryEditor.vue', () => {
     const wrapper = createWrapper()
     await flushPromises()
     expect(() => wrapper.unmount()).not.toThrow()
+  })
+
+  it('accepts lineNumbers prop', () => {
+    const wrapper = createWrapper({ lineNumbers: true })
+    expect(wrapper.find('div.code-editor').exists()).toBe(true)
+  })
+
+  it('accepts lineNumbers false prop', () => {
+    const wrapper = createWrapper({ lineNumbers: false })
+    expect(wrapper.find('div.code-editor').exists()).toBe(true)
   })
 })

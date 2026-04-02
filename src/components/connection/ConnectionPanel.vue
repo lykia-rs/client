@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Database, Plus, X } from 'lucide-vue-next'
+import { Database, Plus, X, Settings } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
 import ThemeToggle from '@/components/ui/ThemeToggle.vue'
 import type { Connection } from '@/composables/useConnections'
@@ -13,6 +13,7 @@ const emit = defineEmits<{
   select: [conn: Connection]
   add: []
   remove: [id: string]
+  openSettings: []
 }>()
 </script>
 
@@ -116,6 +117,13 @@ const emit = defineEmits<{
     <div
       class="px-3 h-8 border-t border-border/70 flex items-center justify-end bg-zinc-100 dark:bg-zinc-950/60"
     >
+      <button
+        class="p-1.5 text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700/50 rounded transition-all duration-200"
+        title="Settings"
+        @click="emit('openSettings')"
+      >
+        <Settings :size="14" />
+      </button>
       <ThemeToggle />
     </div>
   </div>
