@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { toRef, ref, watch, computed } from 'vue'
-import { Play, Loader2, Plus, X, Clock, AlertCircle, Table2, Braces } from 'lucide-vue-next'
+import { Play, Loader2, Plus, X, Clock, AlertCircle, LayoutList, Table2, Braces } from 'lucide-vue-next'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
-import ResultView from '@/components/ResultView.vue'
-import CodeEditor from '@/components/CodeEditor.vue'
+import ResultPanel from '@/components/results/ResultPanel.vue'
+import QueryEditor from '@/components/query/QueryEditor.vue'
 import { cn } from '@/lib/utils'
 import { useQueryTabs } from '@/composables/useQueryTabs'
 import { useQueryExecution } from '@/composables/useQueryExecution'
@@ -18,7 +18,7 @@ const connectionRef = toRef(props, 'connection')
 const { tabs, activeTab, activeTabId, addTab, closeTab } = useQueryTabs(connectionRef)
 const { executeQuery: executeQueryFn } = useQueryExecution()
 
-const editorRef = ref<InstanceType<typeof CodeEditor> | null>(null)
+const editorRef = ref<InstanceType<typeof QueryEditor> | null>(null)
 const hasLocalError = ref(false)
 const parseErrorMessage = ref('')
 
@@ -121,7 +121,7 @@ async function executeQuery() {
           </div>
         </div>
 
-        <CodeEditor
+        <QueryEditor
           v-if="activeTab"
           ref="editorRef"
           v-model="activeTab.query"
@@ -168,7 +168,7 @@ async function executeQuery() {
           <div class="flex-1" />
           <div v-if="activeTab?.result" class="flex items-center gap-0.5">
             <button
-              v-for="m in (['table', 'json'] as const)"
+              v-for="m in (['list', 'table', 'json'] as const)"
               :key="m"
               :class="[
                 'p-1 rounded transition-colors',
@@ -176,10 +176,11 @@ async function executeQuery() {
                   ? 'text-zinc-800 dark:text-zinc-200 bg-zinc-300/60 dark:bg-zinc-700/60'
                   : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300',
               ]"
-              :title="m === 'table' ? 'Table view' : 'JSON view'"
+              :title="m === 'list' ? 'List view' : m === 'table' ? 'Table view' : 'JSON view'"
               @click="activeTab!.viewMode = m"
             >
-              <Table2 v-if="m === 'table'" :size="14" />
+              <LayoutList v-if="m === 'list'" :size="14" />
+              <Table2 v-else-if="m === 'table'" :size="14" />
               <Braces v-else :size="14" />
             </button>
           </div>
@@ -203,7 +204,7 @@ async function executeQuery() {
           </div>
 
           <div v-else-if="activeTab?.result" class="flex-1 overflow-hidden">
-            <ResultView :data="activeTab.result" :is-locked="activeTab?.loading" :show-overlay="activeTab?.loadingIndicator" :view-mode="activeTab.viewMode" />
+            <ResultPanel :data="activeTab.result" :is-locked="activeTab?.loading" :show-overlay="activeTab?.loadingIndicator" :view-mode="activeTab.viewMode" />
           </div>
         </div>
 

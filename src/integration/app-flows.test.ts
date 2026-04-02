@@ -6,10 +6,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
 import { invoke } from '@tauri-apps/api/core'
 import App from '@/App.vue'
-import ConnectionPanel from '@/components/ConnectionPanel.vue'
-import ConnectionDialog from '@/components/ConnectionDialog.vue'
-import QueryPanel from '@/components/QueryPanel.vue'
-import ResultView from '@/components/ResultView.vue'
+import ConnectionPanel from '@/components/connection/ConnectionPanel.vue'
+import ConnectionDialog from '@/components/connection/ConnectionDialog.vue'
+import QueryPanel from '@/components/query/QueryPanel.vue'
+import ResultPanel from '@/components/results/ResultPanel.vue'
 import { resetQueryTabsState } from '@/composables/useQueryTabs'
 import type { QueryResult } from '@/composables/useQueryTabs'
 import type { Connection } from '@/composables/useConnections'
@@ -18,8 +18,8 @@ import { flushPromises } from '@/test/utils'
 
 vi.mock('@tauri-apps/api/core')
 
-const CodeEditorStub = {
-  name: 'CodeEditor',
+const QueryEditorStub = {
+  name: 'QueryEditor',
   template: `<textarea
     :value="modelValue"
     :disabled="disabled"
@@ -27,14 +27,14 @@ const CodeEditorStub = {
     @input="$emit('update:modelValue', $event.target.value)"
     class="code-editor-stub"
   />`,
-  props: ['modelValue', 'disabled', 'readonly', 'placeholder'],
+  props: ['modelValue', 'disabled', 'readonly', 'dimmed', 'placeholder'],
   emits: ['update:modelValue', 'parseError', 'parseErrorMessage'],
 }
 
 const stubs = {
   Splitpanes: { template: '<div class="splitpanes"><slot /></div>' },
   Pane: { template: '<div class="pane"><slot /></div>' },
-  CodeEditor: CodeEditorStub,
+  QueryEditor: QueryEditorStub,
 }
 
 // ---------------------------------------------------------------------------
@@ -149,7 +149,7 @@ describe('Integration: Connection → Query → Results', () => {
       })
 
       // Results should be visible in ResultView
-      const rv = wrapper.findComponent(ResultView)
+      const rv = wrapper.findComponent(ResultPanel)
       expect(rv.exists()).toBe(true)
       expect(rv.props('data')).toEqual([
         { id: 1, name: 'Alice', email: 'alice@example.com' },
@@ -271,7 +271,7 @@ describe('Integration: Connection → Query → Results', () => {
       await cp.vm.$emit('select', getConnections(wrapper)[0])
       await wrapper.vm.$nextTick()
 
-      const rt2 = wrapper.findComponent(ResultView)
+      const rt2 = wrapper.findComponent(ResultPanel)
       expect(rt2.exists()).toBe(true)
       expect(rt2.props('data')).toHaveLength(3)
     })
@@ -312,7 +312,7 @@ describe('Integration: Connection → Query → Results', () => {
 
       await typeAndExecute(wrapper, 'SELECT * FROM items')
 
-      const rt = wrapper.findComponent(ResultView)
+      const rt = wrapper.findComponent(ResultPanel)
       expect(rt.exists()).toBe(true)
       expect(rt.props('data')).toEqual([
         { id: 1, value: 'one' },
@@ -335,7 +335,7 @@ describe('Integration: Connection → Query → Results', () => {
       await typeAndExecute(wrapper, 'INSERT INTO t VALUES (1)')
 
       // Non-array data is passed to ResultView
-      const rv = wrapper.findComponent(ResultView)
+      const rv = wrapper.findComponent(ResultPanel)
       expect(rv.exists()).toBe(true)
       expect(rv.props('data')).toEqual({ affected_rows: 1 })
     })
@@ -355,7 +355,7 @@ describe('Integration: Connection → Query → Results', () => {
       await vi.advanceTimersByTimeAsync(500)
       await wrapper.vm.$nextTick()
 
-      const rt = wrapper.findComponent(ResultView)
+      const rt = wrapper.findComponent(ResultPanel)
       expect(rt.props('data')).toHaveLength(3)
 
       // Start a slow second query (never resolves)
@@ -367,7 +367,7 @@ describe('Integration: Connection → Query → Results', () => {
       await wrapper.vm.$nextTick()
 
       // Previous results still visible while loading
-      const rt2 = wrapper.findComponent(ResultView)
+      const rt2 = wrapper.findComponent(ResultPanel)
       expect(rt2.props('data')).toHaveLength(3)
       expect(rt2.props('isLocked')).toBe(true)       // locked immediately
       expect(rt2.props('showOverlay')).toBe(false)    // no overlay before 500ms
@@ -436,7 +436,7 @@ describe('Integration: Connection → Query → Results', () => {
 
       // Run query on connection 1
       await typeAndExecute(wrapper, 'SELECT * FROM users')
-      const rt1 = wrapper.findComponent(ResultView)
+      const rt1 = wrapper.findComponent(ResultPanel)
       expect(rt1.props('data')).toHaveLength(3)
 
       // Add connection 2 and run a different query
@@ -446,7 +446,7 @@ describe('Integration: Connection → Query → Results', () => {
         return { success: true, data: [{ x: 1 }], duration: 5 }
       })
       await typeAndExecute(wrapper, 'SELECT x FROM other')
-      const rt2 = wrapper.findComponent(ResultView)
+      const rt2 = wrapper.findComponent(ResultPanel)
       expect(rt2.props('data')).toEqual([{ x: 1 }])
 
       // Switch back to connection 1 — original results preserved
@@ -454,7 +454,7 @@ describe('Integration: Connection → Query → Results', () => {
       await cp.vm.$emit('select', getConnections(wrapper)[0])
       await wrapper.vm.$nextTick()
 
-      const rt3 = wrapper.findComponent(ResultView)
+      const rt3 = wrapper.findComponent(ResultPanel)
       expect(rt3.props('data')).toHaveLength(3)
       expect(rt3.props('data')).toEqual([
         { id: 1, name: 'Alice', email: 'alice@example.com' },
@@ -465,26 +465,54 @@ describe('Integration: Connection → Query → Results', () => {
   })
 
   describe('View mode toggle', () => {
-    it('switches between table and JSON views after query execution', async () => {
+    it('switches between list, table and JSON views after query execution', async () => {
       mockIPC({ queryData: [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }] })
       const wrapper = mountApp()
       await flushPromises()
       await typeAndExecute(wrapper, 'SELECT * FROM users')
 
-      // Default is table
-      const rv = wrapper.findComponent(ResultView)
-      expect(rv.props('viewMode')).toBe('table')
+      // Default is list
+      const rv = wrapper.findComponent(ResultPanel)
+      expect(rv.props('viewMode')).toBe('list')
 
-      // Click JSON toggle
+      // Click Table toggle
       const qp = getQueryPanel(wrapper)
-      await qp.find('[title="JSON view"]').trigger('click')
-      await wrapper.vm.$nextTick()
-      expect(wrapper.findComponent(ResultView).props('viewMode')).toBe('json')
-
-      // Click table toggle back
       await qp.find('[title="Table view"]').trigger('click')
       await wrapper.vm.$nextTick()
-      expect(wrapper.findComponent(ResultView).props('viewMode')).toBe('table')
+      expect(wrapper.findComponent(ResultPanel).props('viewMode')).toBe('table')
+
+      // Click JSON toggle
+      await qp.find('[title="JSON view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.findComponent(ResultPanel).props('viewMode')).toBe('json')
+
+      // Click List toggle back
+      await qp.find('[title="List view"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.findComponent(ResultPanel).props('viewMode')).toBe('list')
+    })
+
+    it('shows list view as default with card layout', async () => {
+      mockIPC({
+        queryData: [
+          { id: 1, name: 'Alice', meta: { role: 'admin' } },
+          { id: 2, name: 'Bob', meta: { role: 'user' } },
+        ],
+      })
+      const wrapper = mountApp()
+      await flushPromises()
+      await typeAndExecute(wrapper, 'SELECT * FROM users')
+
+      const rv = wrapper.findComponent(ResultPanel)
+      expect(rv.props('viewMode')).toBe('list')
+      // Cards rendered for each row
+      const cards = rv.findAll('[data-testid="list-card"]')
+      expect(cards).toHaveLength(2)
+      // Root-level fields shown as key-value pairs
+      expect(rv.text()).toContain('id')
+      expect(rv.text()).toContain('name')
+      expect(rv.text()).toContain('"Alice"')
+      expect(rv.text()).toContain('"Bob"')
     })
 
     it('shows JSON view with nested data', async () => {
@@ -501,7 +529,7 @@ describe('Integration: Connection → Query → Results', () => {
       await qp.find('[title="JSON view"]').trigger('click')
       await wrapper.vm.$nextTick()
 
-      const rv = wrapper.findComponent(ResultView)
+      const rv = wrapper.findComponent(ResultPanel)
       expect(rv.props('viewMode')).toBe('json')
       expect(rv.text()).toContain('Document 0')
       // Content is collapsed by default, shows field count

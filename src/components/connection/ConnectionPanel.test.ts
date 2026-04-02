@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import ConnectionPanel from '@/components/ConnectionPanel.vue'
+import ConnectionPanel from '@/components/connection/ConnectionPanel.vue'
 import { Database, X } from 'lucide-vue-next'
 import { createMockConnection } from '@/test/utils'
 

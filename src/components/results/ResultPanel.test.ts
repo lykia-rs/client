@@ -1,24 +1,34 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import ResultView from '@/components/ResultView.vue'
-import ResultTable from '@/components/ResultTable.vue'
-import type { QueryResult, ResultViewMode } from '@/composables/useQueryTabs'
+import ResultPanel from '@/components/results/ResultPanel.vue'
+import TableView from '@/components/results/TableView.vue'
+import ListView from '@/components/results/ListView.vue'
+import type { QueryResult, QueryResultRow, ResultViewMode } from '@/composables/useQueryTabs'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mountView = (data: QueryResult | Record<string, any>, isLocked = false, viewMode: ResultViewMode = 'table', showOverlay = false) =>
-  mount(ResultView, { props: { data: data as QueryResult, isLocked, viewMode, showOverlay } })
+const mountView = (data: QueryResult | QueryResultRow, isLocked = false, viewMode: ResultViewMode = 'list', showOverlay = false) =>
+  mount(ResultPanel, { props: { data: data as QueryResult, isLocked, viewMode, showOverlay } })
 
-describe('ResultView.vue', () => {
+describe('ResultPanel.vue', () => {
   describe('view mode switching', () => {
-    it('renders ResultTable in table mode', () => {
+    it('renders ListView in list mode (default)', () => {
       const wrapper = mountView([{ id: 1, name: 'Alice' }])
-      expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+      expect(wrapper.findComponent(ListView).exists()).toBe(true)
+      expect(wrapper.find('[data-testid="list-view"]').exists()).toBe(true)
+      expect(wrapper.findComponent(TableView).exists()).toBe(false)
+      expect(wrapper.find('[data-testid="json-tree"]').exists()).toBe(false)
+    })
+
+    it('renders TableView in table mode', () => {
+      const wrapper = mountView([{ id: 1, name: 'Alice' }], false, 'table')
+      expect(wrapper.findComponent(TableView).exists()).toBe(true)
+      expect(wrapper.find('[data-testid="list-view"]').exists()).toBe(false)
       expect(wrapper.find('[data-testid="json-tree"]').exists()).toBe(false)
     })
 
     it('renders JSON tree in json mode', () => {
       const wrapper = mountView([{ id: 1, name: 'Alice' }], false, 'json')
-      expect(wrapper.findComponent(ResultTable).exists()).toBe(false)
+      expect(wrapper.findComponent(TableView).exists()).toBe(false)
+      expect(wrapper.find('[data-testid="list-view"]').exists()).toBe(false)
       expect(wrapper.find('[data-testid="json-tree"]').exists()).toBe(true)
       expect(wrapper.text()).toContain('Document 0')
     })
@@ -33,9 +43,14 @@ describe('ResultView.vue', () => {
       expect(wrapper.text()).toContain('Document 1')
     })
 
-    it('renders ResultTable for table mode with non-array data', () => {
+    it('renders TableView for table mode with non-array data', () => {
       const wrapper = mountView({ status: 'ok' }, false, 'table')
-      expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+      expect(wrapper.findComponent(TableView).exists()).toBe(true)
+    })
+
+    it('renders ListView for list mode with non-array data', () => {
+      const wrapper = mountView({ status: 'ok' }, false, 'list')
+      expect(wrapper.findComponent(ListView).exists()).toBe(true)
     })
 
     it('renders JSON tree for non-array data in json mode', () => {
@@ -94,7 +109,7 @@ describe('ResultView.vue', () => {
       ).toBe(false)
     })
 
-    it('renders table data correctly when locked', () => {
+    it('renders list data correctly when locked', () => {
       const wrapper = mountView(
         [
           { id: 1, name: 'Alice' },
@@ -102,7 +117,7 @@ describe('ResultView.vue', () => {
         ],
         true,
       )
-      expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
+      expect(wrapper.findComponent(ListView).exists()).toBe(true)
     })
 
     it('shows overlay in json viewMode when showOverlay is true', () => {

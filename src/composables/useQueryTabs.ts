@@ -4,7 +4,7 @@ import type { Connection } from './useConnections'
 export type QueryResultValue = string | number | boolean | null | undefined | QueryResultValue[] | { [key: string]: QueryResultValue }
 export type QueryResultRow = Record<string, QueryResultValue>
 export type QueryResult = QueryResultRow[] | QueryResultRow | null
-export type ResultViewMode = 'table' | 'json'
+export type ResultViewMode = 'list' | 'table' | 'json'
 
 export interface QueryTab {
   id: string
@@ -37,7 +37,7 @@ function createTab(connectionId: string, id?: string): QueryTab {
     loadingIndicator: false,
     connectionId,
     duration: null,
-    viewMode: 'table',
+    viewMode: 'list',
   }
 }
 

@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import JsonTreeView from '@/components/JsonTreeView.vue'
+import JsonView from '@/components/results/JsonView.vue'
 import type { QueryResultValue } from '@/composables/useQueryTabs'
 
 const mountTree = (data: QueryResultValue, props: Record<string, QueryResultValue | boolean> = {}) =>
-  mount(JsonTreeView, { props: { data, ...props } })
+  mount(JsonView, { props: { data, ...props } })
 
-describe('JsonTreeView.vue', () => {
+describe('JsonView.vue', () => {
   describe('primitive values', () => {
     it('renders string with quotes and green color', () => {
       const wrapper = mountTree('hello', { label: 'name' })

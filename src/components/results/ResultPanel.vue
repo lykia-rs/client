@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import ResultTable from '@/components/ResultTable.vue'
-import JsonTreeView from '@/components/JsonTreeView.vue'
+import TableView from '@/components/results/TableView.vue'
+import JsonView from '@/components/results/JsonView.vue'
+import ListView from '@/components/results/ListView.vue'
 import type { QueryResult, QueryResultRow, ResultViewMode } from '@/composables/useQueryTabs'
 
 const props = withDefaults(
@@ -14,7 +15,7 @@ const props = withDefaults(
   {
     isLocked: false,
     showOverlay: false,
-    viewMode: 'table',
+    viewMode: 'list',
   },
 )
 
@@ -47,12 +48,16 @@ const tableData = computed<QueryResultRow[] | null>(() => {
         showOverlay ? 'opacity-50 transition-opacity duration-200' : '',
       ]"
     >
-      <div v-if="viewMode === 'table'" class="flex-1 overflow-hidden">
-        <ResultTable :data="tableData" />
+      <div v-if="viewMode === 'list'" data-testid="list-view" class="flex-1 overflow-hidden">
+        <ListView :data="tableData" />
+      </div>
+
+      <div v-else-if="viewMode === 'table'" class="flex-1 overflow-hidden">
+        <TableView :data="tableData" />
       </div>
 
       <div v-else data-testid="json-tree" class="flex-1 overflow-hidden">
-        <JsonTreeView :data="data" :root="true" />
+        <JsonView :data="data" :root="true" />
       </div>
     </div>
   </div>

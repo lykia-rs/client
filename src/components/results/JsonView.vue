@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ChevronRight, ChevronDown, ChevronsDownUp, ChevronsUpDown } from 'lucide-vue-next'
+import { isExpandable, typeClass, formatPrimitive } from '@/components/results/format'
 import type { QueryResultValue } from '@/composables/useQueryTabs'
 
 const props = withDefaults(
@@ -26,28 +27,9 @@ function toggleExpandAll() {
   expandKey.value++
 }
 
-function isExpandable(val: QueryResultValue): val is Record<string, QueryResultValue> | QueryResultValue[] {
-  return val !== null && val !== undefined && typeof val === 'object'
-}
-
 function entries(val: QueryResultValue): [string, QueryResultValue][] {
   if (!isExpandable(val)) return []
   return Array.isArray(val) ? val.map((v, i) => [String(i), v]) : Object.entries(val)
-}
-
-function typeClass(val: QueryResultValue): string {
-  if (val === null || val === undefined) return 'text-zinc-400 dark:text-zinc-500 italic'
-  if (typeof val === 'string') return 'text-green-600 dark:text-green-400'
-  if (typeof val === 'number') return 'text-blue-600 dark:text-blue-400'
-  if (typeof val === 'boolean') return 'text-purple-600 dark:text-purple-400'
-  return ''
-}
-
-function formatPrimitive(val: QueryResultValue): string {
-  if (val === null) return 'null'
-  if (val === undefined) return 'undefined'
-  if (typeof val === 'string') return `"${val}"`
-  return String(val)
 }
 
 function bracketPair(val: QueryResultValue): [string, string] {
@@ -81,7 +63,7 @@ function childCount(val: QueryResultValue): number {
         :key="`${expandKey}-${index}`"
         class="border-b border-zinc-200/80 dark:border-zinc-800/30"
       >
-        <JsonTreeView
+        <JsonView
           :data="item"
           :label="`Document ${index}`"
           :default-expanded="allExpanded"
@@ -105,7 +87,7 @@ function childCount(val: QueryResultValue): number {
       </button>
     </div>
     <div class="flex-1 overflow-auto p-2">
-      <JsonTreeView :key="expandKey" :data="data" :default-expanded="allExpanded" />
+      <JsonView :key="expandKey" :data="data" :default-expanded="allExpanded" />
     </div>
   </div>
 
@@ -132,7 +114,7 @@ function childCount(val: QueryResultValue): number {
       </span>
     </button>
     <div v-if="expanded" class="ml-4 border-l border-zinc-200 dark:border-zinc-800/50 pl-2">
-      <JsonTreeView
+      <JsonView
         v-for="[key, val] in entries(data)"
         :key="key"
         :data="val"

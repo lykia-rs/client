@@ -18,8 +18,11 @@ A Tauri 2.x desktop app with a Vue 3 + TypeScript frontend. It connects to a Lyk
 
 ```
 src/
-  components/          # Vue components (ConnectionPanel, QueryPanel, ResultTable, CodeEditor)
-  components/ui/       # shadcn-vue primitives (Button, Input, Label, etc.)
+  components/
+    connection/        # ConnectionPanel, ConnectionDialog
+    query/             # QueryPanel, QueryEditor (CodeMirror wrapper)
+    results/           # ResultPanel (view switcher), TableView, JsonView, ListView
+    ui/                # shadcn-vue primitives (Button, Input, Label, etc.)
   composables/         # Shared state (useConnections, useQueryExecution, useQueryTabs, useTheme)
   lib/                 # WASM bindings (wasm.ts), language support (lykia-lang.ts), error highlighting
   integration/         # Integration tests (full App mount with mockIPC)
@@ -103,9 +106,9 @@ import { flushPromises } from '@/test/utils'
 
 vi.mock('@tauri-apps/api/core')
 
-// Stub CodeEditor to avoid CodeMirror DOM dependency
-const CodeEditorStub = {
-  name: 'CodeEditor',
+// Stub QueryEditor to avoid CodeMirror DOM dependency
+const QueryEditorStub = {
+  name: 'QueryEditor',
   template: `<textarea
     :value="modelValue"
     :disabled="disabled"
@@ -113,7 +116,7 @@ const CodeEditorStub = {
     @input="$emit('update:modelValue', $event.target.value)"
     class="code-editor-stub"
   />`,
-  props: ['modelValue', 'disabled', 'readonly', 'placeholder'],
+  props: ['modelValue', 'disabled', 'readonly', 'dimmed', 'placeholder'],
   emits: ['update:modelValue', 'parseError', 'parseErrorMessage'],
 }
 
@@ -121,7 +124,7 @@ const CodeEditorStub = {
 const stubs = {
   Splitpanes: { template: '<div class="splitpanes"><slot /></div>' },
   Pane: { template: '<div class="pane"><slot /></div>' },
-  CodeEditor: CodeEditorStub,
+  QueryEditor: QueryEditorStub,
 }
 
 describe('MyComponent', () => {
@@ -228,7 +231,7 @@ it('shows loading after 500ms', async () => {
 
 ### Writing Integration Tests
 
-Integration tests live in `src/integration/` and mount the full `App.vue` with stubs for CodeEditor and Splitpanes. They test multi-component flows end-to-end within the Vitest/happy-dom environment.
+Integration tests live in `src/integration/` and mount the full `App.vue` with stubs for QueryEditor and Splitpanes. They test multi-component flows end-to-end within the Vitest/happy-dom environment.
 
 Run with: `pnpm test:integration`
 
@@ -239,16 +242,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
 import { invoke } from '@tauri-apps/api/core'
 import App from '@/App.vue'
-import ConnectionPanel from '@/components/ConnectionPanel.vue'
-import ConnectionDialog from '@/components/ConnectionDialog.vue'
-import QueryPanel from '@/components/QueryPanel.vue'
-import ResultTable from '@/components/ResultTable.vue'
+import ConnectionPanel from '@/components/connection/ConnectionPanel.vue'
+import ConnectionDialog from '@/components/connection/ConnectionDialog.vue'
+import QueryPanel from '@/components/query/QueryPanel.vue'
+import ResultPanel from '@/components/results/ResultPanel.vue'
 import { resetQueryTabsState } from '@/composables/useQueryTabs'
 import { flushPromises } from '@/test/utils'
 
 vi.mock('@tauri-apps/api/core')
 
-// Same stubs as unit tests (CodeEditorStub, Splitpanes, Pane)
+// Same stubs as unit tests (QueryEditorStub, Splitpanes, Pane)
 
 function mountApp() {
   return mount(App, { global: { stubs } })
@@ -277,7 +280,7 @@ describe('Integration flow', () => {
     const wrapper = mountApp()
     await flushPromises()
 
-    // Interact with ConnectionPanel, QueryPanel, verify ResultTable
+    // Interact with ConnectionPanel, QueryPanel, verify ResultPanel
   })
 })
 ```

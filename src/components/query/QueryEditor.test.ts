@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import CodeEditor from '@/components/CodeEditor.vue'
+import QueryEditor from '@/components/query/QueryEditor.vue'
 import { setErrors, clearErrors } from '@/lib/error-highlighting'
 import { flushPromises } from '@/test/utils'
 
@@ -61,13 +61,13 @@ vi.mock('@/lib/error-highlighting', () => ({
 
 // --- Tests ---
 
-describe('CodeEditor.vue', () => {
+describe('QueryEditor.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   function createWrapper(props = {}) {
-    return mount(CodeEditor, {
+    return mount(QueryEditor, {
       props: { modelValue: '', ...props },
     })
   }
@@ -98,26 +98,26 @@ describe('CodeEditor.vue', () => {
 
   it('exposes showErrors method', () => {
     const wrapper = createWrapper()
-    expect(typeof (wrapper.vm as InstanceType<typeof CodeEditor>).showErrors).toBe('function')
+    expect(typeof (wrapper.vm as InstanceType<typeof QueryEditor>).showErrors).toBe('function')
   })
 
   it('exposes hideErrors method', () => {
     const wrapper = createWrapper()
-    expect(typeof (wrapper.vm as InstanceType<typeof CodeEditor>).hideErrors).toBe('function')
+    expect(typeof (wrapper.vm as InstanceType<typeof QueryEditor>).hideErrors).toBe('function')
   })
 
   it('calls setErrors when showErrors is invoked with a view', async () => {
     const wrapper = createWrapper()
     await flushPromises()
     const errors = [{ from: 0, to: 5, message: 'Test error', severity: 'error' as const }]
-    ;(wrapper.vm as InstanceType<typeof CodeEditor>).showErrors(errors)
+    ;(wrapper.vm as InstanceType<typeof QueryEditor>).showErrors(errors)
     expect(setErrors).toHaveBeenCalledWith(expect.anything(), errors)
   })
 
   it('calls clearErrors when hideErrors is invoked', async () => {
     const wrapper = createWrapper()
     await flushPromises()
-    ;(wrapper.vm as InstanceType<typeof CodeEditor>).hideErrors()
+    ;(wrapper.vm as InstanceType<typeof QueryEditor>).hideErrors()
     expect(clearErrors).toHaveBeenCalled()
   })
 
