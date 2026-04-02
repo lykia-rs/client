@@ -5,8 +5,8 @@ import ResultTable from '@/components/ResultTable.vue'
 import type { QueryResult, ResultViewMode } from '@/composables/useQueryTabs'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mountView = (data: QueryResult | Record<string, any>, isLocked = false, viewMode: ResultViewMode = 'table') =>
-  mount(ResultView, { props: { data: data as QueryResult, isLocked, viewMode } })
+const mountView = (data: QueryResult | Record<string, any>, isLocked = false, viewMode: ResultViewMode = 'table', showOverlay = false) =>
+  mount(ResultView, { props: { data: data as QueryResult, isLocked, viewMode, showOverlay } })
 
 describe('ResultView.vue', () => {
   describe('view mode switching', () => {
@@ -55,8 +55,19 @@ describe('ResultView.vue', () => {
       expect(container.classes()).not.toContain('select-none')
     })
 
-    it('renders locked state with overlay when isLocked is true', () => {
+    it('blocks interaction when isLocked is true without overlay', () => {
       const wrapper = mountView([{ id: 1, name: 'Test' }], true)
+      const container = wrapper.find('.relative')
+      expect(container.classes()).toContain('pointer-events-none')
+      expect(container.classes()).toContain('select-none')
+      expect(container.classes()).toContain('cursor-wait')
+      // No overlay or dimming without showOverlay
+      expect(wrapper.find('.bg-zinc-100\\/50').exists()).toBe(false)
+      expect(wrapper.find('.opacity-50').exists()).toBe(false)
+    })
+
+    it('renders locked state with overlay when showOverlay is true', () => {
+      const wrapper = mountView([{ id: 1, name: 'Test' }], true, 'table', true)
       const overlay = wrapper.find('.bg-zinc-100\\/50')
       expect(overlay.exists()).toBe(true)
       expect(overlay.text()).toContain('Query running...')
@@ -65,12 +76,17 @@ describe('ResultView.vue', () => {
       expect(container.classes()).toContain('select-none')
     })
 
-    it('applies opacity when locked, not when unlocked', () => {
+    it('applies opacity only when showOverlay is true', () => {
+      expect(
+        mountView([{ id: 1 }], true, 'table', true)
+          .find('.opacity-50')
+          .exists(),
+      ).toBe(true)
       expect(
         mountView([{ id: 1 }], true)
           .find('.opacity-50')
           .exists(),
-      ).toBe(true)
+      ).toBe(false)
       expect(
         mountView([{ id: 1 }], false)
           .find('.opacity-50')
@@ -89,8 +105,8 @@ describe('ResultView.vue', () => {
       expect(wrapper.findComponent(ResultTable).exists()).toBe(true)
     })
 
-    it('shows overlay in json viewMode when locked', () => {
-      const wrapper = mountView([{ id: 1 }], true, 'json')
+    it('shows overlay in json viewMode when showOverlay is true', () => {
+      const wrapper = mountView([{ id: 1 }], true, 'json', true)
       expect(wrapper.find('.bg-zinc-100\\/50').exists()).toBe(true)
       expect(wrapper.find('[data-testid="json-tree"]').exists()).toBe(true)
     })

@@ -84,10 +84,30 @@ The execute button uses the active connection's color as background.
 
 ## Loading UI
 
-- **Shimmer bar**: `.loading-shimmer` element appears at top of results pane during execution.
-- **Spinner**: `.animate-spin` icon shown on the active tab and the execute button after 500ms.
+Loading has two tiers based on query duration:
+
+### Fast queries (< 500ms)
+
+- **Editor**: locked (no editing) but not dimmed. Cursor changes to `cursor-wait`.
+- **Results**: locked (`pointer-events-none`, `select-none`, `cursor-wait`) but no overlay, no dimming.
+- **No visual indicators**: no spinners, no shimmer bar, no "Running..." text.
+- This provides a silent freeze — the UI is unresponsive but visually unchanged.
+
+### Slow queries (≥ 500ms)
+
+- **Editor**: locked and dimmed (`opacity-50`, `cursor-not-allowed`).
+- **Results**: locked with overlay (`backdrop-blur`, "Query running..." text, `opacity-50`).
+- **Shimmer bar**: `.loading-shimmer` element appears at top of results pane.
+- **Spinner**: `.animate-spin` icon shown on the active tab and the execute button.
 - **Tab close button**: replaced by spinner while that tab's query is running.
-- **Previous results**: remain visible with `ResultTable` locked (`isLocked: true`).
+
+### State mapping
+
+| State              | `loading` | `loadingIndicator` | Editor dimmed | Editor locked | Results locked | Results overlay |
+|--------------------|-----------|---------------------|---------------|---------------|----------------|-----------------|
+| Idle               | false     | false               | No            | No            | No             | No              |
+| Fast loading (<500ms) | true  | false               | No            | Yes           | Yes            | No              |
+| Slow loading (≥500ms) | true  | true                | Yes           | Yes           | Yes            | Yes             |
 
 ## Error Display
 

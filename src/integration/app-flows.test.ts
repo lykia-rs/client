@@ -369,7 +369,8 @@ describe('Integration: Connection → Query → Results', () => {
       // Previous results still visible while loading
       const rt2 = wrapper.findComponent(ResultView)
       expect(rt2.props('data')).toHaveLength(3)
-      expect(rt2.props('isLocked')).toBe(false) // loadingIndicator not yet triggered (< 500ms)
+      expect(rt2.props('isLocked')).toBe(true)       // locked immediately
+      expect(rt2.props('showOverlay')).toBe(false)    // no overlay before 500ms
     })
   })
 

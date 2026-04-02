@@ -25,11 +25,12 @@ type ResultViewMode = 'table' | 'json'
 
 ### ResultView
 
-| Prop       | Type              | Default   | Description                          |
-|------------|-------------------|-----------|--------------------------------------|
-| `data`     | `QueryResult`     | —         | Query result data                    |
-| `isLocked` | `boolean`         | `false`   | Overlay + disable during loading     |
-| `viewMode` | `ResultViewMode`  | `'table'` | Display mode: table or JSON tree     |
+| Prop          | Type              | Default   | Description                                |
+|---------------|-------------------|-----------|--------------------------------------------|
+| `data`        | `QueryResult`     | —         | Query result data                          |
+| `isLocked`    | `boolean`         | `false`   | Block interaction (pointer-events, select)  |
+| `showOverlay` | `boolean`         | `false`   | Show dimming overlay + "Query running..."   |
+| `viewMode`    | `ResultViewMode`  | `'table'` | Display mode: table or JSON tree           |
 
 ### ResultTable
 
@@ -110,12 +111,25 @@ When `data` is `null` and no query has been executed: "Execute a query to see re
 
 ## Lock Overlay
 
-When `isLocked: true` (query running), rendered by `ResultView`:
+The lock state has two tiers:
+
+### Interaction lock (`isLocked: true`)
+
+Blocks user interaction without visual changes (used for fast queries < 500ms):
+
+- `pointer-events-none` — prevents clicks/scrolling.
+- `select-none` — prevents text selection.
+- `cursor-wait` — indicates the UI is busy.
+- No dimming, no overlay text.
+
+### Visual overlay (`showOverlay: true`)
+
+Full visual feedback for slow queries (≥ 500ms). Requires `isLocked: true`:
 
 - Semi-transparent overlay: `.absolute.inset-0` with backdrop blur.
 - Text: "Query running...".
 - Content has `opacity-50`.
-- Pointer events disabled on entire component (`pointer-events-none select-none`).
+- Pointer events disabled on entire component.
 
 ## DOM Selectors
 

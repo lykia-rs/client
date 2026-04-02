@@ -17,9 +17,12 @@ const CodeEditorStub = {
     :readonly="readonly"
     @input="$emit('update:modelValue', $event.target.value)"
     class="code-editor-stub"
-    :class="{ 'opacity-50 cursor-not-allowed': disabled }"
+    :class="{
+      'opacity-50 cursor-not-allowed': dimmed,
+      'cursor-wait': disabled && !dimmed,
+    }"
   />`,
-  props: ['modelValue', 'disabled', 'readonly', 'placeholder'],
+  props: ['modelValue', 'disabled', 'readonly', 'dimmed', 'placeholder'],
   emits: ['update:modelValue', 'parseError', 'parseErrorMessage'],
 }
 
@@ -204,6 +207,7 @@ describe('QueryPanel.vue', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.findComponent(ResultView).exists()).toBe(true)
     expect(wrapper.findComponent(ResultView).props('isLocked')).toBe(true)
+    expect(wrapper.findComponent(ResultView).props('showOverlay')).toBe(true)
   })
 
   it('displays execution time after query completes', async () => {
@@ -423,6 +427,58 @@ describe('QueryPanel.vue', () => {
     expect(textarea.attributes('readonly')).toBeUndefined()
     expect(textarea.classes()).not.toContain('opacity-50')
     expect(textarea.classes()).not.toContain('cursor-not-allowed')
+  })
+
+  it('does not dim editor before 500ms but locks it', async () => {
+    vi.useFakeTimers()
+    mockSlow()
+    const wrapper = createWrapper()
+    await wrapper.find('textarea').setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('[data-testid="execute-button"]').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // Before 500ms: disabled (locked) but not dimmed
+    const textarea = wrapper.find('textarea')
+    expect(textarea.attributes('disabled')).toBeDefined()
+    expect(textarea.attributes('readonly')).toBeDefined()
+    expect(textarea.element.closest('.cursor-wait')).not.toBeNull()
+    expect(textarea.element.closest('.opacity-50')).toBeNull()
+
+    // After 500ms: dimmed
+    vi.advanceTimersByTime(500)
+    await wrapper.vm.$nextTick()
+    expect(textarea.element.closest('.opacity-50')).not.toBeNull()
+  })
+
+  it('locks results immediately on loading and shows overlay after 500ms', async () => {
+    vi.useFakeTimers()
+    mockSuccess([{ id: 1 }], 20)
+    const wrapper = createWrapper()
+
+    await wrapper.find('textarea').setValue('SELECT * FROM test')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('[data-testid="execute-button"]').trigger('click')
+    await vi.advanceTimersByTimeAsync(500)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent(ResultView).exists()).toBe(true)
+
+    // Start a slow second query
+    vi.mocked(invoke).mockImplementation(() => new Promise(() => {}))
+    await wrapper.find('textarea').setValue('SELECT * FROM slow')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('[data-testid="execute-button"]').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // Before 500ms: locked but no overlay
+    expect(wrapper.findComponent(ResultView).props('isLocked')).toBe(true)
+    expect(wrapper.findComponent(ResultView).props('showOverlay')).toBe(false)
+
+    // After 500ms: locked with overlay
+    vi.advanceTimersByTime(500)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent(ResultView).props('isLocked')).toBe(true)
+    expect(wrapper.findComponent(ResultView).props('showOverlay')).toBe(true)
   })
 
   it('shows spinner instead of close button when query is running', async () => {

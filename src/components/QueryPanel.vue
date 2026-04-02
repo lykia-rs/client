@@ -127,6 +127,7 @@ async function executeQuery() {
           v-model="activeTab.query"
           :disabled="activeTab.loading"
           :readonly="activeTab.loading"
+          :dimmed="activeTab.loadingIndicator"
           placeholder="Enter your query here..."
           @parse-error="hasLocalError = $event"
           @parse-error-message="parseErrorMessage = $event"
@@ -202,7 +203,7 @@ async function executeQuery() {
           </div>
 
           <div v-else-if="activeTab?.result" class="flex-1 overflow-hidden">
-            <ResultView :data="activeTab.result" :is-locked="activeTab?.loadingIndicator" :view-mode="activeTab.viewMode" />
+            <ResultView :data="activeTab.result" :is-locked="activeTab?.loading" :show-overlay="activeTab?.loadingIndicator" :view-mode="activeTab.viewMode" />
           </div>
         </div>
 

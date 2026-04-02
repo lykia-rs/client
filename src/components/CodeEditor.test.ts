@@ -77,15 +77,23 @@ describe('CodeEditor.vue', () => {
     expect(wrapper.find('div.code-editor').exists()).toBe(true)
   })
 
-  it('applies opacity class when disabled', () => {
-    const wrapper = createWrapper({ disabled: true })
+  it('applies opacity class when dimmed', () => {
+    const wrapper = createWrapper({ dimmed: true })
     expect(wrapper.find('div').classes()).toContain('opacity-50')
     expect(wrapper.find('div').classes()).toContain('cursor-not-allowed')
   })
 
-  it('does not apply disabled classes when enabled', () => {
+  it('applies cursor-wait when disabled but not dimmed', () => {
+    const wrapper = createWrapper({ disabled: true })
+    expect(wrapper.find('div').classes()).toContain('cursor-wait')
+    expect(wrapper.find('div').classes()).not.toContain('opacity-50')
+    expect(wrapper.find('div').classes()).not.toContain('cursor-not-allowed')
+  })
+
+  it('does not apply disabled or dimmed classes when enabled', () => {
     const wrapper = createWrapper({ disabled: false })
     expect(wrapper.find('div').classes()).not.toContain('opacity-50')
+    expect(wrapper.find('div').classes()).not.toContain('cursor-wait')
   })
 
   it('exposes showErrors method', () => {

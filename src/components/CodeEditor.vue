@@ -16,6 +16,7 @@ const props = defineProps<{
   modelValue: string
   disabled?: boolean
   readonly?: boolean
+  dimmed?: boolean
   placeholder?: string
 }>()
 
@@ -155,7 +156,10 @@ defineExpose({ showErrors, hideErrors })
   <div
     ref="containerRef"
     class="w-full h-full flex-1 flex flex-col overflow-hidden bg-white dark:bg-zinc-900 transition-opacity duration-200 code-editor"
-    :class="{ 'opacity-50 cursor-not-allowed': disabled }"
+    :class="{
+      'opacity-50 cursor-not-allowed': dimmed,
+      'cursor-wait': disabled && !dimmed,
+    }"
   />
 </template>
 
