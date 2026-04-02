@@ -34,7 +34,7 @@ async fn test_connection(address: String) -> Result<ConnectionResult, String> {
         })
     })
     .await
-    .map_err(|e| format!("Connection error."))?
+    .map_err(|e| format!("Connection error: {}", e))?
 }
 
 #[tauri::command]
@@ -43,7 +43,7 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
         tokio::runtime::Handle::current().block_on(async move {
             let mut session = get_session(&address, Protocol::Tcp).await;
             let msg = Message::Request(Request::Run(query));
-            
+
             match session.send_receive(msg).await {
                 Ok(Message::Response(Response::Value(bson, duration))) => Ok(QueryResult {
                     success: true,
@@ -83,7 +83,7 @@ async fn execute_query(address: String, query: String) -> Result<QueryResult, St
         })
     })
     .await
-    .map_err(|e| format!("Connection error."))?
+    .map_err(|e| format!("Connection error: {}", e))?
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

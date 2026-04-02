@@ -3,7 +3,7 @@ import type { Connection } from './useConnections'
 
 export type QueryResultValue = string | number | boolean | null | undefined | QueryResultValue[] | { [key: string]: QueryResultValue }
 export type QueryResultRow = Record<string, QueryResultValue>
-export type QueryResult = QueryResultRow[] | null
+export type QueryResult = QueryResultRow[] | QueryResultRow | null
 export type ResultViewMode = 'table' | 'json'
 
 export interface QueryTab {

@@ -13,6 +13,7 @@ import ResultView from '@/components/ResultView.vue'
 import { resetQueryTabsState } from '@/composables/useQueryTabs'
 import type { QueryResult } from '@/composables/useQueryTabs'
 import type { Connection } from '@/composables/useConnections'
+import { resetConnectionsState } from '@/composables/useConnections'
 import { flushPromises } from '@/test/utils'
 
 vi.mock('@tauri-apps/api/core')
@@ -120,6 +121,7 @@ describe('Integration: Connection → Query → Results', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     resetQueryTabsState()
+    resetConnectionsState()
   })
 
   afterEach(() => {

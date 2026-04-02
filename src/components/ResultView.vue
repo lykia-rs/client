@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import ResultTable from '@/components/ResultTable.vue'
 import JsonTreeView from '@/components/JsonTreeView.vue'
-import type { QueryResult, ResultViewMode } from '@/composables/useQueryTabs'
+import type { QueryResult, QueryResultRow, ResultViewMode } from '@/composables/useQueryTabs'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     data: QueryResult
     isLocked?: boolean
@@ -14,6 +15,13 @@ withDefaults(
     viewMode: 'table',
   },
 )
+
+// Normalize data for ResultTable: wrap non-array results in an array
+const tableData = computed<QueryResultRow[] | null>(() => {
+  if (props.data === null) return null
+  if (Array.isArray(props.data)) return props.data
+  return [props.data]
+})
 </script>
 
 <template>
@@ -34,7 +42,7 @@ withDefaults(
       ]"
     >
       <div v-if="viewMode === 'table'" class="flex-1 overflow-hidden">
-        <ResultTable :data="data" />
+        <ResultTable :data="tableData" />
       </div>
 
       <div v-else data-testid="json-tree" class="flex-1 overflow-hidden">

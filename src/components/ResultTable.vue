@@ -11,10 +11,10 @@ import {
   type SortingState,
 } from '@tanstack/vue-table'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-vue-next'
-import type { QueryResult, QueryResultRow, QueryResultValue } from '@/composables/useQueryTabs'
+import type { QueryResultRow, QueryResultValue } from '@/composables/useQueryTabs'
 
 const props = defineProps<{
-  data: QueryResult
+  data: QueryResultRow[] | null
 }>()
 
 const sorting = ref<SortingState>([])

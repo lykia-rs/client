@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ResultTable from '@/components/ResultTable.vue'
-import type { QueryResult } from '@/composables/useQueryTabs'
+import type { QueryResultRow } from '@/composables/useQueryTabs'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mountTable = (data: QueryResult | (Record<string, any>) | (string | number | boolean)[]) =>
-  mount(ResultTable, { props: { data: data as QueryResult } })
+const mountTable = (data: QueryResultRow[] | null | (Record<string, any>) | (string | number | boolean)[]) =>
+  mount(ResultTable, { props: { data: data as QueryResultRow[] | null } })
 
 describe('ResultTable.vue', () => {
   it('renders table for array data with objects', () => {

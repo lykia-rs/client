@@ -6,6 +6,7 @@ import ConnectionPanel from '@/components/ConnectionPanel.vue'
 import QueryPanel from '@/components/QueryPanel.vue'
 import ConnectionDialog from '@/components/ConnectionDialog.vue'
 import type { Connection } from '@/composables/useConnections'
+import { resetConnectionsState } from '@/composables/useConnections'
 import { flushPromises } from '@/test/utils'
 
 vi.mock('@tauri-apps/api/core')
@@ -31,6 +32,7 @@ async function addSecondConnection(wrapper: ReturnType<typeof mountApp>) {
 describe('App.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    resetConnectionsState()
   })
 
   it('renders the main application structure', () => {
