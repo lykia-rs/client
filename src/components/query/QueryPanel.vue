@@ -8,6 +8,7 @@ import QueryEditor from '@/components/query/QueryEditor.vue'
 import { cn } from '@/lib/utils'
 import { useQueryTabs } from '@/composables/useQueryTabs'
 import { useQueryExecution } from '@/composables/useQueryExecution'
+import { useSettings } from '@/composables/useSettings'
 import type { Connection } from '@/composables/useConnections'
 
 const props = defineProps<{
@@ -17,6 +18,7 @@ const props = defineProps<{
 const connectionRef = toRef(props, 'connection')
 const { tabs, activeTab, activeTabId, addTab, closeTab } = useQueryTabs(connectionRef)
 const { executeQuery: executeQueryFn } = useQueryExecution()
+const { settings } = useSettings()
 
 const editorRef = ref<InstanceType<typeof QueryEditor> | null>(null)
 const hasLocalError = ref(false)
@@ -128,6 +130,7 @@ async function executeQuery() {
           :disabled="activeTab.loading"
           :readonly="activeTab.loading"
           :dimmed="activeTab.loadingIndicator"
+          :line-numbers="settings.showLineNumbers"
           placeholder="Enter your query here..."
           @parse-error="hasLocalError = $event"
           @parse-error-message="parseErrorMessage = $event"

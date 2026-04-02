@@ -203,4 +203,15 @@ describe('ConnectionPanel.vue', () => {
     if (disabledButton) await disabledButton.trigger('click')
     expect(wrapper.emitted('remove')).toBeFalsy()
   })
+
+  it('renders settings button', () => {
+    const wrapper = createWrapper()
+    expect(wrapper.find('button[title="Settings"]').exists()).toBe(true)
+  })
+
+  it('emits openSettings when settings button is clicked', async () => {
+    const wrapper = createWrapper()
+    await wrapper.find('button[title="Settings"]').trigger('click')
+    expect(wrapper.emitted('openSettings')).toHaveLength(1)
+  })
 })
