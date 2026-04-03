@@ -84,7 +84,7 @@ function formatValue(val: QueryResultValue): string {
               v-for="header in headerGroup.headers"
               :key="header.id"
               :class="[
-                'text-left px-3 py-2.5 font-semibold text-label uppercase tracking-widest text-zinc-500 dark:text-zinc-500 select-none',
+                'text-left px-3 py-2 font-semibold text-label text-zinc-500 dark:text-zinc-500 select-none',
                 header.column.getCanSort()
                   ? 'cursor-pointer select-none hover:bg-zinc-200 dark:hover:bg-zinc-800/50 transition-colors'
                   : '',

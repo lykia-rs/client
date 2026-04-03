@@ -94,12 +94,11 @@ describe('TableView.vue', () => {
     expect(wrapper.find('table').exists()).toBe(false)
   })
 
-  it('has sticky table header with uppercase styling', () => {
+  it('has sticky table header', () => {
     const wrapper = mountTable([{ id: 1 }])
     const thead = wrapper.find('thead')
     expect(thead.classes()).toContain('sticky')
     expect(thead.classes()).toContain('top-0')
-    expect(wrapper.find('th').classes()).toContain('uppercase')
   })
 
   it('has hover effect on table rows', () => {

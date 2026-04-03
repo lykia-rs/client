@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toRef, ref, watch, computed } from 'vue'
-import { Play, Loader2, Plus, X, Clock, AlertCircle, LayoutList, Table2, Braces } from 'lucide-vue-next'
+import { Play, Plus, X, Clock, AlertCircle, LayoutList, Table2, Braces } from 'lucide-vue-next'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import ResultPanel from '@/components/results/ResultPanel.vue'
@@ -79,12 +79,11 @@ async function executeQuery() {
             />
             <span class="font-medium tracking-wide">{{ tab.name }}</span>
 
-            <!-- Show spinner when loading indicator is active, close button when not -->
-            <Loader2
+            <!-- Show blinking dot when loading indicator is active, close button when not -->
+            <span
               v-if="tab.loadingIndicator"
-              :size="12"
-              class="animate-spin ml-0.5"
-              :style="{ color: connection.color }"
+              class="inline-block w-1.5 h-1.5 rounded-full ml-1 blink-dot"
+              :style="{ backgroundColor: connection.color }"
             />
             <button
               v-else-if="tabs.length > 1 && !tab.loading"
@@ -116,7 +115,10 @@ async function executeQuery() {
               :style="{ backgroundColor: connection.color }"
               @click="executeQuery"
             >
-              <Loader2 v-if="activeTab?.loadingIndicator" :size="12" class="animate-spin" />
+              <span
+                v-if="activeTab?.loadingIndicator"
+                class="inline-block w-1.5 h-1.5 rounded-full blink-dot bg-white"
+              />
               <Play v-else :size="12" fill="currentColor" />
               {{ activeTab?.loadingIndicator ? 'Running...' : 'Execute' }}
             </button>
@@ -244,5 +246,14 @@ async function executeQuery() {
 
 .loading-shimmer {
   animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+
+.blink-dot {
+  animation: blink 1.5s ease-in-out infinite;
 }
 </style>

@@ -39,50 +39,46 @@ async function handleSubmit() {
     @click.self="emit('close')"
   >
     <div
-      class="bg-white dark:bg-zinc-900 rounded-xl border border-border/60 w-full max-w-md p-6 shadow-2xl shadow-black/30 animate-in zoom-in-95 duration-200"
+      class="bg-white dark:bg-zinc-900 rounded-lg border border-border/60 w-full max-w-sm mx-4 shadow-2xl shadow-black/30 animate-in zoom-in-95 duration-200"
     >
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="text-ui font-semibold text-muted-foreground tracking-tight">New Connection</h2>
+      <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/40">
+        <h2 class="text-sm font-semibold text-foreground">New Connection</h2>
         <button
-          class="text-muted-foreground hover:text-foreground p-1 hover:bg-accent rounded transition-all duration-200"
+          class="text-muted-foreground hover:text-foreground p-1 -mr-1 hover:bg-accent rounded transition-all duration-200"
           @click="emit('close')"
         >
-          <X :size="16" />
+          <X :size="14" />
         </button>
       </div>
 
-      <form class="space-y-4" @submit.prevent="handleSubmit">
-        <div class="space-y-1.5">
-          <Label class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
-            >Host</Label
-          >
-          <Input v-model="host" type="text" placeholder="localhost" class="font-mono" />
+      <form class="px-5 py-4 space-y-3" @submit.prevent="handleSubmit">
+        <div class="space-y-1">
+          <Label class="text-xs text-muted-foreground">Host</Label>
+          <Input v-model="host" type="text" placeholder="localhost" class="font-mono text-sm h-8" />
         </div>
 
-        <div class="space-y-1.5">
-          <Label class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
-            >Port</Label
-          >
-          <Input v-model="port" type="text" placeholder="19191" class="font-mono" />
+        <div class="space-y-1">
+          <Label class="text-xs text-muted-foreground">Port</Label>
+          <Input v-model="port" type="text" placeholder="19191" class="font-mono text-sm h-8" />
         </div>
 
         <div
           v-if="error"
-          class="text-sm text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-950/20 border border-red-300 dark:border-red-900/30 rounded-lg px-3 py-2 animate-in slide-in-from-top duration-200"
+          class="text-xs text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded px-3 py-2 animate-in slide-in-from-top duration-200"
         >
           {{ error }}
         </div>
-
-        <div class="flex gap-2 justify-end pt-2">
-          <Button variant="ghost" type="button" :disabled="loading" @click="emit('close')">
-            Cancel
-          </Button>
-          <Button type="submit" :disabled="loading">
-            <Loader2 v-if="loading" :size="16" class="animate-spin mr-2" />
-            {{ loading ? 'Connecting...' : 'Connect' }}
-          </Button>
-        </div>
       </form>
+
+      <div class="flex gap-2 justify-end px-5 pb-4 pt-1">
+        <Button variant="ghost" size="sm" type="button" :disabled="loading" @click="emit('close')">
+          Cancel
+        </Button>
+        <Button size="sm" type="submit" :disabled="loading" @click="handleSubmit">
+          <Loader2 v-if="loading" :size="14" class="animate-spin mr-1.5" />
+          {{ loading ? 'Connecting...' : 'Connect' }}
+        </Button>
+      </div>
     </div>
   </div>
 </template>

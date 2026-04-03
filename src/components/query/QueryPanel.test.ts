@@ -172,7 +172,7 @@ describe('QueryPanel.vue', () => {
     await startLoading(wrapper)
     const btn = wrapper.find('[data-testid="execute-button"]')
     expect(btn.text()).toContain('Running...')
-    expect(btn.html()).toContain('animate-spin')
+    expect(btn.html()).toContain('blink-dot')
   })
 
   it('shows loading bar at top of results pane during query execution', async () => {
@@ -489,10 +489,10 @@ describe('QueryPanel.vue', () => {
       .findAll('button')
       .filter((b) => b.attributes('title')?.includes('Close tab'))
     expect(closeButtons.length).toBeGreaterThan(0)
-    const initialSpinnerCount = wrapper.findAll('.animate-spin').length
+    const initialDotCount = wrapper.findAll('.blink-dot').length
 
     await startLoading(wrapper)
-    expect(wrapper.findAll('.animate-spin').length).toBeGreaterThan(initialSpinnerCount)
+    expect(wrapper.findAll('.blink-dot').length).toBeGreaterThan(initialDotCount)
     expect(findTabs(wrapper).length).toBeGreaterThan(0)
   })
 

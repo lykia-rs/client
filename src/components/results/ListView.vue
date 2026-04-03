@@ -25,20 +25,20 @@ const pagedData = computed(() => {
 
 <template>
   <div v-if="data && data.length > 0" class="flex flex-col h-full">
-    <div class="flex-1 overflow-auto p-2 space-y-2">
+    <div class="flex-1 overflow-auto p-1.5 space-y-1">
       <div
         v-for="(row, index) in pagedData"
         :key="currentPage * PAGE_SIZE + index"
-        class="border border-zinc-200/80 dark:border-zinc-800/40 rounded-lg bg-white dark:bg-zinc-900/60 shadow-sm"
+        class="border border-zinc-200/60 dark:border-zinc-800/30 rounded bg-white dark:bg-zinc-900/60"
         data-testid="list-card"
       >
-        <div class="divide-y divide-zinc-100 dark:divide-zinc-800/30">
+        <div class="px-3 py-1.5">
           <div
-            v-for="[key, value] in Object.entries(row)"
+            v-for="([key, value], i) in Object.entries(row)"
             :key="key"
-            class="flex gap-3 px-3 py-1.5 items-start"
+            :class="['flex gap-2 items-baseline', i > 0 ? 'mt-0.5' : '']"
           >
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 min-w-[100px] max-w-[160px] truncate pt-0.5 shrink-0 select-none">
+            <span class="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 min-w-[80px] max-w-[140px] truncate shrink-0 select-none">
               {{ key }}
             </span>
             <div class="flex-1 min-w-0">
