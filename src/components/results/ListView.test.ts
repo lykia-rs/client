@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ListView from '@/components/results/ListView.vue'
-import JsonView from '@/components/results/JsonView.vue'
+import CardField from '@/components/results/CardField.vue'
 import type { QueryResultRow } from '@/composables/useQueryTabs'
 
 const mountList = (data: QueryResultRow[] | null) =>
@@ -46,18 +46,25 @@ describe('ListView.vue', () => {
   })
 
   describe('nested objects', () => {
-    it('renders JsonView for object values', () => {
+    it('renders CardField for each field', () => {
       const wrapper = mountList([
         { id: 1, meta: { role: 'admin', level: 5 } },
       ])
-      expect(wrapper.findComponent(JsonView).exists()).toBe(true)
+      expect(wrapper.findAllComponents(CardField).length).toBeGreaterThanOrEqual(2)
     })
 
-    it('renders JsonView for array values', () => {
+    it('shows Object label for nested objects', () => {
+      const wrapper = mountList([
+        { id: 1, meta: { role: 'admin', level: 5 } },
+      ])
+      expect(wrapper.text()).toContain('Object')
+    })
+
+    it('shows Array label for nested arrays', () => {
       const wrapper = mountList([
         { id: 1, tags: ['a', 'b', 'c'] },
       ])
-      expect(wrapper.findComponent(JsonView).exists()).toBe(true)
+      expect(wrapper.text()).toContain('Array (3)')
     })
   })
 

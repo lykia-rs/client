@@ -57,7 +57,7 @@ const tableData = computed<QueryResultRow[] | null>(() => {
       </div>
 
       <div v-else data-testid="json-tree" class="flex-1 overflow-hidden">
-        <JsonView :data="data" :root="true" />
+        <JsonView :data="data" />
       </div>
     </div>
   </div>
