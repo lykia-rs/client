@@ -183,13 +183,13 @@ describe('JsonView.vue', () => {
   describe('empty/edge cases', () => {
     it('renders empty container for null data', () => {
       const wrapper = mountTree(null)
-      expect(wrapper.find('.flex.flex-col').exists()).toBe(true)
+      expect(wrapper.find('div').exists()).toBe(true)
       expect(wrapper.findAll('[data-testid="doc-toggle"]')).toHaveLength(0)
     })
 
     it('renders empty container for empty array', () => {
       const wrapper = mountTree([])
-      expect(wrapper.find('.flex.flex-col').exists()).toBe(true)
+      expect(wrapper.find('div').exists()).toBe(true)
       expect(wrapper.findAll('[data-testid="doc-toggle"]')).toHaveLength(0)
     })
 

@@ -24,15 +24,24 @@ export function formatExpandableLabel(val: Record<string, QueryResultValue> | Qu
   return 'Object'
 }
 
+export function entries(val: QueryResultValue): [string, QueryResultValue][] {
+  if (!isExpandable(val)) return []
+  return Array.isArray(val) ? val.map((v, i) => [String(i), v]) : Object.entries(val)
+}
+
+function truncate(str: string, max: number): string {
+  return str.length > max ? str.slice(0, max) + '...' : str
+}
+
 export function formatDocumentPreview(val: Record<string, QueryResultValue> | QueryResultValue[]): string {
   if (Array.isArray(val)) {
     if (val.length === 0) return '[ ]'
-    const first = isExpandable(val[0]) ? '{...}' : formatPrimitive(val[0])
+    const first = isExpandable(val[0]) ? '{...}' : truncate(formatPrimitive(val[0]), 48)
     return val.length === 1 ? `[ ${first} ]` : `[ ${first}, ... ]`
   }
   const kvPairs = Object.entries(val)
   if (kvPairs.length === 0) return '{ }'
   const [key, value] = kvPairs[0]
-  const formatted = isExpandable(value) ? '{...}' : formatPrimitive(value)
+  const formatted = isExpandable(value) ? '{...}' : truncate(formatPrimitive(value), 48)
   return kvPairs.length === 1 ? `{ ${key}: ${formatted} }` : `{ ${key}: ${formatted}, ... }`
 }

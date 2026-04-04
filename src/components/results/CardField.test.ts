@@ -120,4 +120,20 @@ describe('CardField.vue', () => {
       expect(wrapper.text()).toContain('"third"')
     })
   })
+
+  describe('empty expandable values', () => {
+    it('expands empty object with no children', async () => {
+      const wrapper = mountField('obj', {})
+      expect(wrapper.find('[data-testid="card-field-toggle"]').exists()).toBe(true)
+      await wrapper.find('[data-testid="card-field-toggle"]').trigger('click')
+      expect(wrapper.findAll('[data-testid="card-field-toggle"]')).toHaveLength(1)
+    })
+
+    it('expands empty array with no children', async () => {
+      const wrapper = mountField('arr', [])
+      expect(wrapper.find('[data-testid="card-field-toggle"]').exists()).toBe(true)
+      await wrapper.find('[data-testid="card-field-toggle"]').trigger('click')
+      expect(wrapper.findAll('[data-testid="card-field-toggle"]')).toHaveLength(1)
+    })
+  })
 })

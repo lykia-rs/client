@@ -2,14 +2,14 @@
 import { ref, computed } from 'vue'
 import { ChevronRight, ChevronDown, ChevronsDownUp, ChevronsUpDown } from 'lucide-vue-next'
 import CardField from '@/components/results/CardField.vue'
-import { isExpandable, typeClass, formatPrimitive, formatDocumentPreview } from '@/components/results/format'
+import { isExpandable, typeClass, formatPrimitive, formatDocumentPreview, entries } from '@/components/results/format'
 import type { QueryResultValue } from '@/composables/useQueryTabs'
 
 const props = defineProps<{
   data: QueryResultValue
 }>()
 
-const expandedDocs = ref<Record<number, boolean>>({})
+const expandedDocs = ref(new Set<number>())
 const allExpanded = ref(false)
 
 const items = computed<QueryResultValue[]>(() => {
@@ -19,21 +19,17 @@ const items = computed<QueryResultValue[]>(() => {
 })
 
 function toggle(index: number) {
-  expandedDocs.value = { ...expandedDocs.value, [index]: !expandedDocs.value[index] }
+  const next = new Set(expandedDocs.value)
+  if (next.has(index)) next.delete(index)
+  else next.add(index)
+  expandedDocs.value = next
 }
 
 function toggleExpandAll() {
   allExpanded.value = !allExpanded.value
-  const next: Record<number, boolean> = {}
-  if (allExpanded.value) {
-    items.value.forEach((_, i) => { next[i] = true })
-  }
-  expandedDocs.value = next
-}
-
-function entries(val: QueryResultValue): [string, QueryResultValue][] {
-  if (!isExpandable(val)) return []
-  return Array.isArray(val) ? val.map((v, i) => [String(i), v]) : Object.entries(val)
+  expandedDocs.value = allExpanded.value
+    ? new Set(items.value.map((_, i) => i))
+    : new Set()
 }
 </script>
 
@@ -68,15 +64,15 @@ function entries(val: QueryResultValue): [string, QueryResultValue][] {
             @click="toggle(index)"
           >
             <component
-              :is="expandedDocs[index] ? ChevronDown : ChevronRight"
+              :is="expandedDocs.has(index) ? ChevronDown : ChevronRight"
               :size="14"
               class="text-zinc-400 dark:text-zinc-500 shrink-0"
             />
-            <span v-if="!expandedDocs[index]" class="text-zinc-500 dark:text-zinc-400 truncate">
+            <span v-if="!expandedDocs.has(index)" class="text-zinc-500 dark:text-zinc-400 truncate">
               {{ formatDocumentPreview(item) }}
             </span>
           </button>
-          <div v-if="expandedDocs[index]" class="ml-5 pl-3 pb-1 border-l border-zinc-200 dark:border-zinc-700/50">
+          <div v-if="expandedDocs.has(index)" class="ml-5 pl-3 pb-1 border-l border-zinc-200 dark:border-zinc-700/50">
             <CardField
               v-for="[key, val] in entries(item)"
               :key="key"
@@ -94,5 +90,5 @@ function entries(val: QueryResultValue): [string, QueryResultValue][] {
       </div>
     </div>
   </div>
-  <div v-else class="flex flex-col h-full" />
+  <div v-else />
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ChevronRight, ChevronDown } from 'lucide-vue-next'
-import { isExpandable, typeClass, formatPrimitive, formatExpandableLabel } from '@/components/results/format'
+import { isExpandable, typeClass, formatPrimitive, formatExpandableLabel, entries } from '@/components/results/format'
 import type { QueryResultValue } from '@/composables/useQueryTabs'
 
 defineProps<{
@@ -10,11 +10,6 @@ defineProps<{
 }>()
 
 const expanded = ref(false)
-
-function entries(val: QueryResultValue): [string, QueryResultValue][] {
-  if (!isExpandable(val)) return []
-  return Array.isArray(val) ? val.map((v, i) => [String(i), v]) : Object.entries(val)
-}
 </script>
 
 <template>
