@@ -79,9 +79,9 @@ async function executeQuery() {
             />
             <span class="font-medium tracking-wide">{{ tab.name }}</span>
 
-            <!-- Show blinking dot when loading indicator is active, close button when not -->
+            <!-- Show blinking dot on non-active tabs when loading, close button when not -->
             <span
-              v-if="tab.loadingIndicator"
+              v-if="tab.loadingIndicator && activeTabId !== tab.id"
               class="inline-block w-1.5 h-1.5 rounded-full ml-1 blink-dot"
               :style="{ backgroundColor: connection.color }"
             />
@@ -206,6 +206,10 @@ async function executeQuery() {
             <span class="text-sm text-zinc-400 dark:text-zinc-600"
               >Execute a query to see results</span
             >
+          </div>
+
+          <div v-else-if="activeTab?.loading && !activeTab?.result" class="flex-1 flex items-center justify-center">
+            <span v-if="activeTab?.loadingIndicator" class="text-zinc-600 dark:text-zinc-400 text-sm font-medium">Query running...</span>
           </div>
 
           <div v-else-if="activeTab?.result" class="flex-1 overflow-hidden">
