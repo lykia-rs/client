@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import JsonView from '@/components/results/JsonView.vue'
-import { isExpandable, typeClass, formatPrimitive } from '@/components/results/format'
+import CardField from '@/components/results/CardField.vue'
 import type { QueryResultRow } from '@/composables/useQueryTabs'
 
 const props = defineProps<{
@@ -25,33 +24,20 @@ const pagedData = computed(() => {
 
 <template>
   <div v-if="data && data.length > 0" class="flex flex-col h-full">
-    <div class="flex-1 overflow-auto p-1.5 space-y-1">
+    <div class="flex-1 overflow-auto p-1.5 space-y-1.5">
       <div
         v-for="(row, index) in pagedData"
         :key="currentPage * PAGE_SIZE + index"
-        class="border border-zinc-200/60 dark:border-zinc-800/30 rounded bg-white dark:bg-zinc-900/60"
+        class="border border-zinc-200/60 dark:border-zinc-800/30 rounded-lg bg-white dark:bg-zinc-900/60 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-none"
         data-testid="list-card"
       >
-        <div class="px-3 py-1.5">
-          <div
-            v-for="([key, value], i) in Object.entries(row)"
+        <div class="px-3 py-2">
+          <CardField
+            v-for="[key, value] in Object.entries(row)"
             :key="key"
-            :class="['flex gap-2 items-baseline', i > 0 ? 'mt-0.5' : '']"
-          >
-            <span class="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 min-w-[80px] max-w-[140px] truncate shrink-0 select-none">
-              {{ key }}
-            </span>
-            <div class="flex-1 min-w-0">
-              <template v-if="isExpandable(value)">
-                <JsonView :data="value" />
-              </template>
-              <template v-else>
-                <span :class="['font-mono text-[12px]', typeClass(value)]">
-                  {{ formatPrimitive(value) }}
-                </span>
-              </template>
-            </div>
-          </div>
+            :field-key="key"
+            :value="value"
+          />
         </div>
       </div>
     </div>

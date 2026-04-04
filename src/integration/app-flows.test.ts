@@ -534,9 +534,8 @@ describe('Integration: Connection → Query → Results', () => {
 
       const rv = wrapper.findComponent(ResultPanel)
       expect(rv.props('viewMode')).toBe('json')
-      expect(rv.text()).toContain('Document 0')
-      // Content is collapsed by default, shows field count
-      expect(rv.text()).toContain('3 fields')
+      // Collapsed by default, shows preview of first key-value pair
+      expect(rv.text()).toContain('{ id: 1, ... }')
     })
   })
 

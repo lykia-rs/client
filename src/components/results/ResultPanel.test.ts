@@ -30,7 +30,7 @@ describe('ResultPanel.vue', () => {
       expect(wrapper.findComponent(TableView).exists()).toBe(false)
       expect(wrapper.find('[data-testid="list-view"]').exists()).toBe(false)
       expect(wrapper.find('[data-testid="json-tree"]').exists()).toBe(true)
-      expect(wrapper.text()).toContain('Document 0')
+      expect(wrapper.text()).toContain('{ id: 1, ... }')
     })
 
     it('shows multiple documents in json mode', () => {
@@ -39,8 +39,7 @@ describe('ResultPanel.vue', () => {
         false,
         'json',
       )
-      expect(wrapper.text()).toContain('Document 0')
-      expect(wrapper.text()).toContain('Document 1')
+      expect(wrapper.findAll('[data-testid="doc-toggle"]')).toHaveLength(2)
     })
 
     it('renders TableView for table mode with non-array data', () => {
@@ -56,8 +55,8 @@ describe('ResultPanel.vue', () => {
     it('renders JSON tree for non-array data in json mode', () => {
       const wrapper = mountView({ status: 'ok' }, false, 'json')
       expect(wrapper.find('[data-testid="json-tree"]').exists()).toBe(true)
-      // Collapsed by default, shows field count
-      expect(wrapper.text()).toContain('1 fields')
+      // Collapsed by default, shows preview
+      expect(wrapper.text()).toContain('{ status: "ok" }')
     })
   })
 
